@@ -1,0 +1,217 @@
+name: Build IOT-DEMO
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on pull request event but only for the master branch
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["master"]
+
+env:
+  SIMULATOR_AZURE_FUNCTIONS: simulator-azure-functions # set this to your application's name
+  SIMULATOR_AZURE_FUNCTIONS_PACKAGE_PATH: "./IoTDeviceSimulator/azure-functions/" # set this to the path to your web app project, defaults to the repository root
+  IoTSERVICE_AZURE_FUNCTIONS: IoTService # set this to your application's name
+  IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH: "./IoTService/azure-functions/" # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: "16" # set this to the node version you wish to use for the project
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This job detects which project is updated and runs the other build jobs based on the results.
+  changes_build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      web-client: ${{ steps.filter.outputs.web-client }}
+      IoTVisualizer: ${{ steps.filter.outputs.IoTVisualizer }}
+      simulator-azure-functions: ${{ steps.filter.outputs.simulator-azure-functions }}
+      iotService-azure-functions: ${{ steps.filter.outputs.iotService-azure-functions }}
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Public repo - https://github.com/dorny/paths-filter
+      # Github market place - https://github.com/marketplace/actions/paths-changes-filter
+      # This dorny/paths-filter@v2 action detects changes in repo.
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            web-client:
+              - 'IoTDeviceSimulator/web-client/**'
+            IoTVisualizer:
+              - 'IoTVisualizer/**'
+            simulator-azure-functions: 
+              - 'IoTDeviceSimulator/azure-functions/**'
+            iotService-azure-functions:
+              - 'IoTService/azure-functions/**'
+
+  # This job creates optimized build of IoT Simulator web-client project
+  simulator_webClient_build:
+    needs: changes_build
+    if: needs.changes_build.outputs.web-client == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Setting up default working space to run the commands
+        working-directory: ./IoTDeviceSimulator/web-client/    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTDeviceSimulator/web-client/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo Web client running - ${{ needs.changes_build.outputs.web-client}}
+      # Install dependencies for projects
+      - name: Install dependencies
+        run: npm ci
+      # Creating optimized build
+      - name: Build
+        run: npm run build
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+
+  # This job build azure functions from IoT Device simulator.
+  simulator_azureFunctions_build:
+    needs: changes_build
+    if: needs.changes_build.outputs.simulator-azure-functions == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTDeviceSimulator/azure-functions/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo azure-functions running - ${{ needs.changes_build.outputs.azure-functions}}
+      # Install dependencies for projects
+      # Run build and test related commands if present in package.json
+      - name: "Resolve Project Dependencies Using Npm"
+        shell: bash
+        run: |
+          pwd
+          pushd './${{ env.SIMULATOR_AZURE_FUNCTIONS_PACKAGE_PATH }}'
+          pwd
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+          pwd
+          popd
+          pwd
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+
+  # This job build azure functions from IoTService.
+  iotService_azureFunctions_build:
+    needs: changes_build
+    if: needs.changes_build.outputs.iotService-azure-functions == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTService/azure-functions/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo IoTService running - ${{ needs.changes_build.outputs.IoTService}}
+      # Install dependencies for projects
+      # Run build and test related commands if present in package.json
+      - name: "Resolve Project Dependencies Using Npm"
+        shell: bash
+        run: |
+          pwd
+          pushd './${{ env.IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH }}'
+          pwd
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+          pwd
+          popd
+          pwd
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+
+  # This job creates optimized build of IoT Visualizer project
+  iotVisualizer_build:
+    needs: changes_build
+    if: needs.changes_build.outputs.IoTVisualizer == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Setting up default working space to run the commands
+        working-directory: ./IoTVisualizer/    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTVisualizer/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}}  
+          echo IoT Visualizer running - ${{ needs.changes_build.outputs.IoTVisualizer}}
+      # Install dependencies for projects
+      - name: Install dependencies
+        run: npm ci
+      # Creating optimized build
+      - name: Build
+        run: npm run build
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true

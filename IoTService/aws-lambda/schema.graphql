@@ -1,0 +1,22 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Mutation {
+  publish(data: String!, name: String!): SensorData @aws_iam @aws_lambda
+}
+
+type Query {
+  getChannel: SensorData
+}
+
+type SensorData @aws_api_key @aws_iam @aws_lambda {
+  data: String!
+  name: String!
+}
+
+type Subscription {
+  subscribe(name: String!): SensorData @aws_subscribe(mutations : ["publish"])
+}

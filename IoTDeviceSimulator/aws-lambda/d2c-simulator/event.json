@@ -1,0 +1,35 @@
+{    
+    "devices":[
+        {
+            "deviceId": "TemperatureDevice",
+            "phenomenon": "Security",
+            "unit": "degF",
+            "isRunning": "false",
+            "amplitude": "10",
+            "mean": "80",
+            "telemetrySendInterval": "1000",
+            "valueIsBool": "false",
+            "behaviour": "Sine Function",
+            "noise_magnitude": "5",
+            "noiseSd": "0.14",
+            "sine_period": "20000",
+            "thingTypeName":"AWSThings"
+        },
+        {
+            "deviceId": "MyTemperatureDevice",
+            "phenomenon": "Motion",
+            "unit": "degF",
+            "isRunning": "true",
+            "amplitude": "10",
+            "mean": "80",
+            "telemetrySendInterval": "2000",
+            "valueIsBool": "false",
+            "behaviour": "Sine Function",
+            "noise_magnitude": "5",
+            "noiseSd": "0.14",
+            "sine_period": "20000",
+            "thingTypeName":"AWSThings"
+        }
+    ],
+    "interval":"30000"
+}

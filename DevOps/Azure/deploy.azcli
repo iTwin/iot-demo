@@ -1,0 +1,34 @@
+# The following commands have been tested on bash shell.
+
+az login --use-device-code
+
+# Use your subscription name
+az account set --subscription "<Your Azure Subscription>"
+
+RG=iot-workflow-rg
+LOCATION=""
+
+DeploymentName=Deployment-$(date +"%Y-%m-%d")
+
+az deployment sub create --name $DeploymentName --template-file deploy-sub.json --location $LOCATION --parameters rgLocation=$LOCATION rgName=$RG
+
+az deployment group create --name $DeploymentName --template-file deploy.json \
+    --resource-group $RG
+
+IoTHubName=`az deployment group show --resource-group $RG --name $DeploymentName --query properties.outputs.iothubName.value`
+IoTHubName=${IoTHubName//\"/}       #remove double quotes
+IoTHubName=${IoTHubName%$'\r'}      #remove carriage return
+
+# Create Azure IoT Hub
+# az iot hub create --resource-group $RG --name $IoTHubName
+
+# Register a new device in Azure IoT Hub
+# For this example command: device id is Device001
+az iot hub device-identity create --device-id Device001 --hub-name $IoTHubName
+
+# Command to get the primary connection string for the device. This connection string would be later
+# used in running the Node.js SDK device sample to send messages from a device to your IoT hub. 
+az iot hub device-identity connection-string show --device-id Device001 --hub-name $IoTHubName
+
+
+

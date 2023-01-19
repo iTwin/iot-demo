@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "IOT_HUB_CONNECTION_STRING1": "<This is iothubowner connection string in Azure portal in the 'Shared access policies' of IoT Hub resource>",   
+    "IOT_HUB_CONNECTION_STRING2": "<This is iothubowner connection string in Azure portal in the 'Shared access policies' of IoT Hub resource>",   
+    "AZURE_STORAGE_CONNECTION_STRING": "<This is azure storage account connection string in Azure portal in the 'Access Keys' of Storage account>"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "http://127.0.0.1:5500",
+    "CORSCredentials": true
+  }
+}

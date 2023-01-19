@@ -1,0 +1,89 @@
+{
+  "Connections": [
+    {
+      "id": 1,
+      "type": "AZURE_IOT_HUB",
+      "name": "",
+      "connectionUrl1": "",
+      "connectionUrl2": ""
+    },
+    {
+      "id": 2,
+      "type": "",
+      "name": "Mock Connection",
+      "connectionUrl1": "",
+      "connectionUrl2": ""
+    }
+  ],
+  "HeatMap": {
+    "types": [],
+    "Show": "true",
+    "Transparency": "",
+    "colors": [
+      {
+        "phenomenon": "",
+        "data": [
+          {
+            "min": 38,
+            "max": 42.9,
+            "color": "",
+            "unit": ""
+          }
+        ]
+      }
+    ],
+    "options": {}
+  },
+  "chart": {
+    "types": [],
+    "Show": "true",
+    "colors": [],
+    "NoOfDevicesInChart": "",
+    "ChartDuration": "",
+    "options": {
+      "animation": {
+        "duration": ""
+      },
+      "scales": {
+        "y": {
+          "grace": "",
+          "ticks": {
+            "color": ""
+          },
+          "title": {
+            "text": "",
+            "display": true,
+            "color": ""
+          }
+        },
+        "x": {
+          "type": "time",
+          "ticks": {
+            "color": "",
+            "source": ""
+          },
+          "title": {
+            "text": "Time (HH:MM:SS)",
+            "display": true,
+            "color": ""
+          }
+        }
+      }
+    }
+  },
+  "Logs": {
+    "Show": "true",
+    "options": {
+      "fieldSeparator": "",
+      "quoteStrings": "",
+      "decimalSeparator": "",
+      "showLabels": true,
+      "showTitle": true,
+      "title": "",
+      "useTextFile": false,
+      "useBom": true,
+      "useKeysAsHeaders": true,
+      "filename": ""
+    }
+  }
+}

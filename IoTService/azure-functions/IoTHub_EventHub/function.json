@@ -1,0 +1,20 @@
+{
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "IoTHubMessages",
+      "direction": "in",
+      "eventHubName": "samples-workitems",
+      "connection": "IoTHubConnection",
+      "cardinality": "many",
+      "consumerGroup": "<add consumerGroup here>"
+    },
+    {
+      "name": "newMessage",
+      "hubName": "default",
+      "connectionStringSetting": "AzureSignalRConnectionString",
+      "direction": "out",
+      "type": "signalR"
+    }
+  ]
+}

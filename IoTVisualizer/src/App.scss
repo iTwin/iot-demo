@@ -1,0 +1,298 @@
+/*---------------------------------------------------------------------------------------------
+* Copyright © Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
+.viewer-container {
+  height: calc(100vh - 50px);
+}
+
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap");
+
+.viewer-container {
+  height: calc(100vh - 50px);
+}
+
+.smart-table {
+  font-size: 12px;
+
+  table {
+    border-collapse: collapse;
+    border: 1px solid black;
+
+    tr,
+    td,
+    th {
+      border: 1px solid black;
+      text-align: left;
+      padding: 8px;
+    }
+  }
+}
+
+.device-kind,
+.device-list {
+  display: flex;
+  align-items: center;
+}
+
+.device-list {
+  margin-left: 20px;
+}
+.btn-wrapper {
+  display: flex;
+}
+
+.left-btn-div {
+  flex: 0 0 48%;
+  display: flex;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.right-btn-div {
+  flex: 0 0 50%;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-left {
+  width: 100%;
+}
+
+.btn-right {
+  width: 100%;
+}
+
+.MonitoringModes {
+  margin-top: 10px;
+  margin-left: 40px;
+
+  .modes {
+    margin: 5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    .card-mode {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 39%;
+      max-width: 39%;
+      border: 1px solid rgba(221, 221, 221, 0.9);
+      padding: 10px;
+      margin: 5px;
+
+      img {
+        width: 40px;
+        height: 40px;
+        opacity: 0.7;
+      }
+
+      .mode-name {
+        font-size: 16px;
+        font-family: Roboto;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.8);
+      }
+
+      &:hover {
+        border: 1px solid rgba(221, 221, 221, 1);
+        box-shadow: rgb(0 0 0 / 35%) 0px 5px 15px;
+
+        img {
+          opacity: 1;
+        }
+
+        .mode-name {
+          color: rgba(0, 0, 0, 0.8);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.rounded-button {
+  display: block;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: transparent;
+  cursor: pointer;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.mode-header {
+  display: flex;
+  align-items: center;
+  box-shadow: rgb(100 100 111 / 20%) 0px 7px 29px 0px;
+  height: 40px;
+  margin-bottom: 16px;
+
+  button {
+    color: red;
+  }
+
+  div {
+    color: rgba(0, 0, 0, 0.8);
+    flex: 1;
+    text-align: center;
+    margin-right: 30px;
+    font-size: 16px;
+    font-family: Roboto;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.switch-mode {
+  padding: 0 16px;
+}
+
+.uicore-inputs-select {
+  height: 30px;
+  width: 74%;
+  font-size: 14px;
+  font-family: Roboto;
+  font-weight: 400;
+  margin-bottom: 14px;
+}
+
+.sensor-listtitle {
+  font-size: 16px;
+  font-family: Roboto;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.nodevice {
+  font-size: 16px;
+  font-style: italic;
+  font-family: Roboto;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+}
+
+.sensorlist {
+  .device-kind {
+    min-height: 32px;
+
+    > div {
+      font-size: 14px;
+      font-family: Roboto;
+      font-weight: 500;
+    }
+  }
+
+  .device-list {
+    min-height: 28px;
+
+    input[type="checkbox"] {
+      width: 16px;
+      /*Desired width*/
+      height: 16px;
+    }
+
+    > div {
+      font-size: 14px;
+      font-family: Roboto;
+      font-weight: 400;
+    }
+  }
+}
+
+ul,
+li {
+  margin: 5px;
+  padding: 0px;
+  list-style: none;
+}
+
+.smart-list {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.smart-list > h3 {
+  margin: 10px;
+}
+
+.Environment_table {
+  h4 {
+    margin-top: 15px;
+  }
+
+  .legendlist {
+    > div {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+
+      > div {
+        &:first-child {
+          margin-right: 6px;
+        }
+
+        &:last-child {
+          font-size: 14px;
+          font-family: Roboto;
+          font-weight: 400;
+        }
+      }
+    }
+  }
+}
+
+.label_select {
+  width: 100%;
+}
+
+.label {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.CustomDialog {
+  .core-dialog-content {
+    border-bottom: 1px solid #ddd;
+  }
+
+  .core-dialog-container {
+    width: 40%;
+  }
+
+  .dialog-content {
+    b {
+      font-size: 16px;
+      font-family: Roboto;
+      font-weight: 500;
+    }
+
+    font-size: 14px;
+    font-family: Roboto;
+    font-weight: 400;
+  }
+
+  .core-dialog-footer {
+    padding: 0 !important;
+
+    .dialog-btn {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+
+      > button {
+        margin-left: 10px;
+        margin: 10px;
+      }
+    }
+  }
+}

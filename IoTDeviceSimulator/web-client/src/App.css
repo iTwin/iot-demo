@@ -1,0 +1,168 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright © Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+.App {
+  text-align: center;
+  margin: 20px auto;
+  height: max-content;
+  padding: 20px 30px;
+  box-shadow: 2px 4px 8px 2px rgba(0, 0, 0, 0.25);
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button {
+  margin: 10px !important;
+}
+
+.components-signin {
+	font-family: Arial;
+	width: 275px;
+	height: 300px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 2px 4px 8px 2px rgba(0, 0, 0, 0.25);
+}
+
+.components-signin-content {
+	flex-direction: column;
+	height: 100%;
+	box-sizing: border-box;
+	position: relative;
+	padding: 1.75em;
+}
+
+.icon {
+	top: 0;
+	left: 50%;
+	font-size: 5em;
+	background-color: transparent;
+	transform: translate(-50%, -50%);
+}
+
+a {
+  text-decoration: underline;
+  margin-left: 0.5em;
+  color: #3d08a1;
+  cursor: pointer;
+}
+
+a:hover {
+	color: #6e40c7;
+}
+
+a:active {
+	color: #3d08a1;
+}
+
+.tableStyle {
+  border-style: outset;
+  padding: 10px 10px 10px 10px;
+  white-space: nowrap;
+}
+
+.tableLabelStyle {
+  border-style: outset;
+  padding: 10px 10px 10px 10px;
+  width: 20%;
+  background-color: #cce0d2;
+}
+
+header {
+  background-color: #282c34;
+  text-align: center;
+}
+
+header button {
+  width: 100px;
+  margin: 10px !important;
+}
+
+.container {
+  text-align: center;
+  font-size: large;
+  margin: 20%;
+}
+
+.behaviour-prop {
+  display: flex;
+  justify-content: center;
+}
+
+.button-config {
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  margin-left: 9px;
+}
+
+.button-config:hover {
+  cursor: pointer;
+}
+
+.buttons {
+  margin-left: 0px !important;
+}
+
+.iui-backdrop {
+  height: 1860.78px !important;
+}
+
+.preview {
+  display: block !important;
+  height: 174px !important;
+  width: 348px !important;
+  margin: 0px 0px 0px 0px !important;
+}
+
+.iui-toggle-switch-wrapper {
+  margin: 5px 0px !important;
+}
+
+.iui-dialog-default {
+	max-width: 430px !important;
+	min-width: 430px !important;
+}
+
+.table-top {
+	display: flex;
+	flex-direction: row;
+}

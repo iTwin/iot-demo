@@ -1,0 +1,12 @@
+{
+    "Roles": [
+        {
+            "Role": "Admin",
+            "emailIds": []
+        },
+        {
+            "Role": "User",
+            "emailIds": []
+        }
+    ]
+}

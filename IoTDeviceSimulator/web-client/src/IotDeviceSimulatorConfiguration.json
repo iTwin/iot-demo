@@ -1,0 +1,11 @@
+{
+    "connections": [
+        {
+            "id": "1",
+            "type": "",
+            "name": "",
+            "IoTHubConnectionStringId": ""
+        }
+    ],
+    "duration": ""
+}

@@ -1,82 +1,42 @@
-# Getting Started with the iTwin Viewer Create React App Template
+# iTwin IoT Demo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The IoT demo source code is intended to help you get started with IoT data monitoring and visualization in [iTwin Viewer](https://developer.bentley.com/tutorials/itwin-viewer-hello-world/) apps. You will be introduced to a generic approach to fetch real-time sensor data from different IoT systems to an iTwin.
 
-## Environment Variables
+## How monitoring IoT devices in real-time could be useful for end users?
 
-Prior to running the app, you will need to add OIDC client configuration to the variables in the .env file:
+Consider a technician monitoring a facility. It won't be a good user experience if they have to continuously refresh an application's screen to check the status of their equipment. It would be better for the application to show changing data in real time without refreshing the screen, so monitoring would be easy.
 
-```
-# ---- Authorization Client Settings ----
-IMJS_AUTH_CLIENT_CLIENT_ID=""
-IMJS_AUTH_CLIENT_REDIRECT_URI=""
-IMJS_AUTH_CLIENT_LOGOUT_URI=""
-IMJS_AUTH_CLIENT_SCOPES =""
-```
+## Architectural approach
 
-- You can generate a [test client](https://developer.bentley.com/tutorials/web-application-quick-start/#2-register-an-application) to get started.
+The following architecture defines an iTwin IoT workflow for fetching real-time data from devices connected to multiple IoT platforms.
 
-- When you are ready to build a production application, [register here](https://developer.bentley.com/register/).
+In the below diagram, we see an IoT Visualizer which is an iTwin Viewer application customized for visualizing and monitoring real-time sensor data.
+It also consists of IoT Extension, which is another module that has a connection manager responsible for connecting with different IoT platforms and UI components that helps visualize and monitor IoT data through mouse tooltips, color-coded heatmaps and charts. 
+The objective here is to provide a generic approach to fetch real-time IoT data in iTwin.
 
-You should also add a valid contextId and iModelId for your user in the this file:
+![IoT Workflow](./assets/iot-itwin-demo.png)
 
-```
-# ---- Test ids ----
-IMJS_CONTEXT_ID = ""
-IMJS_IMODEL_ID = ""
-```
+For the detailed architecture explaining the system with Azure IoT hub click [here](./AzureConnectionGuidelines.md#architectural-approach).
 
-- For the IMJS_CONTEXT_ID variable, you can use the id of one of your existing Projects or Assets. You can obtain their ids via the [Administration REST APIs](https://developer.bentley.com/api-groups/administration/api-reference/).
+For the detailed architecture explaining the system with AWS IoT core click [here](./AWSConnectionGuidelines.md#architectural-approach).
 
-- For the IMJS_IMODEL_ID variable, use the id of an iModel that belongs to the context that you specified in the IMJS_CONTEXT_ID variable. You can obtain iModel ids via the [Data Management REST APIs](https://developer.bentley.com/api-groups/data-management/apis/imodels/operations/get-project-or-asset-imodels/).
 
-- Alternatively, you can [generate a test iModel](https://developer.bentley.com/tutorials/web-application-quick-start/#3-create-an-imodel) to get started without an existing iModel.
+## Overview of file structure
 
-- If at any time you wish to change the iModel that you are viewing, you can change the values of the contextId or iModelId query parameters in the url (i.e. localhost:3000?contextId=myNewContextId&iModelId=myNewIModelId)
+1. [IoT Visualizer](./IoTVisualizer/): This folder contains code for the iTwin Viewer application and the IoT Extension module. The [IoT Extension](./IoTVisualizer/src/IoTExtension/) is the parent module that wraps up all the code for the IoT Connection and UI components in one place. The [IoT Connection](./IoTVisualizer/src/IoTExtension/IoTConnection/) module has the connection manager code and any code for a new IoT connection should be put here. 
+    
+    Refer to [this](./IoTVisualizer/README.md) Readme for more details.
 
-## Available Scripts
+2. [IoT Service](./IoTService/): This folder contains code for Azure Functions or AWS Lambda which get triggered as devices are sending telemetry messages to Azure IoT Hub or AWS IoT Core respectively.
 
-In the project directory, you can run:
+3. [IoT Device Simulator](IoTDeviceSimulator): This folder contains code that generates and sends telemetry messages from devices to Azure IoT Hub/ AWS IoT Core.
+    - The [web-client](./IoTDeviceSimulator/web-client/) module consists of code for the simulator web portal.
+    - The [azure-functions](./IoTDeviceSimulator/azure-functions/) and [aws-lambda](./IoTDeviceSimulator/aws-lambda/) modules have the serverless backend code for generating real-time sensor data and also querying and modifying devices. 
+    
+    Refer to [this](./IoTDeviceSimulator/README.md) Readme for more details.
 
-### `yarn start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Data Throughput Analysis
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+An experiment was conducted to test the performance of this application in terms of scalability, data throughput and recommended data frequencies. Please check out the [Data Throughput Analysis](./DataThroughputAnalysis.md#data-throughput-analysis) document to get details of this experiment.
 
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Next Steps
-
-- [iTwin Viewer options](https://www.npmjs.com/package/@itwin/web-viewer-react)
-
-- [Extending the iTwin Viewer](https://www.itwinjs.org/learning/tutorials/hello-world-viewer/)
-
-- [Using the iTwin Platform](https://developer.bentley.com/)
-
-- [iTwin Developer Program](https://www.youtube.com/playlist?list=PL6YCKeNfXXd_dXq4u9vtSFfsP3OTVcL8N)

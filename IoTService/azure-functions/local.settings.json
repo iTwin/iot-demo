@@ -1,0 +1,15 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "FUNCTIONS_WORKER_RUNTIME": "node",
+      "AzureSignalRConnectionString": "<Find this value in the Azure Portal in the Keys blade of SignalR resource>",
+      "AzureWebJobsStorage": "<Find this value in the Azure Portal in the 'Access keys' blade of storage account>",
+      "IoTHubConnection": "<This is 'Event Hub compatible endpoint' value in the Azure Portal in the 'Built-in endpoints' blade of IoT Hub resource>",
+      "WebHookSecret": "<This is Webhook secret which is returned from webhook creation >"
+    },
+    "Host": {
+      "LocalHttpPort": 7071,
+      "CORS": "http://127.0.0.1:5500",
+      "CORSCredentials": true
+    }
+}

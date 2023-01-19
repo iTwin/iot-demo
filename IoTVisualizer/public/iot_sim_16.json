@@ -1,0 +1,9 @@
+[
+  { "IoTId": 25791, "Reading": "52 psi" },
+  { "IoTId": 27983, "Reading": "70 deg F" },
+  { "IoTId": 27985, "Reading": "188 ft" },
+  { "IoTId": 27987, "Reading": "true" },
+  { "IoTId": 27988, "Reading": "9.0 in" },
+  { "IoTId": 29898, "Reading": "63 AQI" },
+  { "IoTId": 67800, "Reading": "true" }
+]

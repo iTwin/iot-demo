@@ -1,0 +1,377 @@
+name: Deploy IOT-DEMO
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: ["master"]
+
+env:
+  SIMULATOR_AZURE_FUNCTIONS: simulator-azure-functions # set this to your application's name
+  SIMULATOR_AZURE_FUNCTIONS_PACKAGE_PATH: "./IoTDeviceSimulator/azure-functions/" # set this to the path to your web app project, defaults to the repository root
+  IoTSERVICE_AZURE_FUNCTIONS: IoTService # set this to your application's name
+  IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH: "./IoTService/azure-functions" # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: "16" # set this to the node version you wish to use for the project
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This job detects which project is updated and runs the other build jobs based on the results.
+  changes_deployment:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      web-client: ${{ steps.filter.outputs.web-client }}
+      IoTVisualizer: ${{ steps.filter.outputs.IoTVisualizer }}
+      simulator-azure-functions: ${{ steps.filter.outputs.simulator-azure-functions }}
+      iotService-azure-functions: ${{ steps.filter.outputs.iotService-azure-functions }}
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Public repo - https://github.com/dorny/paths-filter
+      # Github market place - https://github.com/marketplace/actions/paths-changes-filter
+      # This dorny/paths-filter@v2 action detects changes in repo.
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            web-client:
+              - 'IoTDeviceSimulator/web-client/**'
+            IoTVisualizer:
+              - 'IoTVisualizer/**'
+            simulator-azure-functions: 
+              - 'IoTDeviceSimulator/azure-functions/**'
+            iotService-azure-functions:
+              - 'IoTService/azure-functions/**'
+
+  # This job creates optimized build of IoT Simulator web-client project and deploy it to azure blob.
+  simulator_webClient_deployment:
+    needs: changes_deployment
+    if: needs.changes_deployment.outputs.web-client == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Setting up default working space to run the commands
+        working-directory: ./IoTDeviceSimulator/web-client/    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTDeviceSimulator/web-client/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}}
+          echo Web client running - ${{ needs.changes_deployment.outputs.web-client}}
+      # Install dependencies for projects
+      - name: Install dependencies
+        run: npm ci
+      # Creating .env file dynamically
+      - name: "Create env file"
+        run: |
+          touch .env
+          > .env
+          echo REACT_APP_FUNCTION_URL = ${{secrets.REACT_APP_FUNCTION_URL}}  >> .env
+          echo REACT_APP_CLIENT_ID =  ${{secrets.REACT_APP_CLIENT_ID}} >> .env
+          echo REACT_APP_REDIRECT_URI = ${{secrets.REACT_APP_REDIRECT_URI}} >> .env
+          echo REACT_APP_CLIENT_SCOPES = ${{secrets.REACT_APP_CLIENT_SCOPES}} >> .env
+          echo REACT_APP_AUTHORITY = ${{ secrets.REACT_APP_AUTHORITY }}>> .env
+          echo REACT_APP_IOT_CONNECTION_NAME = ${{secrets.REACT_APP_IOT_CONNECTION_NAME }}>> .env
+          echo REACT_APP_AZURE_STORAGE_SAS_URL = ${{secrets.REACT_APP_AZURE_STORAGE_SAS_URL}} >> .env
+          echo REACT_APP_AWS_API_GATEWAY_APIKEY = ${{secrets.REACT_APP_AWS_API_GATEWAY_APIKEY}} >> .env
+          echo REACT_APP_AWS_API_GATEWAY_URL = ${{secrets.REACT_APP_AWS_API_GATEWAY_URL}} >> .env
+          ls -l
+          pwd
+      # Creating optimized build
+      - name: Build
+        run: npm run build
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+      # Azure login
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # Uploading optimized build to azure blob storage - $web container
+      - name: Upload to blob storage
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            pwd
+            cd ./IoTDeviceSimulator/web-client/
+            ls -l
+            az storage blob upload-batch --account-name ${{secrets.IOT_SIMULATOR_STORAGE_ACCOUNT_NAME}} -s ./build/ -d '$web' --overwrite=true
+      # Azure logout
+      - name: logout
+        run: |
+          az logout
+        if: always()
+
+  # This job deploys azure functions from IoT Device simulator
+  simulator_azureFunctions_deployment:
+    needs: changes_deployment
+    if: needs.changes_deployment.outputs.simulator-azure-functions == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTDeviceSimulator/azure-functions/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo azure-functions running - ${{ needs.changes_deployment.outputs.azure-functions}}
+      # Install dependencies for projects
+      # Run build and test related commands if present in package.json
+      - name: "Resolve Project Dependencies Using Npm"
+        shell: bash
+        run: |
+          pwd
+          pushd './${{ env.SIMULATOR_AZURE_FUNCTIONS_PACKAGE_PATH }}'
+          pwd
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+          pwd
+          popd
+          pwd
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+      # This github action deploys azure functions using publish profile
+      - name: "Run Azure Functions Action"
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.SIMULATOR_AZURE_FUNCTIONS }}
+          package: ${{ env.SIMULATOR_AZURE_FUNCTIONS_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.SIMULATOR_AZURE_FUNCTIONS_PUBLISH_PROFILE }}
+
+  # This job deploys azure functions from IoTService 1.
+  iotService_azureFunctions_1_deployment:
+    needs: changes_deployment
+    if: needs.changes_deployment.outputs.iotService-azure-functions == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTService/azure-functions/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo IoTService running - ${{ needs.changes_deployment.outputs.IoTService}}
+      # consumerGroup attribute in /IoTService/IoTHub_EventHub/function.json should have "<add consumerGroup here>" as value.
+      - name: updating the EventHub consumer group
+        run: |
+          cd ./IoTService/azure-functions/IoTHub_EventHub/
+          pwd
+          ls -l
+          sed -i 's/<add consumerGroup here>/${{secrets.IOT_HUB_1_CONSUMER_GROUP}}/g' function.json
+      # Install dependencies for projects
+      # Run build and test related commands if present in package.json
+      - name: "Resolve Project Dependencies Using Npm"
+        shell: bash
+        run: |
+          pwd
+          pushd './${{ env.IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH }}'
+          pwd
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+          pwd
+          popd
+          pwd
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+      # This github action deploys azure functions using publish profile
+      - name: "Run Azure Functions Action"
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.IoTSERVICE_AZURE_FUNCTIONS }}
+          package: ${{ env.IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.IOT_SERVICE_1_AZURE_FUNCTIONS_PUBLISH_PROFILE }}
+
+  # This job deploys azure functions from IoTService 2.
+  iotService_azureFunctions_2_deployment:
+    needs: changes_deployment
+    if: needs.changes_deployment.outputs.iotService-azure-functions == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest    
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTService/azure-functions/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}} 
+          echo IoTService running - ${{ needs.changes_deployment.outputs.IoTService}}
+      # consumerGroup attribute in /IoTService/IoTHub_EventHub/function.json should have "<add consumerGroup here>" as value.
+      - name: updating the EventHub consumer group
+        run: |
+          cd ./IoTService/azure-functions/IoTHub_EventHub/
+          pwd
+          ls -l
+          sed -i 's/<add consumerGroup here>/${{secrets.IOT_HUB_2_CONSUMER_GROUP}}/g' function.json
+      # Install dependencies for projects
+      # Run build and test related commands if present in package.json
+      - name: "Resolve Project Dependencies Using Npm"
+        shell: bash
+        run: |
+          pwd
+          pushd './${{ env.IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH }}'
+          pwd
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+          pwd
+          popd
+          pwd
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+      # This github action deploys azure functions using publish profile
+      - name: "Run Azure Functions Action"
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.IoTSERVICE_AZURE_FUNCTIONS }}
+          package: ${{ env.IoTSERVICE_AZURE_FUNCTIONS_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.IOT_SERVICE_2_AZURE_FUNCTIONS_PUBLISH_PROFILE }}
+
+  # This job creates optimized build of IoT Visualizer project project and deploy it to azure blob.
+  iotVisualizer_deployment:
+    needs: changes_deployment
+    if: needs.changes_deployment.outputs.IoTVisualizer == 'true'
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Setting up default working space to run the commands
+        working-directory: ./IoTVisualizer/  
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      # Setting up the node js
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          # Cache dependencies for projects
+          cache-dependency-path: "./IoTVisualizer/package-lock.json"
+      # Getting information about events when pipline triggers
+      - name: Github action event information
+        run: |
+          echo github.event_name - ${{github.event_name}}   
+          echo github.event.pull_request.merged - ${{github.event.pull_request.merged }}
+          echo github.event.action - ${{github.event.action}}
+          echo IoT Visualizer running - ${{ needs.changes_deployment.outputs.IoTVisualizer}}
+      # Install dependencies for projects
+      - name: Install dependencies
+        run: npm ci
+      # Creating .env file dynamically
+      - name: "Create env file"
+        run: |
+          touch .env
+          > .env
+          echo IMJS_AZURE_STORAGE_SAS_URL = ${{secrets.IMJS_AZURE_STORAGE_SAS_URL}}  >> .env
+          echo IMJS_ITWIN_ID = ${{secrets.IMJS_ITWIN_ID}}  >> .env
+          echo IMJS_IMODEL_ID =  ${{secrets.IMJS_IMODEL_ID}} >> .env
+          echo IMJS_AUTH_CLIENT_CLIENT_ID = ${{secrets.IMJS_AUTH_CLIENT_CLIENT_ID}} >> .env
+          echo IMJS_AUTH_CLIENT_REDIRECT_URI = ${{secrets.IMJS_AUTH_CLIENT_REDIRECT_URI}} >> .env
+          echo IMJS_AUTH_CLIENT_LOGOUT_URI = ${{ secrets.IMJS_AUTH_CLIENT_LOGOUT_URI }}>> .env
+          echo IMJS_AUTH_CLIENT_SCOPES = ${{secrets.IMJS_AUTH_CLIENT_SCOPES }}>> .env
+          echo IMJS_AUTH_AUTHORITY = ${{secrets.IMJS_AUTH_AUTHORITY}} >> .env
+          echo IMJS_FUNCTION_APP_URL = ${{secrets.IMJS_FUNCTION_APP_URL}} >> .env
+          echo IMJS_AWS_API_GATEWAY_APIKEY = ${{secrets.IMJS_AWS_API_GATEWAY_APIKEY}} >> .env
+          echo IMJS_AWS_APPSYNC_APIKEY = ${{secrets.IMJS_AWS_APPSYNC_APIKEY}} >> .env
+          echo IMJS_AWS_REGION = ${{secrets.IMJS_AWS_REGION}} >> .env
+          echo IMJS_AWS_IOT_MQTT_TOPIC = ${{secrets.IMJS_AWS_IOT_MQTT_TOPIC}} >> .env
+          echo SKIP_PREFLIGHT_CHECK=true >> .env
+          ls -l
+          pwd
+      # Adding client id to sign-in callback index.html
+      - name: "updating sign-in callback"
+        run: |
+          cd ./public/signin-callback
+          pwd
+          ls -l
+          sed -i 's/<add client id here>/${{secrets.IMJS_AUTH_CLIENT_CLIENT_ID}}/g' index.html
+          sed -i 's/<add scopes here>/${{secrets.IMJS_AUTH_CLIENT_SCOPES }}/g' index.html
+      # Creating optimized build
+      - name: Build
+        run: npm run build
+      # Auditing node modules
+      - name: Audit
+        run: |
+          npm audit
+        continue-on-error: true
+      # Azure login
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # Uploading optimized build to azure blob storage - $web container
+      - name: Upload to blob storage
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            pwd
+            cd ./IoTVisualizer/
+            ls -l
+            az storage blob upload-batch --account-name ${{secrets.IOT_VISUALIZER_STORAGE_ACCOUNT_NAME}} -s ./build/ -d '$web' --overwrite=true
+      # Azure logout
+      - name: logout
+        run: |
+          az logout
+        if: always()

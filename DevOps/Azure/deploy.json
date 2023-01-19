@@ -1,0 +1,181 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "srSku": {
+      "type": "string",
+      "allowedValues": [ "Free_F1", "Standard_S1" ],
+      "defaultValue": "Standard_S1",
+      "metadata": {
+        "description": "SKU for SignalR Service"
+      }
+    },
+    "srCapacity": {
+      "type": "int",
+      "allowedValues": [ 1, 2, 5, 10, 20, 50, 100 ],
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Capacity for SignalR Service, has to be 1 for Free SKU"
+      }
+    }    
+  },
+  "functions": [],
+  "variables": {
+    "srName": "[concat('sr-', uniqueString(resourceGroup().id))]",
+    "stgName": "[concat('stg', uniqueString(resourceGroup().id))]",
+    "aiName": "[concat('ai-', uniqueString(resourceGroup().id))]",
+    "fnName": "[concat('fn-', uniqueString(resourceGroup().id))]",
+    "iothubName": "[concat('iothub-', uniqueString(resourceGroup().id))]",
+    "srApiVersion": "2018-10-01"
+  },
+  "resources": [
+   {
+      "name": "[variables('stgName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "tags": {
+        "displayName": "Storage for iTwin IoT Workflow Sample"
+      },
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      }
+    },
+    {
+      "type": "microsoft.insights/components",
+      "kind": "other",
+      "name": "[variables('aiName')]",
+      "apiVersion": "2014-04-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Application Insights for iTwin IoT Workflow Sample"
+      },
+      "properties": {}
+    },
+    {
+      "name": "[variables('fnName')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[resourceGroup().location]",
+      "kind": "functionapp",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('stgName'))]",
+        "[resourceId('microsoft.insights/components', variables('aiName'))]",
+        "[resourceId('Microsoft.SignalRService/signalR', variables('srName'))]"
+      ],
+      "properties": {
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stgName'), ';AccountKey=', listKeys(variables('stgName'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[concat('wcs', variables('fnName'))]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stgName'), ';AccountKey=', listKeys(variables('stgName'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stgName'), ';AccountKey=', listKeys(variables('stgName'),'2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~3"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('microsoft.insights/components/', variables('aiName')), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "node"
+            },
+            {
+              "name": "AzureSignalRConnectionString",
+              "value": "[concat('Endpoint=https://', variables('srName'), '.service.signalr.net;AccessKey=', listKeys(resourceId('Microsoft.SignalRService/signalR', variables('srName')), variables('srApiVersion')).primaryKey, ';Version=1.0;')]"
+            }
+          ]
+        },
+        "cors": {
+          "allowedOrigins": [ "*" ]
+        }
+      },
+      "resources": [
+      ]
+    },
+    {
+      "name": "[variables('srName')]",
+      "type": "Microsoft.SignalRService/signalR",
+      "apiVersion": "[variables('srApiVersion')]",
+      "tags": {
+        "displayName": "Serverless SignalR Service"
+      },
+      "sku": {
+        "name": "[parameters('srSku')]",
+        "capacity": "[parameters('srCapacity')]"
+      },
+      "properties": {
+        "features": [
+          {
+            "flag": "ServiceMode",
+            "value": "Serverless"
+          }
+        ]       
+      },
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "apiVersion": "2016-02-03",
+      "type": "Microsoft.Devices/IotHubs",
+      "name": "[variables('iothubName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "S1",
+        "tier": "Standard",
+        "capacity": "[parameters('srCapacity')]"
+      },
+      "properties": {
+        "location": "[resourceGroup().location]"
+      }
+    },
+    {
+      "type": "Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups",
+      "apiVersion": "2021-03-31",
+      "name": "[concat(variables('iothubName'), '/events/cg1')]",
+      "properties": {
+        "name": "cg1"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+      ]
+    }      
+  ],
+  "outputs": {
+    "srConnectionString": {
+      "type": "string",
+      "value": "[concat('Endpoint=https://', variables('srName'), '.service.signalr.net;AccessKey=', listKeys(resourceId('Microsoft.SignalRService/signalR', variables('srName')), variables('srApiVersion')).primaryKey, ';Version=1.0;')]"
+    },
+    "storageConnectionString": {
+      "type": "string",
+      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('stgName'), ';AccountKey=', listKeys(variables('stgName'),'2015-05-01-preview').key1)]"
+    },
+    "appInsightsInstrumentationKey": {
+      "type": "string",
+      "value": "[reference(resourceId('microsoft.insights/components/', variables('aiName')), '2015-05-01').InstrumentationKey]"
+    },
+    "hubKeys": {
+      "value": "[listKeys(resourceId('Microsoft.Devices/IotHubs', variables('iothubName')), '2016-02-03')]",
+      "type": "object"
+    },
+    "iothubName": {
+      "value": "[variables('iothubName')]",
+      "type": "string"
+    }
+  }
+}

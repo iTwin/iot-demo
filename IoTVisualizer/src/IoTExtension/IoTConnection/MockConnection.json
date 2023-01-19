@@ -1,0 +1,44 @@
+[
+  {
+    "deviceName": "P1",
+    "deviceId": "25791",
+    "phenomenon": "Water Pressure",
+    "unit": "psi"
+  },
+  {
+    "deviceName": "T1",
+    "deviceId": "27983",
+    "phenomenon": "Temperature",
+    "unit": "deg F"
+  },
+  {
+    "deviceName": "V1",
+    "deviceId": "27985",
+    "phenomenon": "Visibility",
+    "unit": "ft"
+  },
+  {
+    "deviceName": "MS1",
+    "deviceId": "27987",
+    "phenomenon": "Motion",
+    "unit": ""
+  },
+  {
+    "deviceName": "L1",
+    "deviceId": "27988",
+    "phenomenon": "Water Level",
+    "unit": "ft"
+  },
+  {
+    "deviceName": "AQ1",
+    "deviceId": "27898",
+    "phenomenon": "Air Quality",
+    "unit": "aqi"
+  },
+  {
+    "deviceName": "O1",
+    "deviceId": "67800",
+    "phenomenon": "Occupancy",
+    "unit": ""
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "name": "@itwin/iot-simulator-azure-functions",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "IoT Simulator APIs",
+  "scripts": {
+    "start": "func start",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.11.0",
+    "aws-sdk": "^2.1233.0",
+    "azure-iot-device-mqtt": "1.15.8",
+    "azure-iot-provisioning-device-mqtt": "1.7.12",
+    "azure-iot-security-symmetric-key": "1.7.12",
+    "azure-iothub": "^1.14.6",
+    "dotenv": "^16.0.1"
+  }
+}
