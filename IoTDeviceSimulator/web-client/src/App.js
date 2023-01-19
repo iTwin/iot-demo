@@ -73,6 +73,7 @@ function App() {
   }
 
   const startSimulator = async () => {
+    // startSimulator
     setToggle(true);
     const rows = await getDevices();
     await removeDevices(rows, selectedDevices);

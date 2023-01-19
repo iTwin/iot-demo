@@ -53,7 +53,6 @@ module.exports = async function (context, req) {
     }
 
     getCurrentDataObject() {
-      //getCurrentDataObject
       let telemetry;
       let unit;
       let data;

@@ -145,6 +145,7 @@ const App: React.FC = () => {
   };
 
   const onIModelAppInit = async () => {
+    // onIModelAppInit
     await TreeWidget.initialize();
     await PropertyGridManager.initialize();
     await MeasureTools.startup();
