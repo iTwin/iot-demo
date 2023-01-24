@@ -26,6 +26,11 @@ module.exports = async function (context, req) {
                         "isRunning": req.body.deviceTwinArray[index].isRunning,
                         "min": req.body.deviceTwinArray[index].min,
                         "max": req.body.deviceTwinArray[index].max,
+                        "slope": req.body.deviceTwinArray[index].slope,
+                        "behaviourArray": req.body.deviceTwinArray[index].behaviourArray,
+                        "currDataArray": req.body.deviceTwinArray[index].currDataArray,
+                        "signalArray": req.body.deviceTwinArray[index].signalArray,
+                        "renderList": req.body.deviceTwinArray[index].renderList,
                     },
                 },
             };

@@ -73,7 +73,6 @@ function App() {
   }
 
   const startSimulator = async () => {
-    // startSimulator
     setToggle(true);
     const rows = await getDevices();
     await removeDevices(rows, selectedDevices);
@@ -193,7 +192,12 @@ function App() {
             twin.properties.desired.sine_period = device.sine_period;
             twin.properties.desired.min = device.min;
             twin.properties.desired.max = device.max;
-            twin.properties.desired.isRunning = device.isRunning
+            twin.properties.desired.isRunning = device.isRunning;
+            twin.properties.desired.slope = device.slope;
+            twin.properties.desired.behaviourArray = device.behaviourArray;
+            twin.properties.desired.currDataArray = device.currDataArray;
+            twin.properties.desired.signalArray = device.signalArray;
+            twin.properties.desired.renderList = device.renderList;
             break;
           }
         }
@@ -220,6 +224,11 @@ function App() {
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
+        slope: device.properties.desired.slope,
+        behaviourArray: device.properties.desired.behaviourArray,
+        currDataArray: device.properties.desired.currDataArray,
+        signalArray: device.properties.desired.signalArray,
+        renderList: device.properties.desired.renderList,
       }
       setData([...data, newDevice]);
     }
@@ -375,7 +384,12 @@ function App() {
             isRunning: deviceTwin.properties.desired.isRunning,
             min: deviceTwin.properties.desired.min,
             max: deviceTwin.properties.desired.max,
-            primaryKey: deviceTwin.authentication.symmetricKey.primaryKey
+            primaryKey: deviceTwin.authentication.symmetricKey.primaryKey,
+            slope: deviceTwin.properties.desired.slope,
+            behaviourArray: deviceTwin.properties.desired.behaviourArray,
+            currDataArray: deviceTwin.properties.desired.currDataArray,
+            signalArray: deviceTwin.properties.desired.signalArray,
+            renderList: deviceTwin.properties.desired.renderList,
           });
         } else {
           selectedDeviceIds.push(row)

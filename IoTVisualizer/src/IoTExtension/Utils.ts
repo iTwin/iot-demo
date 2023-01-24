@@ -9,7 +9,14 @@ import { ITwinLink, Story } from "./clients/ITwinLink";
 import { callbackType, IoTConnectionManager } from "./IoTConnection/IoTConnectionManager";
 import { ActivityStatus, Roles, SmartDevice } from "./SmartDevice";
 import { BlobServiceClient } from "@azure/storage-blob";
+import { toaster } from "@itwin/itwinui-react";
+import { IotAlert } from "./IotAlert";
+import { Point3d } from "@itwin/core-geometry";
+
 let configuration: any = [];
+let count = 1;
+let resolved = 0;
+let alert: IotAlert;
 
 let userRole: Roles | undefined = Roles.Unauthorized;
 export const getConnection = (deviceProps: SmartDevice) => {
@@ -159,6 +166,44 @@ export const removeConsumerCallback = (key: string) => {
   });
 };
 
+export const resolveAlert = async (iotId: any, connectionId: any) => {
+  const data = { deviceId: iotId, connectionStringId: connectionId, action: "resolve" };
+  const response = await fetch(`${process.env.IMJS_FUNCTION_APP_URL}/c2d-simulator` ?? "", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }).catch((error) => console.log(`Request failed: ${error}`));
+  if (response && response.status === 200) {
+    return true;
+  }
+  return false;
+};
+
+export const func = async (elementId: any) => {
+  resolved = 1;
+  const temp = resolveAlert(elementId, "IOT_HUB_CONNECTION_STRING2");
+  return temp;
+};
+
+function getLabel(myArray: any[], iotId: any) {
+  let label = "";
+  myArray.forEach(function (element: any) {
+    if (element.iotId === iotId) {
+      label = element.label;
+    }
+  });
+  return label;
+}
+
+function getLoc(myArray: any[], iotId: any) {
+  let loc: Point3d = Point3d.create(0, 0, 0);
+  myArray.forEach(function (element: any) {
+    if (element.iotId === iotId) {
+      loc = element.origin;
+    }
+  });
+  return loc;
+}
+
 export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[]) => {
 
   const data: { iotId: string, value: string, unit: string, phenomenon: string, timeStamp: Date }[] = []; // Todo: can Queue data str. be used??
@@ -179,6 +224,19 @@ export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[])
             realTimeData = msgJson.data;
           }
           data.push({ iotId: device?.iotId, value: realTimeData, unit: device?.unit, phenomenon: device?.phenomenon, timeStamp: msgJson.timeStamp });
+          if (data[0].iotId === "iothub:device:Concourse-RestRoom7-T1" && parseFloat(data[0].value) > 110 && count === 1) {
+            const label = getLabel(deviceList, data[0].iotId);
+            const loc = getLoc(deviceList, data[0].iotId);
+            alert = new IotAlert(data[0].iotId, loc, label);
+            alert.display();
+            count++;
+          } else if (data[0].iotId === "iothub:device:Concourse-RestRoom7-T1" && parseFloat(data[0].value) < 110 && resolved === 1) {
+            const label = getLabel(deviceList, data[0].iotId);
+            toaster.closeAll();
+            toaster.positive(`Temperature is normalised for '${label}'`);
+            count = 1;
+            resolved = 0;
+          }
           return data;
         }
       }
