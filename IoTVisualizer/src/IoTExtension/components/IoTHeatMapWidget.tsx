@@ -19,14 +19,14 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface IoTHeatMapWidgetProps {
   imodel?: IModelConnection;
-  currentLevel?: Story;  // If not supplied, the levelChanged callback will trigger with the default level
-  levelChanged(currentLevel?: Story): void;
+  currentLevel?: Story;  // If not supplied, the onLevelChanged callback will trigger with the default level
+  onLevelChanged(currentLevel?: Story): void;
 }
 const callBackId = uuidv4();
 
 export const IoTHeatMapWidget: React.FC<IoTHeatMapWidgetProps> = () => {
   const [selectedLevel, setSelectedLevel] = useState<Story>();
-  const [showHeatMap, setShowHeatMap] = useState<boolean>(false);
+  const [isHeatMapEnabled, setIsHeatMapEnabled] = useState<boolean>(false);
   const [deviceList, setDeviceList] = useState<SmartDevice[]>([]);
   const [measuredParameter, setMeasuredParameter] = useState<string>("");
   const [phenomenon, setPhenomenon] = useState<string[]>([]);
@@ -77,7 +77,7 @@ export const IoTHeatMapWidget: React.FC<IoTHeatMapWidgetProps> = () => {
     }, deviceListForListen, callBackId);
   }, [deviceList, callBackId]);
 
-  const onSelectParameterChanged = useCallback((selectedParameter: string) => {
+  const handleSelectedPhenomenonChanged = useCallback((selectedParameter: string) => {
     removeColorCode();
     onSelectParameter(selectedParameter);
   }, [removeColorCode, onSelectParameter]);
@@ -128,7 +128,7 @@ export const IoTHeatMapWidget: React.FC<IoTHeatMapWidgetProps> = () => {
     const connection = e.detail as IoTConnection;
     const callbacks = ITwinViewerApp.store.getState().consumerState.consumerCallbacks;
     if (callbacks.size !== 0) {
-      IoTConnectionManager.handleConnectionChange(connection);
+      IoTConnectionManager.connectionChangedNotification(connection);
     }
     if (!connection.get()) {
       removeColorCode(connection);
@@ -142,18 +142,18 @@ export const IoTHeatMapWidget: React.FC<IoTHeatMapWidgetProps> = () => {
     };
   }, [deviceList, measuredParameter]);
 
-  const onShowHeatMap = (checkedHeatMap: boolean) => {
+  const handleShowHeatMap = (checkedHeatMap: boolean) => {
     if (!checkedHeatMap) {
       onDefaultMode();
     }
-    setShowHeatMap(checkedHeatMap);
+    setIsHeatMapEnabled(checkedHeatMap);
   };
 
   return (<>
     <br />
     <div style={{ margin: "8px" }}>
       <div></div>
-      <ToggleSwitch labelPosition="right" defaultChecked={showHeatMap} onChange={(e) => onShowHeatMap(e.target.checked)} label={"Show Heat Map"} />
+      <ToggleSwitch labelPosition="right" defaultChecked={isHeatMapEnabled} onChange={(e) => handleShowHeatMap(e.target.checked)} label={"Show Heat Map"} />
       <div className="MonitoringModes">
         <div>
           {
@@ -164,8 +164,8 @@ export const IoTHeatMapWidget: React.FC<IoTHeatMapWidgetProps> = () => {
                   name={parameterEl}
                   value={parameterEl}
                   checked={measuredParameter === parameterEl}
-                  onChange={() => onSelectParameterChanged(parameterEl)}
-                  disabled={showHeatMap ? phenomenon.includes(parameterEl) ? false : true : true}
+                  onChange={() => handleSelectedPhenomenonChanged(parameterEl)}
+                  disabled={isHeatMapEnabled ? phenomenon.includes(parameterEl) ? false : true : true}
                 />
                 <span>{parameterEl}</span>
               </div>

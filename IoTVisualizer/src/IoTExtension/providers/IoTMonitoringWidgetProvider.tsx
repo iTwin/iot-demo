@@ -44,7 +44,7 @@ export class IoTMonitoringWidgetProvider implements UiItemsProvider {
             id: "IoTHeatMapWidget",
             label: "IoTHeatMap",
             defaultState: WidgetState.Floating,
-            getWidgetContent: () => <IoTHeatMapWidget imodel={ITwinLink.iModel} levelChanged={this.handleLevelChange} />,
+            getWidgetContent: () => <IoTHeatMapWidget imodel={ITwinLink.iModel} onLevelChanged={this.handleLevelChange} />,
           },
         );
       }
@@ -63,7 +63,7 @@ export class IoTMonitoringWidgetProvider implements UiItemsProvider {
           id: "Devices",
           label: "IoT Devices",
           defaultState: WidgetState.Floating,
-          getWidgetContent: () => <Provider store={ITwinViewerApp.store}><IoTDeviceListWidget imodel={ITwinLink.iModel} levelChanged={this.handleLevelChange} /></Provider>,
+          getWidgetContent: () => <Provider store={ITwinViewerApp.store}><IoTDeviceListWidget imodel={ITwinLink.iModel} onLevelChanged={this.handleLevelChange} /></Provider>,
         },
       );
       if (getConfiguration()?.Logs?.Show === "true") {

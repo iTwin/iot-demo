@@ -18,14 +18,14 @@ let timeout;
 let count;
 
 function App() {
-  const [toggle, setToggle] = useState(false);
+  const [isSimulatorStarted, setIsSimulatorStarted] = useState(false);
   const [data, setData] = useState([]);
   const [deviceTwins, setDeviceTwins] = useState([]);
-  const [openDeviceTwin, setOpenDeviceTwin] = useState(false);
+  const [isDeviceTwinModalOpen, setIsDeviceTwinModalOpen] = useState(false);
   const [deviceTwin, setDeviceTwin] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDevices, setSelectedDevices] = useState([]);
-  const [enableLogging, setEnableLogging] = useState(false);
+  const [isLoggingEnabled, setIsLoggingEnabled] = useState(false);
   const [user, setUser] = React.useState();
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRole, setUserRole] = useState("");
@@ -38,10 +38,10 @@ function App() {
   useTheme("os");
 
   const updateDeviceTwin = async (deviceArray, selectedConnectionStringId) => {
-    let updatedDevice = false;
+    let isDeviceUpdated = false;
     const response = await editDeviceTwins(deviceArray, selectedConnectionStringId)
-    updatedDevice = response.updated;
-    if (updatedDevice) {
+    isDeviceUpdated = response.updated;
+    if (isDeviceUpdated) {
       handleClose();
     }
   };
@@ -72,25 +72,24 @@ function App() {
     }
   }
 
-  const startSimulator = async () => {
-    // startSimulator
-    setToggle(true);
+  const handleStartSimulator = async () => {
+    
+    setIsSimulatorStarted(true);
     const rows = await getDevices();
     await removeDevices(rows, selectedDevices);
     if (selectedDevices.length === 0) {
-      setToggle(false);
+      setIsSimulatorStarted(false);
       toaster.negative("Please Select atleast one device!!");
     } else {
       toaster.informational("Starting simulator...", { type: "persisting" });
       let simulatorStarted = false;
       if (selectedConnection.includes("Azure")) {
         func_start(selectedDevices, selectedConnectionStringId);
-        simulatorStarted = await startSimulatorForAzure(selectedDevices, enableLogging, selectedConnectionStringId);
+        simulatorStarted = await startSimulatorForAzure(selectedDevices, isLoggingEnabled, selectedConnectionStringId);
       }
       else {
         simulatorStarted = await startSimulatorForAWS(selectedDevices);
-      }
-      console.log(simulatorStarted);
+      }      
       toaster.closeAll();
       if (simulatorStarted) {
         let deviceString = "devices";
@@ -98,30 +97,30 @@ function App() {
           deviceString = "device";
         }
         toaster.positive("Simulator started!! Sending data for " + selectedDevices.length + " " + deviceString, { type: "persisting" });
-        timeout = setTimeout(stopSimulator, parseFloat(duration) * 1000 * 60);
+        timeout = setTimeout(handleStopSimulator, parseFloat(duration) * 1000 * 60);
       } else {
-        setToggle(false);
+        setIsSimulatorStarted(false);
         toaster.negative("Simulator start request not successful. Try again!!", { type: "persisting" });
       }
     }
   };
 
-  const stopSimulator = async () => {
+  const handleStopSimulator = async () => {
     clearTimeout(timeout);
     toaster.informational("Stopping simulator...", { type: "persisting" });
     toaster.closeAll();
-    let simulatorStopped = false;
+    let isSimulatorStopped = false;
     if (selectedConnection.includes("Azure")) {
       func_stop(selectedDevices, selectedConnectionStringId);
-      simulatorStopped = await stopSimulatorForAzure(selectedDevices, selectedConnectionStringId);
+      isSimulatorStopped = await stopSimulatorForAzure(selectedDevices, selectedConnectionStringId);
     } else {
-      simulatorStopped = await stopSimulatorForAWS(selectedDevices);
+      isSimulatorStopped = await stopSimulatorForAWS(selectedDevices);
     }
-    if (simulatorStopped) {
-      setToggle(false);
+    if (isSimulatorStopped) {
+      setIsSimulatorStarted(false);
       toaster.positive("Simulator stopped!!", { hasCloseButton: true });
       toaster.informational("You need to refresh the content");
-      if (enableLogging) {
+      if (isLoggingEnabled) {
         const downloadedData = await getBlobData("simulatorcontainer", "devicelog_".concat(selectedConnectionStringId.concat(".json")));
 
         if (downloadedData !== undefined && downloadedData !== "") {
@@ -150,8 +149,8 @@ function App() {
   };
 
   const beforeUnloadHandler = (e) => {
-    if (toggle) {
-      stopSimulator();
+    if (isSimulatorStarted) {
+      handleStopSimulator();
       if (navigator.userAgent.indexOf("Firefox") > 0) {
         const time = Date.now();
         while ((Date.now() - time) < 500) {
@@ -167,9 +166,9 @@ function App() {
     }
   })
 
-  const openDeviceTwinModal = async (deviceAction, deviceTwin) => {
+  const handleOpenDeviceTwinModal = async (deviceAction, deviceTwin) => {
     setDeviceTwin({ ...deviceTwin, deviceAction });
-    setOpenDeviceTwin(true);
+    setIsDeviceTwinModalOpen(true);
   }
 
   const handleClose = (device) => {
@@ -223,7 +222,7 @@ function App() {
       }
       setData([...data, newDevice]);
     }
-    setOpenDeviceTwin(false);
+    setIsDeviceTwinModalOpen(false);
   }
 
   const getDevices = useCallback(async () => {
@@ -274,7 +273,7 @@ function App() {
     setDuration(configuration.duration);
   }
 
-  const onConnectionSelected = async (ConnectionStringId) => {
+  const handleConnectionSelected = async (ConnectionStringId) => {
     setSelectedConnectionStringId(ConnectionStringId);
     setSelectedConnection(connections.find((conn) => conn.IoTHubConnectionStringId === ConnectionStringId).name);
   }
@@ -388,21 +387,21 @@ function App() {
   );
   const isRowDisabled = useCallback(
     (rowData) => {
-      if (toggle) {
+      if (isSimulatorStarted) {
         return rowData;
       }
       else {
         return (rowData.isRunning === true || rowData.isRunning === "true");
       }
     },
-    [toggle],
+    [isSimulatorStarted],
   );
 
-  const onEnableLogging = (checked) => {
+  const handleLoggingEnabled = (checked) => {
     if (checked) {
-      setEnableLogging(true);
+      setIsLoggingEnabled(true);
     } else {
-      setEnableLogging(false);
+      setIsLoggingEnabled(false);
     }
   }
 
@@ -460,7 +459,7 @@ function App() {
             width: "100px",
             Cell: (data) => {
               return (<div>
-                <Button size="small" styleType="cta" title={isAdmin ? "Edit Device" : "View Device Properties"} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original)}> {isAdmin ? "Edit" : "View"}</Button>
+                <Button size="small" styleType="cta" title={isAdmin ? "Edit Device" : "View Device Properties"} disabled={isSimulatorStarted || data.row.original.isRunning === true} onClick={() => handleOpenDeviceTwinModal(DeviceAction.UPDATE, data.row.original)}> {isAdmin ? "Edit" : "View"}</Button>
               </div>
               );
             },
@@ -468,7 +467,7 @@ function App() {
         ],
       },
     ],
-    [toggle, isAdmin]);
+    [isSimulatorStarted, isAdmin]);
 
 
   const pageSizeList = useMemo(() => [10, 25, 50], []);
@@ -523,7 +522,7 @@ function App() {
                   options={connectionList}
                   displayStyle="default"
                   value={selectedConnectionStringId}
-                  onChange={(conn) => onConnectionSelected(conn)}
+                  onChange={(conn) => handleConnectionSelected(conn)}
                   placeholder='Select Connection'
 
                 /></div></div>
@@ -533,14 +532,14 @@ function App() {
               <Button styleType='borderless' size='small' onClick={() => { setSelectedConnection("") }} style={{ color: "blue" }}> <u>Back to IoT Connections List</u></Button>
               <h2>Connection: {selectedConnection ?? ""}</h2>
 
-              <Button styleType='cta' size='large' disabled={toggle} onClick={startSimulator}>Start</Button>
-              <Button styleType='cta' size='large' disabled={!toggle} onClick={stopSimulator}>Stop</Button>
+              <Button styleType='cta' size='large' disabled={isSimulatorStarted} onClick={handleStartSimulator}>Start</Button>
+              <Button styleType='cta' size='large' disabled={!isSimulatorStarted} onClick={handleStopSimulator}>Stop</Button>
               <br />
-              {selectedConnection.includes("Azure") ? <Checkbox label="Enable Logging" defaultChecked={enableLogging} onChange={(event) => onEnableLogging(event.target.checked)} /> : <></>}
+              {selectedConnection.includes("Azure") ? <Checkbox label="Enable Logging" defaultChecked={isLoggingEnabled} onChange={(event) => handleLoggingEnabled(event.target.checked)} /> : <></>}
               <div className="table-top">
                 <h2 style={{ textAlign: 'left' }}>Devices</h2>
-                {isAdmin ? selectedConnection.includes("Azure") ? <Button styleType='cta' disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>Add</Button> : <></> : <></>}
-                <Button styleType='cta' onClick={refresh} disabled={toggle}>Refresh</Button>
+                {isAdmin ? selectedConnection.includes("Azure") ? <Button styleType='cta' disabled={isSimulatorStarted} onClick={() => handleOpenDeviceTwinModal(DeviceAction.ADD)}>Add</Button> : <></> : <></>}
+                <Button styleType='cta' onClick={refresh} disabled={isSimulatorStarted}>Refresh</Button>
               </div>
               <Table
                 columns={columns}
@@ -553,7 +552,7 @@ function App() {
                 onSelect={onSelect}
                 isRowDisabled={isRowDisabled}
               />
-              <DeviceTwin device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isAdmin={isAdmin} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <DeviceTwin device={deviceTwin} onClose={handleClose} isOpen={isDeviceTwinModalOpen} isAdmin={isAdmin} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
             </div>
           }
         </div> :

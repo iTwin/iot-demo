@@ -41,7 +41,10 @@ export const startSimulatorForAWS = async (selectedDevices) => {
 
   selectedDevices.map((device) => device.isRunning = "true");
   const result = await editAWSThings(selectedDevices);
-  console.log(result);
+  if(!result)
+  {    
+    return false;
+  }
   const data = { devices: selectedDevices, interval: "300000" }
   const response = fetch(`${process.env.REACT_APP_AWS_API_GATEWAY_URL}/d2csimulator` ?? "", {
     method: "post",
@@ -51,8 +54,11 @@ export const startSimulatorForAWS = async (selectedDevices) => {
     }),
     body: JSON.stringify(data)
   }).catch((error) => console.log(`Request failed: ${error}`));
-  console.log(response);
-  return true;
+  if(response)
+  {
+    return true;
+  }
+  
 }
 
 export const stopSimulatorForAWS = async (selectedDevices) => {

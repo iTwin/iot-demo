@@ -177,10 +177,10 @@ export class DeviceMonitorUI {
     });
   }
 
-  public static clearColorCode(observedElement: string, clearEmphasized?: boolean) {
+  public static clearColorCode(observedElement: string, isEmphasizedElementCleared?: boolean) {
     const vp = IModelApp.viewManager.selectedView!;
     const emphasize = EmphasizeElements.getOrCreate(vp);
-    if (clearEmphasized) {
+    if (isEmphasizedElementCleared) {
       emphasize.clearEmphasizedElements(vp);
     }
     const emphasizedElements = emphasize.getEmphasizedElements(vp);

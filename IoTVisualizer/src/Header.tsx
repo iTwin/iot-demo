@@ -8,32 +8,28 @@ import React from "react";
 import styles from "./Header.module.scss";
 
 interface HeaderProps {
-  handleLogin: () => void;
-  handleLogout: () => void;
-  loggedIn: boolean;
+  onLogin: () => void;
+  onLogout: () => void;
+  isLoggedIn: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  loggedIn,
-  handleLogin,
-  handleLogout,
-}: HeaderProps) => {
+export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   return (
     <header className={styles.header}>
       <div className={styles.buttonContainer}>
         <Button
           className={styles.button}
-          onClick={handleLogin}
+          onClick={props.onLogin}
           styleType="cta"
-          disabled={loggedIn}
+          disabled={props.isLoggedIn}
         >
           {"Sign In"}
         </Button>
         <Button
           className={styles.button}
-          onClick={handleLogout}
+          onClick={props.onLogout}
           styleType="cta"
-          disabled={!loggedIn}
+          disabled={!props.isLoggedIn}
         >
           {"Sign Out"}
         </Button>

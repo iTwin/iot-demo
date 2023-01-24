@@ -9,6 +9,9 @@ import { ITwinLink, Story } from "./clients/ITwinLink";
 import { callbackType, IoTConnectionManager } from "./IoTConnection/IoTConnectionManager";
 import { ActivityStatus, Roles, SmartDevice } from "./SmartDevice";
 import { BlobServiceClient } from "@azure/storage-blob";
+import { toaster } from "@itwin/itwinui-react";
+import { MessageBoxValue } from "@itwin/core-frontend";
+
 let configuration: any = [];
 
 let userRole: Roles | undefined = Roles.Unauthorized;
@@ -43,6 +46,19 @@ export const getDevicesLevelWise = async (zmin?: number, zmax?: number) => {
   return devices;
 };
 
+export const checkNamedVersionCreated = async (result: Promise<MessageBoxValue>) => {
+  const value = await result.then((value1) => {
+    return value1.valueOf();
+  });
+  if (value === 6) {
+    window.location.reload();
+  }
+};
+
+export const displayToaster = (msg: string) => {
+  toaster.negative(msg, { type: "persisting" });
+};
+
 export const setDeviceStatusToActive = (devices: SmartDevice[] | SmartDevice) => {
   const deviceList = ITwinViewerApp.store.getState().deviceState.deviceList;
   if (!Array.isArray(devices)) {
@@ -66,13 +82,13 @@ export const setDeviceStatusToActive = (devices: SmartDevice[] | SmartDevice) =>
       });
     });
   }
-  const flag = ITwinViewerApp.store.getState().deviceState.changeDeviceStatus;
+  const flag = ITwinViewerApp.store.getState().deviceState.isDeviceStatusChanged;
   ITwinViewerApp.store.dispatch({
     type: DeviceActionId.setDeviceList,
     payload: deviceList,
   });
   ITwinViewerApp.store.dispatch({
-    type: DeviceActionId.setChangeDeviceStatus,
+    type: DeviceActionId.setIsDeviceStatusChanged,
     payload: !flag,
   });
 };
@@ -114,13 +130,13 @@ export const resetDeviceStatus = (devices: SmartDevice[] | SmartDevice) => {
       });
     });
   }
-  const flag = ITwinViewerApp.store.getState().deviceState.changeDeviceStatus;
+  const flag = ITwinViewerApp.store.getState().deviceState.isDeviceStatusChanged;
   ITwinViewerApp.store.dispatch({
     type: DeviceActionId.setDeviceList,
     payload: deviceList,
   });
   ITwinViewerApp.store.dispatch({
-    type: DeviceActionId.setChangeDeviceStatus,
+    type: DeviceActionId.setIsDeviceStatusChanged,
     payload: !flag,
   });
 };

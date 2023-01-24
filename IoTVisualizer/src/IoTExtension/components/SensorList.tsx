@@ -14,7 +14,7 @@ import { getDevicesLevelWise } from "../Utils";
 
 interface SensorListProps extends CommonProps {
   selectedLevel?: Story;
-  deviceStatusChanged?: boolean | undefined;
+  isDeviceStatusChanged?: boolean | undefined;
 }
 
 export const SensorList: React.FC<SensorListProps> = (props: SensorListProps) => {

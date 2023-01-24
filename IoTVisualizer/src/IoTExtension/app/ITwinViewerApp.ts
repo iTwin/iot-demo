@@ -7,7 +7,6 @@ import { FrameworkReducer, StateManager, UiFramework } from "@itwin/appui-react"
 
 import { AppState, AppStore } from "./AppState";
 
-// this is a singleton - all methods are static and no instances may be created
 export class ITwinViewerApp {
   private constructor() { }
   private static _appState: AppState;

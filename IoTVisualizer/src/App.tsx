@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import "./App.scss";
 import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient } from "@itwin/browser-authorization";
-import { IModelApp, MessageBoxValue } from "@itwin/core-frontend";
+import { IModelApp } from "@itwin/core-frontend";
 import { useAccessToken, Viewer, ViewerContentToolsProvider, ViewerNavigationToolsProvider, ViewerStatusbarItemsProvider } from "@itwin/web-viewer-react";
 import { MeasureTools, MeasureToolsUiItemsProvider } from "@itwin/measure-tools-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -14,7 +14,6 @@ import { IoTMonitoringWidgetProvider } from "./IoTExtension/providers/IoTMonitor
 import { ITwinLink } from "./IoTExtension/clients/ITwinLink";
 import { IoTConnectionManager } from "./IoTExtension/IoTConnection/IoTConnectionManager";
 import { ITwinViewerApp } from "./IoTExtension/app/ITwinViewerApp";
-import { toaster } from "@itwin/itwinui-react";
 import { checkUserRole, getConfiguration, readConfiguration } from "./IoTExtension/Utils";
 import { Roles } from "./IoTExtension/SmartDevice";
 import { TreeWidget, TreeWidgetUiItemsProvider } from "@itwin/tree-widget-react";
@@ -32,19 +31,6 @@ const uiProviders = [
     },
   }),
 ];
-
-export const checkNamedVersionCreated = async (result: Promise<MessageBoxValue>) => {
-  const value = await result.then((value1) => {
-    return value1.valueOf();
-  });
-  if (value === 6) {
-    window.location.reload();
-  }
-};
-
-export const displayToaster = (msg: string) => {
-  toaster.negative(msg, { type: "persisting" });
-};
 
 const App: React.FC = () => {
   const accessToken = useAccessToken();
@@ -134,17 +120,17 @@ const App: React.FC = () => {
     }
   }, [accessToken, isLoggingIn]);
 
-  const onLoginClick = async () => {
+  const handleLoginClick = async () => {
     setIsLoggingIn(true);
     await authClient.signIn();
   };
 
-  const onLogoutClick = async () => {
+  const handleLogoutClick = async () => {
     setIsLoggingIn(false);
     await authClient.signOut();
   };
 
-  const onIModelAppInit = async () => {
+  const handleOnIModelAppInit = async () => {
     await TreeWidget.initialize();
     await PropertyGridManager.initialize();
     await MeasureTools.startup();
@@ -173,9 +159,9 @@ const App: React.FC = () => {
   return (
     <div className="viewer-container">
       <Header
-        handleLogin={onLoginClick}
-        loggedIn={!!accessToken}
-        handleLogout={onLogoutClick}
+        onLogin={handleLoginClick}
+        isLoggedIn={!!accessToken}
+        onLogout={handleLogoutClick}
       />
       {isLoggingIn ? (
         <span>`Logging in....`</span>
@@ -184,7 +170,7 @@ const App: React.FC = () => {
           iTwinId={contextId ?? ""}
           iModelId={iModelId ?? ""}
           authClient={authClient}
-          onIModelAppInit={onIModelAppInit}
+          onIModelAppInit={handleOnIModelAppInit}
           uiProviders={uiProviders}
           enablePerformanceMonitors={false}
         />

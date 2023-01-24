@@ -244,6 +244,7 @@ This is our recommended editor and debugger tool for developing iTwin.js applica
     - In step 6, the name of the resource should be "d2csimulator" and Select the POST method.
     - In step 7, Enter the name of the d2csimulator Lambda function.
     - In steps 8 and 9, select POST Method. 
+    - Under Integration Request -> HTTP Headers, add a header named *X-Amz-Invocation-Type* with a value *'Event'* (with the single quote). This is done so that the API request can return a response without waiting for the Lambda to execute, as Lambda may run for long time depending on how long the user wishes to monitor data.
 
     updateThings:
     - In step 6, the name of the resource should be "updatethings" and Select the POST method.

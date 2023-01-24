@@ -25,14 +25,14 @@ export const getLogData = () => {
 
 const callBackId = uuidv4();
 export const IoTLogsWidget = () => {
-  const [toggle, setToggle] = useState(false);
+  const [isLoggingStarted, setIsLoggingStarted] = useState(false);
   const [startTimeStamp, setStartTimeStamp] = useState("");
   const [stopTimeStamp, setStopTimeStamp] = useState("");
   const [selectedConnection, setSelectedConnection] = useState(0);
   const [connectionList, setConnectionList] = useState<{ label: string, value: number }[]>([]);
 
-  const startLogging = useCallback(() => {
-    setToggle(true);
+  const handleStartLogging = useCallback(() => {
+    setIsLoggingStarted(true);
     setStartTimeStamp("Logging started : ".concat((new Date(Date.now())).toString()));
     setStopTimeStamp("");
     if (document.getElementById("logs") !== null) {
@@ -48,8 +48,8 @@ export const IoTLogsWidget = () => {
     }, deviceListFromSelectedConnection, callBackId);
   }, [selectedConnection, callBackId]);
 
-  const stopLogging = () => {
-    setToggle(false);
+  const handleStopLogging = () => {
+    setIsLoggingStarted(false);
     setStopTimeStamp("Logging stopped : ".concat((new Date(Date.now())).toString()));
     removeConsumerCallback(callBackId);
     const options = getConfiguration().Logs.options;
@@ -74,11 +74,11 @@ export const IoTLogsWidget = () => {
   const ConnectionChanged = (e: any) => {
     const callbacks = ITwinViewerApp.store.getState().consumerState.consumerCallbacks;
     if (callbacks.size !== 0) {
-      IoTConnectionManager.handleConnectionChange(e.detail);
+      IoTConnectionManager.connectionChangedNotification(e.detail);
     }
   };
 
-  const onConnectionSelected = (connection: number) => {
+  const handleConnectionSelected = (connection: number) => {
     setSelectedConnection(connection);
     setStartTimeStamp("");
     setStopTimeStamp("");
@@ -113,16 +113,16 @@ export const IoTLogsWidget = () => {
           options={connectionList}
           displayStyle="default"
           value={selectedConnection}
-          onChange={(conn: any) => onConnectionSelected(conn)}
+          onChange={(conn: any) => handleConnectionSelected(conn)}
           placeholder='Select Connection'
-          disabled={toggle}
+          disabled={isLoggingStarted}
         />
         <div className="btn-wrapper" aria-disabled={selectedConnection === 0 ? true : false}>
           <div className="left-btn-div">
-            <Button styleType="cta" className="btn-left" size="small" title="Start Logging" onClick={startLogging} disabled={toggle || selectedConnection === 0}>Start</Button>
+            <Button styleType="cta" className="btn-left" size="small" title="Start Logging" onClick={handleStartLogging} disabled={isLoggingStarted || selectedConnection === 0}>Start</Button>
           </div >
           <div className="right-btn-div">
-            <Button styleType="cta" className="btn-right" title="Stop Logging" size="small" onClick={stopLogging} disabled={!toggle}>Stop</Button>
+            <Button styleType="cta" className="btn-right" title="Stop Logging" size="small" onClick={handleStopLogging} disabled={!isLoggingStarted}>Stop</Button>
           </div>
         </div >
         <div id="startTimeStamp">{startTimeStamp}</div>

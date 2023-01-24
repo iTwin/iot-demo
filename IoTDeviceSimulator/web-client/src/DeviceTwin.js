@@ -33,10 +33,10 @@ export function DeviceTwin(props) {
         max: props.device.max,
         thingTypeName: props.device.thingTypeName,
     });
-    const [sineConfig, setSineConfig] = useState(false);
-    const [constantConfig, setConstantConfig] = useState(false);
-    const [sineInfo, setSineInfo] = useState(false);
-    const [constantInfo, setConstantInfo] = useState(false);
+    const [isSineConfigSelected, setIsSineConfigSelected] = useState(false);
+    const [isConstantConfigSelected, setIsConstantConfigSelected] = useState(false);
+    const [isSineInfoShown, setIsSineInfoShown] = useState(false);
+    const [isConstantInfoShown, setIsConstantInfoShown] = useState(false);
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
 
 
@@ -70,41 +70,41 @@ export function DeviceTwin(props) {
         });
     }, [deviceTwin]);
 
-    const setChange = useCallback((event) => {
+    const handleBehaviourChange = useCallback((event) => {
         setDeviceTwin({
             ...deviceTwin,
             behaviour: event,
         });
     }, [deviceTwin]);
 
-    const setSineConfigurer = () => {
+    const handleSineConfiguration = () => {
         if (deviceTwin.behaviour === 'Sine Function') {
-            setConstantConfig(false);
-            setSineConfig(true);
+            setIsConstantConfigSelected(false);
+            setIsSineConfigSelected(true);
         }
     }
-    const setConstantConfigurer = () => {
+    const handleConstantConfiguration = () => {
         if (deviceTwin.behaviour === 'Constant Function') {
-            setSineConfig(false);
-            setConstantConfig(true);
+            setIsSineConfigSelected(false);
+            setIsConstantConfigSelected(true);
         }
     }
-    const setAlert = () => {
+    const handleEmptyBehaviour = () => {
         toaster.negative(`Behaviour property can't be empty`);
     }
 
-    const setSineInfoDisplay = () => {
+    const handleSineInfoDisplay = () => {
         if (deviceTwin.behaviour === 'Sine Function') {
-            setSineInfo(true);
+            setIsSineInfoShown(true);
         }
     }
-    const setConstantInfoDisplay = () => {
+    const handleConstantInfoDisplay = () => {
         if (deviceTwin.behaviour === 'Constant Function') {
-            setConstantInfo(true);
+            setIsConstantInfoShown(true);
         }
     }
 
-    const updateDeviceTwin = useCallback(async (event) => {
+    const handleUpdateDeviceTwin = useCallback(async (event) => {
         event.preventDefault();
         let updatedDevice = false;
         if (props.connection.includes("Azure")) {
@@ -120,7 +120,7 @@ export function DeviceTwin(props) {
             props.handleClose(deviceTwin);
         }
     }, [props, deviceTwin]);
-    const addDevice = useCallback(async (event) => {
+    const handleAddDevice = useCallback(async (event) => {
         event.preventDefault();
         const data = { deviceId: deviceTwin.deviceId, connectionStringId: props.connectionStringId }
         const response = await fetch(`${url}/create-device`, {
@@ -150,33 +150,33 @@ export function DeviceTwin(props) {
     ]
 
     const handleCloseSineWave = () => {
-        setSineConfig(false);
+        setIsSineConfigSelected(false);
     }
 
     const handleCloseConstantWave = () => {
-        setConstantConfig(false);
+        setIsConstantConfigSelected(false);
     }
 
     const handleCloseSineInfo = () => {
-        setSineInfo(false);
+        setIsSineInfoShown(false);
     }
 
     const handleCloseConstantInfo = () => {
-        setConstantInfo(false);
+        setIsConstantInfoShown(false);
     }
 
-    const configureBehaviour = () => {
+    const handleBehaviourConfiguration = () => {
         // eslint-disable-next-line no-lone-blocks
         {
             if (deviceTwin.behaviour === 'Sine Function') {
                 toaster.informational(`Sine Wave Configured`);
-                setSineConfig(false);
+                setIsSineConfigSelected(false);
             }
             else {
                 toaster.informational(`Constant Wave Configured`);
                 deviceTwin.amplitude = null;
                 deviceTwin.sine_period = null;
-                setConstantConfig(false);
+                setIsConstantConfigSelected(false);
             }
 
         }
@@ -235,14 +235,14 @@ export function DeviceTwin(props) {
                         <ToggleSwitch label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, mean: '', amplitude: '', sine_period: '', noise_magnitude: '', unit: '', behaviour: '' })} />
                         <LabeledInput label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
                         <Label style={{ display: deviceTwin.valueIsBool ? 'none' : 'block' }}>Behaviour</Label>
-                        <div className="behaviour-prop" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }}><Select value={deviceTwin.behaviour} placeholder={"Select Behaviour"} options={options} onChange={setChange} style={{ width: "380px" }} ></Select>
-                            <div className="button-config" onClick={(deviceTwin.behaviour === 'Sine Function') ? setSineConfigurer : (deviceTwin.behaviour === 'Constant Function') ? setConstantConfigurer : setAlert} ><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m16 9.42256v-2.85566l-2.20352-.44435a6.05356 6.05356 0 0 0 -.37645-.903l1.2427-1.87048-2.01923-2.01931-1.86669 1.24016a6.047 6.047 0 0 0 -.91294-.38153l-.44131-2.18839h-2.85566l-.44131 2.18839a6.0501 6.0501 0 0 0 -.91778.38383l-1.85881-1.23495-2.01924 2.01923 1.2388 1.86464a6.05267 6.05267 0 0 0 -.38067.91511l-2.18789.44119v2.85566l2.20054.44373a6.059 6.059 0 0 0 .37924.90383l-1.24251 1.87034 2.01923 2.01924 1.88089-1.24959a6.049 6.049 0 0 0 .8949.372l.44515 2.20735h2.85566l.44683-2.21567a6.05213 6.05213 0 0 0 .88907-.37186l1.882 1.25026 2.01923-2.01923-1.25089-1.88287a6.04854 6.04854 0 0 0 .37291-.89285zm-8.0053 1.61456a3.04782 3.04782 0 1 1 3.04782-3.04782 3.04781 3.04781 0 0 1 -3.04782 3.04782z" /></svg></div>
-                            <div className="button-config" onMouseOver={(deviceTwin.behaviour === 'Sine Function') ? setSineInfoDisplay : setConstantInfoDisplay} onMouseOut={(deviceTwin.behaviour === 'Sine Function') ? handleCloseSineInfo : handleCloseConstantInfo}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,1.5A6.5,6.5,0,1,1,1.5,8,6.50736,6.50736,0,0,1,8,1.5M8,0a8,8,0,1,0,8,8A8.02352,8.02352,0,0,0,8,0ZM9.2,3.2a.92336.92336,0,0,1,1,.9A1.30936,1.30936,0,0,1,8.9,5.3a.94477.94477,0,0,1-1-1A1.22815,1.22815,0,0,1,9.2,3.2Zm-2,9.6c-.5,0-.9-.3-.5-1.7l.6-2.4c.1-.4.1-.5,0-.5-.2-.1-.9.2-1.3.5l-.2-.5A6.49723,6.49723,0,0,1,9.1,6.6c.5,0,.6.6.3,1.6l-.7,2.6c-.1.5-.1.6.1.6a2.00284,2.00284,0,0,0,1.1-.6l.3.4A5.76883,5.76883,0,0,1,7.2,12.8Z" fill="#2b9be3" /></svg></div></div>
+                        <div className="behaviour-prop" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }}><Select value={deviceTwin.behaviour} placeholder={"Select Behaviour"} options={options} onChange={handleBehaviourChange} style={{ width: "380px" }} ></Select>
+                            <div className="button-config" onClick={(deviceTwin.behaviour === 'Sine Function') ? handleSineConfiguration : (deviceTwin.behaviour === 'Constant Function') ? handleConstantConfiguration : handleEmptyBehaviour} ><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m16 9.42256v-2.85566l-2.20352-.44435a6.05356 6.05356 0 0 0 -.37645-.903l1.2427-1.87048-2.01923-2.01931-1.86669 1.24016a6.047 6.047 0 0 0 -.91294-.38153l-.44131-2.18839h-2.85566l-.44131 2.18839a6.0501 6.0501 0 0 0 -.91778.38383l-1.85881-1.23495-2.01924 2.01923 1.2388 1.86464a6.05267 6.05267 0 0 0 -.38067.91511l-2.18789.44119v2.85566l2.20054.44373a6.059 6.059 0 0 0 .37924.90383l-1.24251 1.87034 2.01923 2.01924 1.88089-1.24959a6.049 6.049 0 0 0 .8949.372l.44515 2.20735h2.85566l.44683-2.21567a6.05213 6.05213 0 0 0 .88907-.37186l1.882 1.25026 2.01923-2.01923-1.25089-1.88287a6.04854 6.04854 0 0 0 .37291-.89285zm-8.0053 1.61456a3.04782 3.04782 0 1 1 3.04782-3.04782 3.04781 3.04781 0 0 1 -3.04782 3.04782z" /></svg></div>
+                            <div className="button-config" onMouseOver={(deviceTwin.behaviour === 'Sine Function') ? handleSineInfoDisplay : handleConstantInfoDisplay} onMouseOut={(deviceTwin.behaviour === 'Sine Function') ? handleCloseSineInfo : handleCloseConstantInfo}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,1.5A6.5,6.5,0,1,1,1.5,8,6.50736,6.50736,0,0,1,8,1.5M8,0a8,8,0,1,0,8,8A8.02352,8.02352,0,0,0,8,0ZM9.2,3.2a.92336.92336,0,0,1,1,.9A1.30936,1.30936,0,0,1,8.9,5.3a.94477.94477,0,0,1-1-1A1.22815,1.22815,0,0,1,9.2,3.2Zm-2,9.6c-.5,0-.9-.3-.5-1.7l.6-2.4c.1-.4.1-.5,0-.5-.2-.1-.9.2-1.3.5l-.2-.5A6.49723,6.49723,0,0,1,9.1,6.6c.5,0,.6.6.3,1.6l-.7,2.6c-.1.5-.1.6.1.6a2.00284,2.00284,0,0,0,1.1-.6l.3.4A5.76883,5.76883,0,0,1,7.2,12.8Z" fill="#2b9be3" /></svg></div></div>
 
                         {deviceTwin.deviceAction === DeviceAction.ADD ?
-                            <Button className="buttons" styleType="cta" onClick={addDevice} disabled={isDisabled}> Add </Button>
+                            <Button className="buttons" styleType="cta" onClick={handleAddDevice} disabled={isDisabled}> Add </Button>
                             :
-                            <Button className="buttons" styleType="cta" onClick={updateDeviceTwin} disabled={isDisabled} > Update </Button>
+                            <Button className="buttons" styleType="cta" onClick={handleUpdateDeviceTwin} disabled={isDisabled} > Update </Button>
                         }
                     </div> :
                     <table>
@@ -304,10 +304,10 @@ export function DeviceTwin(props) {
                     </table>
                 }
             </Modal>
-            {(deviceTwin.behaviour === 'Sine Function' && sineConfig) ?
+            {(deviceTwin.behaviour === 'Sine Function' && isSineConfigSelected) ?
                 <Modal
                     closeOnExternalClick={false}
-                    isOpen={sineConfig}
+                    isOpen={isSineConfigSelected}
                     onClose={handleCloseSineWave}
                     title='Configure Sine Function'
                     style={{ margin: "0px 441px 0px 441px" }}
@@ -353,10 +353,10 @@ export function DeviceTwin(props) {
                             }}
                         />
                     </div>
-                    <Button className="buttons" styleType="cta" onClick={configureBehaviour} disabled={(deviceTwin.mean !== '' && deviceTwin.amplitude !== '' && deviceTwin.sine_period !== '' && deviceTwin.noise_magnitude !== '' && deviceTwin.noiseSd !== '') ? false : true}> Accept </Button>
-                </Modal> : (deviceTwin.behaviour === 'Constant Function' && constantConfig) ? <Modal
+                    <Button className="buttons" styleType="cta" onClick={handleBehaviourConfiguration} disabled={(deviceTwin.mean !== '' && deviceTwin.amplitude !== '' && deviceTwin.sine_period !== '' && deviceTwin.noise_magnitude !== '' && deviceTwin.noiseSd !== '') ? false : true}> Accept </Button>
+                </Modal> : (deviceTwin.behaviour === 'Constant Function' && isConstantConfigSelected) ? <Modal
                     closeOnExternalClick={false}
-                    isOpen={constantConfig}
+                    isOpen={isConstantConfigSelected}
                     onClose={handleCloseConstantWave}
                     title='Configure Constant Function'
                     style={{ margin: "0px 441px 0px 441px" }}
@@ -402,20 +402,20 @@ export function DeviceTwin(props) {
                             }}
                         />
                     </div>
-                    <Button className="buttons" styleType="cta" onClick={configureBehaviour} disabled={(deviceTwin.mean !== '' && deviceTwin.noise_magnitude !== '' && deviceTwin.noiseSd !== '') ? false : true} > Accept </Button>
+                    <Button className="buttons" styleType="cta" onClick={handleBehaviourConfiguration} disabled={(deviceTwin.mean !== '' && deviceTwin.noise_magnitude !== '' && deviceTwin.noiseSd !== '') ? false : true} > Accept </Button>
                 </Modal> : null
             }
-            {(deviceTwin.behaviour === 'Sine Function' && sineInfo) ?
+            {(deviceTwin.behaviour === 'Sine Function' && isSineInfoShown) ?
                 <Modal
                     closeOnExternalClick={true}
-                    isOpen={sineInfo}
+                    isOpen={isSineInfoShown}
                     style={{ margin: "315px 200px 0px 200px" }}
                     isDismissible={false}
                 >
                     <div>A sinusoidal wave is a mathematical curve defined in terms of the sine trigonometric function, of which it is the graph.</div>
-                </Modal> : (deviceTwin.behaviour === 'Constant Function' && constantInfo) ? <Modal
+                </Modal> : (deviceTwin.behaviour === 'Constant Function' && isConstantInfoShown) ? <Modal
                     closeOnExternalClick={true}
-                    isOpen={constantInfo}
+                    isOpen={isConstantInfoShown}
                     style={{ margin: "315px 200px 0px 200px" }}
                     isDismissible={false}
                 >

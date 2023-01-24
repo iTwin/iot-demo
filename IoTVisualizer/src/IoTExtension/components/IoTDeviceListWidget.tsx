@@ -19,25 +19,25 @@ import { IoTConnection } from "../IoTConnection/IotConnection";
 
 export interface DeviceListWidgetProps {
   imodel?: IModelConnection;
-  currentLevel?: Number;  // If not supplied, the levelChanged callback will trigger with the default level
-  levelChanged(currentLevel?: Story): void;
+  currentLevel?: Number;  // If not supplied, the onLevelChanged callback will trigger with the default level
+  onLevelChanged(currentLevel?: Story): void;
 }
 
 export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: DeviceListWidgetProps) => {
   const [levelListState, setLevelList] = useState<Array<Story>>([]);
   const [selectedLevel, setSelectedLevel] = useState<Story>();
-  const [showMakers, setShowMarkers] = useState<boolean>(true);
-  const [connectionChanged, setConnectionChanged] = useState<boolean>(true);
+  const [isMarkerShown, setIsMarkerShown] = useState<boolean>(true);
+  const [isConnectionChanged, setIsConnectionChanged] = useState<boolean>(true);
 
-  const changeDeviceStatus = useSelector<RootState, boolean | undefined>(
-    (state) => state?.deviceState?.changeDeviceStatus,
+  const isDeviceStatusChanged = useSelector<RootState, boolean | undefined>(
+    (state) => state?.deviceState?.isDeviceStatusChanged,
   );
 
   const levelSelected = useCallback((level: Story) => {
     changeViewForModel(level).catch((error) => {
       console.error(error);
     });
-    props.levelChanged(level);
+    props.onLevelChanged(level);
     setSelectedLevel(level);
   }, [props]);
 
@@ -49,7 +49,7 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
         levelSelected(levelList[0]);
       } else {
         // If level is undefined then add markers for all devices
-        props.levelChanged();
+        props.onLevelChanged();
         const vp = IModelApp.viewManager.selectedView;
         if (vp) {
           const categoryIds = await getCategoriesToTurnOff(vp.iModel);
@@ -63,12 +63,12 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
     });
   }, [levelSelected, props]);
 
-  const onLevelChange = (value: Number) => {
+  const handleLevelChanged = (value: Number) => {
     const level = levelListState.find((val: Story) => val.levelNumber === value);
 
     if (level) {
       levelSelected(level);
-      onShowMarkersToggle(showMakers);
+      handleShowMarkers(isMarkerShown);
       const customEvent = new CustomEvent("LevelChanged", { detail: level });
       document.dispatchEvent(customEvent);
     }
@@ -93,23 +93,23 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
       type: DeviceActionId.setDeviceList,
       payload: _deviceListFromIModel,
     });
-    setConnectionChanged(!connectionChanged);
+    setIsConnectionChanged(!isConnectionChanged);
     const customEvent = new CustomEvent("ConnectionChanged", { detail: connection });
     document.dispatchEvent(customEvent);
   };
 
-  const onShowMarkersToggle = React.useCallback((checked: boolean) => {
+  const handleShowMarkers = React.useCallback((checked: boolean) => {
     if (!checked) {
       // Send props a "fake" level where the top is below the bottom
       const fakeLevel: Story = { name: "", description: "", levelNumber: -1, bottomElevation: 99, topElevation: -99 };
-      props.levelChanged(fakeLevel);
+      props.onLevelChanged(fakeLevel);
     }
 
-    if (checked && !showMakers && selectedLevel)
-      props.levelChanged(selectedLevel);
+    if (checked && !isMarkerShown && selectedLevel)
+      props.onLevelChanged(selectedLevel);
 
-    setShowMarkers(checked);
-  }, [showMakers, selectedLevel, props]);
+    setIsMarkerShown(checked);
+  }, [isMarkerShown, selectedLevel, props]);
 
   const array = Array.from(levelListState, (l) => {
     return { value: l.levelNumber, label: l.name };
@@ -117,18 +117,18 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
 
   return (<><div style={{ margin: "8px" }}>
     <div style={{ margin: "5px 0px" }}>
-      <IoTConnectionListComponent handleConnectionChanged={handleConnectionChanged} />
+      <IoTConnectionListComponent onConnectionChanged={handleConnectionChanged} />
     </div>
     <br />
     <div style={{ margin: "5px 0px" }}>
       {selectedLevel ?
-        <Select value={selectedLevel?.levelNumber} options={array} onChange={(value: any) => onLevelChange(value)}></Select>
+        <Select value={selectedLevel?.levelNumber} options={array} onChange={(value: any) => handleLevelChanged(value)}></Select>
         : <></>
       }
       <br />
-      <ToggleSwitch labelPosition="right" defaultChecked={showMakers} onChange={(e) => onShowMarkersToggle(e.target.checked)} label={"Show devices"} />
+      <ToggleSwitch labelPosition="right" defaultChecked={isMarkerShown} onChange={(e) => handleShowMarkers(e.target.checked)} label={"Show devices"} />
       <br />
-      <SensorList selectedLevel={selectedLevel} deviceStatusChanged={changeDeviceStatus} />
+      <SensorList selectedLevel={selectedLevel} isDeviceStatusChanged={isDeviceStatusChanged} />
       {/* <Button styleType="cta" onClick={toggleSimulationStatus}>{simulationText}</Button> */}
     </div>
     <br />

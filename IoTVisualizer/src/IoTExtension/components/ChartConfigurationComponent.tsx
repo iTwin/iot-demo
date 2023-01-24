@@ -13,8 +13,8 @@ interface ChartConfigurationProps {
   chart: ChartData;
   phenomenonList: SelectOption<string>[];
   deviceList: SmartDevice[];
-  closeModal(): void;
-  configureChart(phenomenon: string, deviceId: string[], charttype: string): void;
+  onCloseModal(): void;
+  onConfigureChart(phenomenon: string, deviceId: string[], charttype: string): void;
 }
 
 export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (props: ChartConfigurationProps) => {
@@ -23,7 +23,7 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
   const [warningMsg, setWarningMsg] = useState("");
   const [chartTypeSelected, setChartTypeSelected] = useState("");
   const chartTypes = getConfiguration().chart.types;
-
+  const {chart} =props;
   useEffect(() => {
     if (props.chart.phenomenon !== "") {
       setSelectedPhenomenon(props.chart.phenomenon);
@@ -38,14 +38,14 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
       });
       setSelectedDevices(d);
     }
-  }, [props]);
+  }, [chart]);
 
-  const onPhenomenonSelectedChanged = (value: string) => {
+  const handlePhenomenonChanged = (value: string) => {
     setWarningMsg("");
     setSelectedPhenomenon(value);
   };
 
-  const setChart = (e: any) => {
+  const handleConfigureChart = (e: any) => {
     if (selectedPhenomenon === "") {
       e.preventDefault();
       setWarningMsg("Please Select Phenomenon");
@@ -64,13 +64,13 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
       return;
     } else {
       e.preventDefault();
-      props.configureChart(selectedPhenomenon, selectedDevices, chartTypeSelected);
-      props.closeModal();
+      props.onConfigureChart(selectedPhenomenon, selectedDevices, chartTypeSelected);
+      props.onCloseModal();
     }
 
   };
 
-  const onSelectDevices = (deviceId: string, checked: boolean) => {
+  const handleSelectedDevices = (deviceId: string, checked: boolean) => {
     const devices = selectedDevices;
     if (checked) {
       devices.push(deviceId);
@@ -83,20 +83,20 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
 
   };
 
-  const onChartTypeSelected = (chartType: string) => {
+  const handleChartTypeSelected = (chartType: string) => {
     setChartTypeSelected(chartType);
     setWarningMsg("");
   };
 
   return (<>
-    <form onSubmit={setChart}>
+    <form onSubmit={handleConfigureChart}>
       {warningMsg !== "" ? <div><Alert type="warning" style={{ height: "20px" }}>
         {warningMsg}
       </Alert></div> : null}
       <br></br>
 
       <Label>Select Phenomenon</Label>
-      <Select value={selectedPhenomenon} options={props.phenomenonList} onChange={(value: any) => onPhenomenonSelectedChanged(value)} disabled={props.chart?.phenomenon !== ""} placeholder="Select Phenomenon"></Select>
+      <Select value={selectedPhenomenon} options={props.phenomenonList} onChange={(value: any) => handlePhenomenonChanged(value)} disabled={props.chart?.phenomenon !== ""} placeholder="Select Phenomenon"></Select>
       <MenuDivider style={{ margin: "10px 10px 10px 10px" }} />
       {selectedPhenomenon !== "" ?
 
@@ -104,7 +104,7 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
           <Label>Select Devices</Label>
           {props.deviceList.map((device) => {
             if (device.phenomenon === selectedPhenomenon) {
-              return (<Checkbox key={device.iotId} label={device.label} defaultChecked={props.chart?.deviceIds?.includes(device.iotId)} onChange={(event) => onSelectDevices(device.iotId, event.target.checked)} />);
+              return (<Checkbox key={device.iotId} label={device.label} defaultChecked={props.chart?.deviceIds?.includes(device.iotId)} onChange={(event) => handleSelectedDevices(device.iotId, event.target.checked)} />);
             }
           })
           } <MenuDivider style={{ margin: "10px 10px 10px 10px" }} /></div> : null
@@ -118,7 +118,7 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
                 key={type}
                 name={type}
                 value={type}
-                onChange={() => onChartTypeSelected(type)}
+                onChange={() => handleChartTypeSelected(type)}
                 checked={chartTypeSelected === type}
                 label={type.concat(" Chart")}
                 required={true}
@@ -132,10 +132,10 @@ export const ChartConfigurationComponent: React.FC<ChartConfigurationProps> = (p
       <MenuDivider style={{ margin: "10px 10px 10px 10px" }} />
       <div className="btn-wrapper">
         <div className="left-btn-div">
-          <Button type="submit" styleType="high-visibility" className="btn-left" size="small" title="Save Chart" onClick={(e) => setChart(e)}>OK</Button>
+          <Button type="submit" styleType="high-visibility" className="btn-left" size="small" title="Save Chart" onClick={(e) => handleConfigureChart(e)}>OK</Button>
         </div >
         <div className="right-btn-div">
-          <Button styleType="default" className="btn-right" title="Cancel" size="small" onClick={props.closeModal} disabled={false}>Cancel</Button>
+          <Button styleType="default" className="btn-right" title="Cancel" size="small" onClick={props.onCloseModal} disabled={false}>Cancel</Button>
         </div>
       </div >
     </form>
