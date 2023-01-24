@@ -134,6 +134,37 @@ Now let’s go back to our iTwin App’s registration page on [My Apps | iTwin P
 
 Once the deployment is done, run the Visualizer app and it should start showing up the real-time data.
 
+## Securing Azure function app
+
+Following are some ways to add security to the Azure function app. This project utilizes Azure Function App keys to secure Azure Function invocation.
+
+### Function App keys : 
+
+- Each function app has three different keys :- admin, host and function.
+- You can find these keys from the Azure portal as shown.
+
+![admin-host key](./assets/admin-host-key.png)
+![function key](./assets/function-key.png)
+
+- The function.json file for an azure function has a property called *authlevel*, which can be set to "anonymous", "admin" or "function".
+- Refer the table below to find out what keys can be used with respect to the authlevel assigned.
+
+    | authlevel | key | 
+    |-----------------------|-------------------------------|
+    |anonymous    | all keys / without any key     |
+    |admin     |  admin key   |
+    |function     |  admin, host, and function key   |
+
+- You can set the authlevel as per your choice and invoke the function app by passing the key as a part of the request header under the property name  *x-functions-key*.
+- Visit [this](https://learn.microsoft.com/en-us/azure/azure-functions/security-concepts?tabs=v4#function-access-keys) link for more information about function access keys. 
+
+### App Service Authentication
+
+- The function app can be secured by enabling app service authentication via various identity providers.
+- Follow the steps mentioned in [this](https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service#3-configure-authentication-and-authorization) link to enable App service authentication in your Function App.
+- After these steps, you need to add your client app credentials as a part of Authorization header and use the token generated to call the Azure function app from your application.
+- Visit [this](https://www.smcculloch.com/how-to-call-aad-protected-azure-function-from-react) link to get a code example of how to call an AAD protected Azure function in your react application.
+
 ## Troubleshooting
 
 1. If after deploying to Azure, the Visualizer still doesn't show any live data then try changing these configuration settings in the function app. Modify General Settings in the function app. Change Node.js Version to Node.js 14 LTS in General Settings. Modify the Function runtime settings. Change the runtime version to ~3 in the Function runtime settings.

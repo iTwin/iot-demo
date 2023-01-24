@@ -12,8 +12,8 @@ import mockData from "./MockConnection.json";
 
 export class MockAPIConnection extends IoTConnection {
   private _timer: NodeJS.Timeout[] = [];
-  constructor(connectionUrl: string) {
-    super(connectionUrl);
+  constructor(connectionUrl: string, key: string) {
+    super(connectionUrl, key);
     if (connectionUrl) {
       this._connection = this._connectionUrl;
     } else {
