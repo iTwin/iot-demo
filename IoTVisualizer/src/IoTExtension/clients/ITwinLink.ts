@@ -32,18 +32,20 @@ export class ITwinLink {
 
     if (!devices) {
       const query = `
-      SELECT physicalDevice.UserLabel as label, physicalDevice.ECInstanceId as id, physicalDevice.Origin as origin, deviceType.UserLabel as type, datapoint.phenomenon as phenomenon, datapoint.iotId as iotId, obsElement.TargetECInstanceId as observedElement 
-      FROM IoTdevice.devicepointobservesspatialelement obsElement
-       JOIN IoTDevice.TelemetryPoint datapoint 
+      SELECT physicalDevice.UserLabel as label, physicalDevice.ECInstanceId as id, physicalDevice.Origin as origin, deviceType.UserLabel as type, pointType.phenomenon as phenomenon, datapoint.codeValue as iotId, obsElement.TargetECInstanceId as observedElement 
+      FROM IoTDeviceFunctional.MeasurementPointObservesSpatialElement obsElement
+       JOIN IoTDeviceFunctional.MeasurementPoint datapoint 
        ON datapoint.ECInstanceId=obsElement.SourceECInstanceId 
-       JOIN IoTDevice.DeviceInterface interface 
+       JOIN IoTDeviceFunctional.DeviceInterface interface 
        ON interface.ECInstanceId = datapoint.Parent.Id 
        JOIN Functional.PhysicalElementFulfillsFunction deviceLink 
        ON deviceLink.TargetECInstanceId = interface.ECInstanceId 
        JOIN Bis.SpatialElement physicalDevice 
        ON physicalDevice.ECInstanceId = deviceLink.SourceECInstanceId 
-       JOIN IoTDevice.DeviceType deviceType 
+       JOIN IoTDeviceFunctional.DeviceInterfaceType deviceType 
        ON deviceType.ECInstanceId = deviceInterface.TypeDefinition.Id
+       JOIN IoTDeviceFunctional.DevicePointType pointType
+       ON pointType.ECInstanceId= datapoint.TypeDefinition.Id
             `;
 
       const results = ITwinLink.iModel.query(query, undefined, { rowFormat: QueryRowFormat.UseJsPropertyNames });
