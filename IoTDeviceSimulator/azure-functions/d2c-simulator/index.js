@@ -17,29 +17,20 @@ module.exports = async function (context, req) {
   const iotHubName = ConnectionString.parse(process.env[req.body.connectionStringId], ["HostName"]).HostName;
   let deviceArray = req.body.selectedDevices.map((deviceTwin) => {
     return {
-
       deviceId: deviceTwin.deviceId,
       telemetrySendInterval: deviceTwin.telemetrySendInterval ?? 5000,
       unit: deviceTwin.unit,
-      mean: deviceTwin.mean,
-      amplitude: deviceTwin.amplitude,
       phenomenon: deviceTwin.phenomenon,
       valueIsBool: deviceTwin.valueIsBool,
       deviceSecurityType: "connectionString",
       connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
       phase: Math.random() * Math.PI,
-      behaviour: deviceTwin.behaviour,
-      noise_magnitude: deviceTwin.noise_magnitude,
       noiseSd: deviceTwin.noiseSd,
-      sine_period: deviceTwin.sine_period,
       isRunning: deviceTwin.isRunning,
       min: deviceTwin.min,
       max: deviceTwin.max,
-      slope: deviceTwin.slope,
-      behaviourArray: deviceTwin.behaviourArray,
       currDataArray: deviceTwin.currDataArray,
       signalArray: deviceTwin.signalArray,
-      renderList: deviceTwin.renderList,
     }
   });
 
@@ -199,8 +190,21 @@ module.exports = async function (context, req) {
 
     generateSignal(signalArray, time) {
       let res = 0;
+      let obj;
       for (let index = 0; index < signalArray.length; index++) {
-        res += signalArray[index].generateValues(time);
+        if (JSON.parse(signalArray[index])["Behaviour"] === "Sine Function") {
+          obj = new sineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"], JSON.parse(signalArray[index])["Phase"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant Function") {
+          obj = new constantGenerator(JSON.parse(signalArray[index])["Mean"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Strictly Increasing Function") {
+          obj = new increasingGenerator(JSON.parse(signalArray[index])["Slope"]);
+        }
+        else {
+          obj = new noiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
+        }
+        res += obj.generateValues(time);
       }
       return res;
     }
@@ -208,52 +212,17 @@ module.exports = async function (context, req) {
     updateSensor(device) {
       this.device = device;
       this.currTime = Date.now();
-      let signalArray = [];
       let time = (this.currTime - this.startTime) / 1000;
-      if (device.behaviour !== undefined && device.behaviour !== '') {
-        if (device.behaviour === 'Sine Function' && device.mean !== undefined && device.amplitude !== undefined && device.phase !== undefined && device.sine_period !== undefined && device.mean !== '' && device.amplitude !== '' && device.phase !== '' && device.sine_period !== '') {
-          const sineObj = new sineGenerator(device.mean, device.amplitude, device.sine_period, device.phase);
-          const noiseObj = new noiseGenerator(device.noise_magnitude, device.noiseSd);
-          signalArray.push(sineObj);
-          signalArray.push(noiseObj);
-        }
-        else if (device.behaviour === 'Constant Function' && device.mean !== undefined && device.mean !== '') {
-          const constantObj = new constantGenerator(device.mean);
-          const noiseObj = new noiseGenerator(device.noise_magnitude, device.noiseSd);
-          signalArray.push(constantObj);
-          signalArray.push(noiseObj);
-        }
-        else if (device.behaviour === 'Strictly Increasing Function' && device.slope !== undefined && device.slope !== '') {
-          const increasingObj = new increasingGenerator(device.slope);
-          const noiseObj = new noiseGenerator(device.noise_magnitude, device.noiseSd);
-          signalArray.push(increasingObj);
-          signalArray.push(noiseObj);
-        }
-        else {
-          const randomObj = new randomGenerator(device.min, device.max);
-          signalArray.push(randomObj);
-        }
-      }
-      else {
-        if (device.valueIsBool) {
-          const booleanObj = new booleanGenerator();
-          signalArray.push(booleanObj);
-        }
-        else {
-          const randomObj = new randomGenerator(device.min, device.max);
-          signalArray.push(randomObj);
-        }
-      }
-      this.currData = this.generateSignal(signalArray, time);
+      this.currData = this.generateSignal(device.signalArray, time);
       return this;
     }
 
     updateSensorForResolve(device) {
       this.device = device;
       this.currTime = Date.now();
-      let signalArray = [];
       let time = (this.currTime - this.startTime) / 1000;
-      const randomObj = new randomGenerator(device.min, device.max);
+      let randomObj = new randomGenerator(device.min, device.max);
+      let signalArray = [];
       signalArray.push(randomObj);
       this.currData = this.generateSignal(signalArray, time);
       return this;

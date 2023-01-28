@@ -180,24 +180,16 @@ function App() {
         for (const twin of deviceTwins) {
           if (twin.deviceId === device.deviceId) {
             twin.properties.desired.deviceName = device.deviceName;
-            twin.properties.desired.mean = device.mean;
-            twin.properties.desired.amplitude = device.amplitude;
             twin.properties.desired.phenomenon = device.phenomenon;
             twin.properties.desired.unit = device.unit;
             twin.properties.desired.valueIsBool = device.valueIsBool;
             twin.properties.desired.telemetrySendInterval = device.telemetrySendInterval;
-            twin.properties.desired.behaviour = device.behaviour;
-            twin.properties.desired.noise_magnitude = device.noise_magnitude;
             twin.properties.desired.noiseSd = device.noiseSd;
-            twin.properties.desired.sine_period = device.sine_period;
             twin.properties.desired.min = device.min;
             twin.properties.desired.max = device.max;
             twin.properties.desired.isRunning = device.isRunning;
-            twin.properties.desired.slope = device.slope;
-            twin.properties.desired.behaviourArray = device.behaviourArray;
             twin.properties.desired.currDataArray = device.currDataArray;
             twin.properties.desired.signalArray = device.signalArray;
-            twin.properties.desired.renderList = device.renderList;
             break;
           }
         }
@@ -211,24 +203,16 @@ function App() {
       const newDevice = {
         deviceId: device.deviceId,
         deviceName: device.properties.desired.deviceName,
-        amplitude: device.properties.desired.amplitude,
-        mean: device.properties.desired.mean,
         phenomenon: device.properties.desired.phenomenon,
         telemetrySendInterval: device.properties.desired.telemetrySendInterval,
         unit: device.properties.desired.unit,
         valueIsBool: device.properties.desired.valueIsBool,
-        behaviour: device.properties.desired.behaviour,
-        noise_magnitude: device.properties.desired.noise_magnitude,
         noiseSd: device.properties.desired.noiseSd,
-        sine_period: device.properties.desired.sine_period,
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
-        slope: device.properties.desired.slope,
-        behaviourArray: device.properties.desired.behaviourArray,
         currDataArray: device.properties.desired.currDataArray,
         signalArray: device.properties.desired.signalArray,
-        renderList: device.properties.desired.renderList,
       }
       setData([...data, newDevice]);
     }
@@ -371,25 +355,17 @@ function App() {
             deviceId: deviceTwin.deviceId,
             deviceName: deviceTwin.properties.desired.deviceName,
             deviceAction: "UPDATE",
-            amplitude: deviceTwin.properties.desired.amplitude,
-            mean: deviceTwin.properties.desired.mean,
             phenomenon: deviceTwin.properties.desired.phenomenon,
             telemetrySendInterval: deviceTwin.properties.desired.telemetrySendInterval,
             unit: deviceTwin.properties.desired.unit,
             valueIsBool: deviceTwin.properties.desired.valueIsBool,
-            behaviour: deviceTwin.properties.desired.behaviour,
-            noise_magnitude: deviceTwin.properties.desired.noise_magnitude,
             noiseSd: deviceTwin.properties.desired.noiseSd,
-            sine_period: deviceTwin.properties.desired.sine_period,
             isRunning: deviceTwin.properties.desired.isRunning,
             min: deviceTwin.properties.desired.min,
             max: deviceTwin.properties.desired.max,
             primaryKey: deviceTwin.authentication.symmetricKey.primaryKey,
-            slope: deviceTwin.properties.desired.slope,
-            behaviourArray: deviceTwin.properties.desired.behaviourArray,
             currDataArray: deviceTwin.properties.desired.currDataArray,
             signalArray: deviceTwin.properties.desired.signalArray,
-            renderList: deviceTwin.properties.desired.renderList,
           });
         } else {
           selectedDeviceIds.push(row)
@@ -433,18 +409,6 @@ function App() {
             Filter: tableFilters.TextFilter(),
           },
           {
-            id: "mean",
-            Header: "Mean",
-            minWidth: "20px",
-            accessor: "mean",
-          },
-          {
-            id: "amplitude",
-            Header: "Amplitude",
-            minWidth: "20px",
-            accessor: "amplitude",
-          },
-          {
             id: "phenomenon",
             Header: "Phenomenon",
             minWidth: "240px",
@@ -462,12 +426,6 @@ function App() {
             Header: "Period (ms)",
             minWidth: "30px",
             accessor: "telemetrySendInterval",
-          },
-          {
-            id: "behaviour",
-            Header: "Behaviour",
-            minWidth: "30px",
-            accessor: "behaviour",
           },
           {
             id: "action",

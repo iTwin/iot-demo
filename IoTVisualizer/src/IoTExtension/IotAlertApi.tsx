@@ -2,17 +2,17 @@ import { Point3d, WritableLowAndHighXYZ, WritableXYAndZ } from "@itwin/core-geom
 import { IModelApp, ViewChangeOptions } from "@itwin/core-frontend";
 
 export class IotAlertApi {
-    public static zoomToElements = async (elementId: string, location: Point3d) => {
-        const vp = IModelApp.viewManager.selectedView;
-        if (vp && elementId) {
-            const viewChangeOpts: ViewChangeOptions = {};
-            viewChangeOpts.animateFrustumChange = true;
-            const zoomFactor = 1.5;
-            const highPoint: WritableXYAndZ = { x: location.x - zoomFactor, y: location.y + zoomFactor, z: location.z - zoomFactor };
-            const lowPoint: WritableXYAndZ = { x: location.x + zoomFactor, y: location.y - zoomFactor, z: location.z + zoomFactor };
-            const point: WritableLowAndHighXYZ = { high: lowPoint, low: highPoint };
-            vp.zoomToVolume(point, { ...viewChangeOpts });
-            vp?.iModel.selectionSet.replace(elementId);
-        }
-    };
+  public static zoomToElements = async (elementId: string, location: Point3d) => {
+    const vp = IModelApp.viewManager.selectedView;
+    if (vp && elementId) {
+      const viewChangeOpts: ViewChangeOptions = {};
+      viewChangeOpts.animateFrustumChange = true;
+      const zoomFactor = 1.5;
+      const highPoint: WritableXYAndZ = { x: location.x - zoomFactor, y: location.y + zoomFactor, z: location.z - zoomFactor };
+      const lowPoint: WritableXYAndZ = { x: location.x + zoomFactor, y: location.y - zoomFactor, z: location.z + zoomFactor };
+      const point: WritableLowAndHighXYZ = { high: lowPoint, low: highPoint };
+      vp.zoomToVolume(point, { ...viewChangeOpts });
+      vp?.iModel.selectionSet.replace(elementId);
+    }
+  };
 }

@@ -22,21 +22,13 @@ export function DeviceTwin(props) {
         unit: props.device.unit,
         valueIsBool: props.device.valueIsBool,
         telemetrySendInterval: props.device.telemetrySendInterval,
-        behaviour: props.device.behaviour,
-        noise_magnitude: props.device.noise_magnitude,
         noiseSd: props.device.noiseSd,
-        sine_period: props.device.sine_period,
-        mean: props.device.mean,
-        amplitude: props.device.amplitude,
         isRunning: props.device.isRunning,
         min: props.device.min,
         max: props.device.max,
         thingTypeName: props.device.thingTypeName,
-        slope: props.device.slope,
-        behaviourArray: props.device.behaviourArray,
         currDataArray: props.device.currDataArray,
         signalArray: props.device.signalArray,
-        renderList: props.device.renderList,
     });
 
     const [sineConfig, setSineConfig] = useState(false);
@@ -58,112 +50,6 @@ export function DeviceTwin(props) {
     const [dataArray, setDataArray] = useState([]);
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
 
-    class generator {
-        constructor() {
-            if (this.constructor === generator) {
-                const error = new Error("Can't instantiate abstract class!");
-                console.log(error);
-            }
-        }
-
-        generateValues(t) {
-            const error = new Error("This method can't be called!");
-            console.log(error);
-        }
-    }
-
-    class sineGenerator extends generator {
-        constructor(mean, amplitude, sine_period, phase) {
-            super();
-            this.mean = mean;
-            this.amplitude = amplitude;
-            this.sine_period = sine_period;
-            this.phase = phase;
-        }
-
-        generateValues(t) {
-            let tempData = parseFloat(this.mean) + Math.sin(t * (2 * Math.PI) / (parseFloat(this.sine_period) / 1000) + parseFloat(this.phase)) * parseFloat(this.amplitude);
-            return tempData;
-        }
-    }
-
-    class constantGenerator extends generator {
-        constructor(mean) {
-            super();
-            this.mean = mean;
-        }
-
-        generateValues(t) {
-            let tempData = parseFloat(this.mean);
-            return tempData;
-        }
-    }
-
-    class increasingGenerator extends generator {
-        constructor(slope) {
-            super();
-            this.slope = slope;
-        }
-
-        generateValues(t) {
-            let tempData = parseFloat(this.slope) * t;
-            return tempData;
-        }
-    }
-
-    class randomGenerator extends generator {
-        constructor(min, max) {
-            super();
-            this.min = min;
-            this.max = max;
-        }
-
-        generateValues(t) {
-            const mean = (parseFloat(this.min) + parseFloat(this.max)) / 2;
-            const constObj = new constantGenerator(mean);
-            let tempData = constObj.generateValues(t);
-            const noise_magnitude = (Math.random() * (parseFloat(this.max) - parseFloat(this.min))) / 2;
-            const noiseSd = 0.45;
-            const noiseObj = new noiseGenerator(noise_magnitude, noiseSd);
-            tempData += noiseObj.generateValues(t);
-            return tempData;
-        }
-    }
-
-    class booleanGenerator extends generator {
-        constructor() {
-            super();
-        }
-
-        generateValues(t) {
-            const randomBoolean = () => Math.random() >= 0.5;
-            let tempData = randomBoolean();
-            return tempData;
-        }
-    }
-
-    class noiseGenerator extends generator {
-        constructor(noise_magnitude, noiseSd) {
-            super();
-            this.noise_magnitude = noise_magnitude;
-            this.noiseSd = noiseSd;
-        }
-
-        generateValues(t) {
-            if (this.noise_magnitude !== undefined && this.noiseSd !== undefined) {
-                let mean = 0;
-                let standard_deviation = parseFloat(this.noiseSd);
-                // Taken reference from this link for range of x->https://en.wikipedia.org/wiki/Normal_distribution#/media/File:Normal_Distribution_PDF.svg
-                let x = (Math.random() - 0.5) * 2;
-                // Taken reference from this link for noise value->https://en.wikipedia.org/wiki/Normal_distribution
-                let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-                let noise_magnitude = parseFloat(this.noise_magnitude) * Math.sign((Math.random() - 0.5) * 2);
-                return noise * noise_magnitude;
-            }
-            return 0;
-        }
-    }
-
     useEffect(() => {
         setDeviceTwin({
             deviceAction: props.device.deviceAction,
@@ -173,21 +59,13 @@ export function DeviceTwin(props) {
             phenomenon: props.device.phenomenon ?? '',
             valueIsBool: props.device.valueIsBool ?? false,
             telemetrySendInterval: props.device.telemetrySendInterval ?? '',
-            behaviour: props.device.behaviour ?? '',
-            noise_magnitude: props.device.noise_magnitude ?? '',
             noiseSd: 0.45,
-            sine_period: props.device.sine_period ?? '',
-            mean: props.device.mean ?? '',
-            amplitude: props.device.amplitude ?? '',
             isRunning: props.device.isRunning ?? false,
             min: props.device.min ?? '',
             max: props.device.max ?? '',
             thingTypeName: props.device.thingTypeName ?? '',
-            slope: props.device.slope ?? '',
-            behaviourArray: props.device.behaviourArray ?? [],
             currDataArray: props.device.currDataArray ?? [],
             signalArray: props.device.signalArray ?? [],
-            renderList: props.device.renderList ?? [],
         });
     }, [props]);
 
@@ -308,6 +186,7 @@ export function DeviceTwin(props) {
             props.handleClose(deviceTwin);
         }
     }, [props, deviceTwin]);
+
     const addDevice = useCallback(async (event) => {
         event.preventDefault();
         const data = { deviceId: deviceTwin.deviceId, connectionStringId: props.connectionStringId }
@@ -376,17 +255,9 @@ export function DeviceTwin(props) {
     }
 
     const removeBehaviour = (index) => {
-        deviceTwin.behaviourArray.splice(Object.values(index)[0], 1);
         deviceTwin.signalArray.splice(Object.values(index)[0], 1);
-        deviceTwin.renderList = deviceTwin.signalArray.map((item, index) =>
-            <div key={index} className="funcElement">
-                <Label>{deviceTwin.behaviourArray[index]}</Label>
-                <Label>{JSON.stringify(item)}</Label>
-                <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-            </div>
-        );
         getCurrentData();
-        setRenderState(deviceTwin.renderList);
+        setRenderState(deviceTwin.signalArray);
     }
 
     const getCurrentData = () => {
@@ -395,22 +266,21 @@ export function DeviceTwin(props) {
             deviceTwin.currDataArray[i] = 0;
         }
         for (let index = 0; index < deviceTwin.signalArray.length; index++) {
-            if (deviceTwin.behaviourArray[index] === 'SINE:') {
-                const phase = 0;
+            if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Sine Function") {
                 for (let ind = 0; ind <= 50; ind++) {
-                    let currData = parseFloat(deviceTwin.signalArray[index].mean) + Math.sin(ind * (2 * Math.PI) / (parseFloat(deviceTwin.signalArray[index].sine_period) / 1000) + phase) * parseFloat(deviceTwin.signalArray[index].amplitude);
+                    let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Mean"]) + Math.sin(ind * (2 * Math.PI) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) + JSON.parse(deviceTwin.signalArray[index])["Phase"]) * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]);
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
-            else if (deviceTwin.behaviourArray[index] === 'CONSTANT:') {
+            else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Constant Function") {
                 for (let ind = 0; ind <= 50; ind++) {
-                    let currData = parseFloat(deviceTwin.signalArray[index].mean);
+                    let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Mean"]);
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
-            else if (deviceTwin.behaviourArray[index] === 'INCREASING:') {
+            else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Strictly Increasing Function") {
                 for (let ind = 0; ind <= 50; ind++) {
-                    let currData = parseFloat(deviceTwin.signalArray[index].slope) * ind;
+                    let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Slope"]) * ind;
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
@@ -420,11 +290,20 @@ export function DeviceTwin(props) {
                 for (let ind = 0; ind <= 50; ind++) {
                     let x = (Math.random() - 0.5) * 2;
                     let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-                    let noise_mag = deviceTwin.signalArray[index].noise_magnitude * Math.sign((Math.random() - 0.5) * 2);
+                    let noise_mag = JSON.parse(deviceTwin.signalArray[index])["Noise Magnitude"] * Math.sign((Math.random() - 0.5) * 2);
                     let currData = noise * noise_mag;
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
+        }
+        setDataArray(deviceTwin.currDataArray);
+    }
+
+    const getCurrentDataForBoolean = () => {
+        deviceTwin.currDataArray = [];
+        for (let i = 0; i <= 50; i++) {
+            const randomBoolean = () => Math.random() >= 0.5;
+            deviceTwin.currDataArray[i] = randomBoolean();
         }
         setDataArray(deviceTwin.currDataArray);
     }
@@ -435,73 +314,35 @@ export function DeviceTwin(props) {
             if (behaviour === 'Sine Function') {
                 toaster.informational(`Sine Wave Configured`);
                 setSineConfig(false);
-                const sineObj = new sineGenerator(mean, amplitude, sine_period, 0);
+                const sineObj = `{"Behaviour":"Sine Function","Mean":${mean},"Amplitude":${amplitude},"Sine Period":${sine_period},"Phase":"0"}`;
                 deviceTwin.signalArray.push(sineObj);
-                deviceTwin.behaviourArray.push("SINE:");
-                deviceTwin.renderList = deviceTwin.signalArray.map((item, index) =>
-                    <div key={index} className="funcElement">
-                        <Label>{deviceTwin.behaviourArray[index]}</Label>
-                        <Label>{JSON.stringify(item)}</Label>
-                        <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-                    </div>
-                );
                 setMean("");
                 setAmplitude("");
                 setSine_period("");
-                setBehaviour("");
-                setRenderState(deviceTwin.renderList);
             }
             else if (behaviour === 'Constant Function') {
                 toaster.informational(`Constant Wave Configured`);
                 setConstantConfig(false);
-                const constObj = new constantGenerator(mean);
+                const constObj = `{"Behaviour":"Constant Function","Mean":${mean}}`;
                 deviceTwin.signalArray.push(constObj);
-                deviceTwin.behaviourArray.push("CONSTANT:");
-                deviceTwin.renderList = deviceTwin.signalArray.map((item, index) =>
-                    <div key={index} className="funcElement">
-                        <Label>{deviceTwin.behaviourArray[index]}</Label>
-                        <Label>{JSON.stringify(item)}</Label>
-                        <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-                    </div>
-                );
                 setMean("");
-                setBehaviour("");
-                setRenderState(deviceTwin.renderList);
             }
             else if (behaviour === 'Strictly Increasing Function') {
                 toaster.informational(`Strictly Increasing Wave Configured`);
                 setIncreasingConfig(false);
-                const increasingObj = new increasingGenerator(slope);
+                const increasingObj = `{"Behaviour":"Strictly Increasing Function","Slope":${slope}}`;
                 deviceTwin.signalArray.push(increasingObj);
-                deviceTwin.behaviourArray.push("INCREASING:");
-                deviceTwin.renderList = deviceTwin.signalArray.map((item, index) =>
-                    <div key={index} className="funcElement">
-                        <Label>{deviceTwin.behaviourArray[index]}</Label>
-                        <Label>{JSON.stringify(item)}</Label>
-                        <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-                    </div>
-                );
                 setSlope("");
-                setBehaviour("");
-                setRenderState(deviceTwin.renderList);
             }
             else {
                 toaster.informational(`Noise Wave Configured`);
                 setNoiseConfig(false);
-                const noiseObj = new noiseGenerator(noise_magnitude, deviceTwin.noiseSd);
+                const noiseObj = `{"Behaviour":"Noise Function","Noise Magnitude":${noise_magnitude},"Noise Standard-deviation":${deviceTwin.noiseSd}}`;
                 deviceTwin.signalArray.push(noiseObj);
-                deviceTwin.behaviourArray.push("NOISE:");
-                deviceTwin.renderList = deviceTwin.signalArray.map((item, index) =>
-                    <div key={index} className="funcElement">
-                        <Label>{deviceTwin.behaviourArray[index]}</Label>
-                        <Label>{JSON.stringify(item)}</Label>
-                        <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-                    </div>
-                );
                 setNoise_magnitude("");
-                setBehaviour("");
-                setRenderState(deviceTwin.renderList);
             }
+            setBehaviour("");
+            setRenderState(deviceTwin.signalArray);
             getCurrentData();
         }
     }
@@ -563,13 +404,16 @@ export function DeviceTwin(props) {
                             <LabeledInput label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
                             <LabeledInput label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
                             <LabeledInput label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                            <ToggleSwitch label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, mean: '', amplitude: '', sine_period: '', noise_magnitude: '', unit: '', behaviour: '' })} />
+                            <ToggleSwitch label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: [] }); getCurrentDataForBoolean(); }} />
                             <LabeledInput label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
-                            <div className="behaviour-label" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }} ><Label style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }}>Behaviour</Label>
-                                <div className="button-config" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div></div>
-                            <div>
-                                {deviceTwin.renderList}
+                            <div className="behaviour-label" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }} ><Label>Behaviour</Label>
+                                <div className="button-config" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div>
                             </div>
+                            {deviceTwin.signalArray ? deviceTwin.signalArray.map((item, index) =>
+                            (<div key={index} className="funcElement">
+                                <Label>{item}</Label>
+                                <div className="button-config" onClick={function () { removeBehaviour({ index }); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
+                            </div>)) : <div></div>}
                             {deviceTwin.deviceAction === DeviceAction.ADD ?
                                 <Button className="buttons" styleType="cta" onClick={addDevice}> Add </Button>
                                 :
@@ -880,7 +724,7 @@ export function DeviceTwin(props) {
                     <Modal
                         closeOnExternalClick={true}
                         isOpen={sineInfo}
-                        style={{ margin: "265px 200px 0px 180px" }}
+                        style={{ margin: "258px 200px 0px 180px" }}
                         isDismissible={false}
                     >
                         <div>A sinusoidal wave is a mathematical curve defined in terms of the sine trigonometric function, of which it is the graph.</div>
@@ -888,7 +732,7 @@ export function DeviceTwin(props) {
                         <Modal
                             closeOnExternalClick={true}
                             isOpen={constantInfo}
-                            style={{ margin: "265px 200px 0px 180px" }}
+                            style={{ margin: "258px 200px 0px 180px" }}
                             isDismissible={false}
                         >
                             <div>A constant wave is a wave that is same everywhere and having the same value of range for different values of the domain.</div>
@@ -896,7 +740,7 @@ export function DeviceTwin(props) {
                             <Modal
                                 closeOnExternalClick={true}
                                 isOpen={increasingInfo}
-                                style={{ margin: "265px 200px 0px 180px" }}
+                                style={{ margin: "258px 200px 0px 180px" }}
                                 isDismissible={false}
                             >
                                 <div>A stricty increasing wave is a wave in which Y-value increases with the increasing value on X-axis.</div>
@@ -904,7 +748,7 @@ export function DeviceTwin(props) {
                                 <Modal
                                     closeOnExternalClick={true}
                                     isOpen={noiseInfo}
-                                    style={{ margin: "265px 200px 0px 180px" }}
+                                    style={{ margin: "258px 200px 0px 180px" }}
                                     isDismissible={false}
                                 >
                                     <div>A noise wave is an unwanted random disturbance of a signal.</div>
@@ -915,7 +759,7 @@ export function DeviceTwin(props) {
                     isOpen={behaviourConfig}
                     onClose={handleCloseBehaviour}
                     title='Select Behaviour'
-                    style={{ margin: "180px auto auto 115px" }}><div className="behaviour-prop" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }}><Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "310px" }} ></Select>
+                    style={{ margin: "180px auto auto 30px" }}><div className="behaviour-prop"><Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "310px" }} ></Select>
                         <div className="button-config" onClick={(behaviour === 'Sine Function') ? setSineConfigurer : (behaviour === 'Constant Function') ? setConstantConfigurer : (behaviour === 'Strictly Increasing Function') ? setIncreasingConfigurer : (behaviour === 'Noise Function') ? setNoiseConfigurer : setAlert} ><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m16 9.42256v-2.85566l-2.20352-.44435a6.05356 6.05356 0 0 0 -.37645-.903l1.2427-1.87048-2.01923-2.01931-1.86669 1.24016a6.047 6.047 0 0 0 -.91294-.38153l-.44131-2.18839h-2.85566l-.44131 2.18839a6.0501 6.0501 0 0 0 -.91778.38383l-1.85881-1.23495-2.01924 2.01923 1.2388 1.86464a6.05267 6.05267 0 0 0 -.38067.91511l-2.18789.44119v2.85566l2.20054.44373a6.059 6.059 0 0 0 .37924.90383l-1.24251 1.87034 2.01923 2.01924 1.88089-1.24959a6.049 6.049 0 0 0 .8949.372l.44515 2.20735h2.85566l.44683-2.21567a6.05213 6.05213 0 0 0 .88907-.37186l1.882 1.25026 2.01923-2.01923-1.25089-1.88287a6.04854 6.04854 0 0 0 .37291-.89285zm-8.0053 1.61456a3.04782 3.04782 0 1 1 3.04782-3.04782 3.04781 3.04781 0 0 1 -3.04782 3.04782z" /></svg></div>
                         <div className="button-config" onMouseOver={(behaviour === 'Sine Function') ? setSineInfoDisplay : (behaviour === 'Constant Function') ? setConstantInfoDisplay : (behaviour === 'Strictly Increasing Function') ? setIncreasingInfoDisplay : setNoiseInfoDisplay} onMouseOut={(behaviour === 'Sine Function') ? handleCloseSineInfo : (behaviour === 'Constant Function') ? handleCloseConstantInfo : (behaviour === 'Strictly Increasing Function') ? handleCloseIncreasingInfo : handleCloseNoiseInfo}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,1.5A6.5,6.5,0,1,1,1.5,8,6.50736,6.50736,0,0,1,8,1.5M8,0a8,8,0,1,0,8,8A8.02352,8.02352,0,0,0,8,0ZM9.2,3.2a.92336.92336,0,0,1,1,.9A1.30936,1.30936,0,0,1,8.9,5.3a.94477.94477,0,0,1-1-1A1.22815,1.22815,0,0,1,9.2,3.2Zm-2,9.6c-.5,0-.9-.3-.5-1.7l.6-2.4c.1-.4.1-.5,0-.5-.2-.1-.9.2-1.3.5l-.2-.5A6.49723,6.49723,0,0,1,9.1,6.6c.5,0,.6.6.3,1.6l-.7,2.6c-.1.5-.1.6.1.6a2.00284,2.00284,0,0,0,1.1-.6l.3.4A5.76883,5.76883,0,0,1,7.2,12.8Z" fill="#2b9be3" /></svg></div></div></Modal> : null}
         </>

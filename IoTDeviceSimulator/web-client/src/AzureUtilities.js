@@ -12,24 +12,16 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
       rows.push({
         deviceId: device.deviceId,
         deviceName: device.properties.desired.deviceName,
-        amplitude: device.properties.desired.amplitude,
-        mean: device.properties.desired.mean,
         phenomenon: device.properties.desired.phenomenon,
         telemetrySendInterval: device.properties.desired.telemetrySendInterval,
         unit: device.properties.desired.unit,
         valueIsBool: device.properties.desired.valueIsBool,
-        behaviour: device.properties.desired.behaviour,
-        noise_magnitude: device.properties.desired.noise_magnitude,
         noiseSd: device.properties.desired.noiseSd,
-        sine_period: device.properties.desired.sine_period,
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
-        slope: device.properties.desired.slope,
-        behaviourArray: device.properties.desired.behaviourArray,
         currDataArray: device.properties.desired.currDataArray,
         signalArray: device.properties.desired.signalArray,
-        renderList: device.properties.desired.renderList,
       })
     });
     return { deviceTwins: devices, rows: rows };
