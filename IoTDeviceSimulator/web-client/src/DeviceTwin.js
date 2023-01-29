@@ -35,10 +35,14 @@ export function DeviceTwin(props) {
     const [constantConfig, setConstantConfig] = useState(false);
     const [increasingConfig, setIncreasingConfig] = useState(false);
     const [noiseConfig, setNoiseConfig] = useState(false);
+    const [triangularConfig, setTriangularConfig] = useState(false);
+    const [sawtoothConfig, setSawtoothConfig] = useState(false);
     const [sineInfo, setSineInfo] = useState(false);
     const [constantInfo, setConstantInfo] = useState(false);
     const [increasingInfo, setIncreasingInfo] = useState(false);
     const [noiseInfo, setNoiseInfo] = useState(false);
+    const [triangularInfo, setTriangularInfo] = useState(false);
+    const [sawtoothInfo, setSawtoothInfo] = useState(false);
     const [behaviourConfig, setBehaviourConfig] = useState(false);
     const [mean, setMean] = useState("");
     const [amplitude, setAmplitude] = useState("");
@@ -106,6 +110,8 @@ export function DeviceTwin(props) {
             setConstantConfig(false);
             setIncreasingConfig(false);
             setNoiseConfig(false);
+            setTriangularConfig(false);
+            setSawtoothConfig(false);
             setSineConfig(true);
         }
     }
@@ -115,6 +121,8 @@ export function DeviceTwin(props) {
             setSineConfig(false);
             setIncreasingConfig(false);
             setNoiseConfig(false);
+            setTriangularConfig(false);
+            setSawtoothConfig(false);
             setConstantConfig(true);
         }
     }
@@ -124,6 +132,8 @@ export function DeviceTwin(props) {
             setSineConfig(false);
             setConstantConfig(false);
             setNoiseConfig(false);
+            setTriangularConfig(false);
+            setSawtoothConfig(false);
             setIncreasingConfig(true);
         }
     }
@@ -133,7 +143,33 @@ export function DeviceTwin(props) {
             setSineConfig(false);
             setConstantConfig(false);
             setIncreasingConfig(false);
+            setTriangularConfig(false);
+            setSawtoothConfig(false);
             setNoiseConfig(true);
+
+        }
+    }
+
+    const setTriangularConfigurer = () => {
+        if (behaviour === 'Triangular Function') {
+            setSineConfig(false);
+            setConstantConfig(false);
+            setIncreasingConfig(false);
+            setNoiseConfig(false);
+            setSawtoothConfig(false);
+            setTriangularConfig(true);
+
+        }
+    }
+
+    const setSawtoothConfigurer = () => {
+        if (behaviour === 'Sawtooth Function') {
+            setSineConfig(false);
+            setConstantConfig(false);
+            setIncreasingConfig(false);
+            setTriangularConfig(false);
+            setNoiseConfig(false);
+            setSawtoothConfig(true);
 
         }
     }
@@ -167,6 +203,18 @@ export function DeviceTwin(props) {
     const setNoiseInfoDisplay = () => {
         if (behaviour === 'Noise Function') {
             setNoiseInfo(true);
+        }
+    }
+
+    const setTriangularInfoDisplay = () => {
+        if (behaviour === 'Triangular Function') {
+            setTriangularInfo(true);
+        }
+    }
+
+    const setSawtoothInfoDisplay = () => {
+        if (behaviour === 'Sawtooth Function') {
+            setSawtoothInfo(true);
         }
     }
 
@@ -216,6 +264,8 @@ export function DeviceTwin(props) {
         { value: 'Constant Function', label: 'Constant Function' },
         { value: 'Strictly Increasing Function', label: 'Strictly Increasing Function' },
         { value: 'Noise Function', label: 'Noise Function' },
+        { value: 'Triangular Function', label: 'Triangular Function' },
+        { value: 'Sawtooth Function', label: 'Sawtooth Function' },
     ]
 
     const handleCloseSineWave = () => {
@@ -232,6 +282,14 @@ export function DeviceTwin(props) {
 
     const handleCloseNoiseWave = () => {
         setNoiseConfig(false);
+    }
+
+    const handleCloseTriangularWave = () => {
+        setTriangularConfig(false);
+    }
+
+    const handleCloseSawtoothWave = () => {
+        setSawtoothConfig(false);
     }
 
     const handleCloseBehaviour = () => {
@@ -252,6 +310,14 @@ export function DeviceTwin(props) {
 
     const handleCloseNoiseInfo = () => {
         setNoiseInfo(false);
+    }
+
+    const handleCloseTriangularInfo = () => {
+        setTriangularInfo(false);
+    }
+
+    const handleCloseSawtoothInfo = () => {
+        setSawtoothInfo(false);
     }
 
     const removeBehaviour = (index) => {
@@ -284,7 +350,7 @@ export function DeviceTwin(props) {
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
-            else {
+            else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Noise Function") {
                 let mean = 0;
                 let standard_deviation = parseFloat(deviceTwin.noiseSd);
                 for (let ind = 0; ind <= 50; ind++) {
@@ -295,15 +361,18 @@ export function DeviceTwin(props) {
                     deviceTwin.currDataArray[ind] += currData;
                 }
             }
-        }
-        setDataArray(deviceTwin.currDataArray);
-    }
-
-    const getCurrentDataForBoolean = () => {
-        deviceTwin.currDataArray = [];
-        for (let i = 0; i <= 50; i++) {
-            const randomBoolean = () => Math.random() >= 0.5;
-            deviceTwin.currDataArray[i] = randomBoolean();
+            else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Triangular Function") {
+                for (let ind = 0; ind <= 50; ind++) {
+                    let currData = 4 * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) * Math.abs((((ind - (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) / 4) % (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000)) + (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000)) % (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) - (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) / 2) - parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]);
+                    deviceTwin.currDataArray[ind] += currData;
+                }
+            }
+            else {
+                for (let ind = 0; ind <= 50; ind++) {
+                    let currData = 2 * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]) * (ind / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000) - Math.floor(1 / 2 + ind / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Sine Period"]) / 1000)));
+                    deviceTwin.currDataArray[ind] += currData;
+                }
+            }
         }
         setDataArray(deviceTwin.currDataArray);
     }
@@ -334,12 +403,28 @@ export function DeviceTwin(props) {
                 deviceTwin.signalArray.push(increasingObj);
                 setSlope("");
             }
-            else {
+            else if (behaviour === 'Noise Function') {
                 toaster.informational(`Noise Wave Configured`);
                 setNoiseConfig(false);
                 const noiseObj = `{"Behaviour":"Noise Function","Noise Magnitude":${noise_magnitude},"Noise Standard-deviation":${deviceTwin.noiseSd}}`;
                 deviceTwin.signalArray.push(noiseObj);
                 setNoise_magnitude("");
+            }
+            else if (behaviour === 'Triangular Function') {
+                toaster.informational(`Triangular Wave Configured`);
+                setTriangularConfig(false);
+                const triangularObj = `{"Behaviour":"Triangular Function","Amplitude":${amplitude},"Sine Period":${sine_period}}`;
+                deviceTwin.signalArray.push(triangularObj);
+                setAmplitude("");
+                setSine_period("");
+            }
+            else {
+                toaster.informational(`Sawtooth Wave Configured`);
+                setSawtoothConfig(false);
+                const sawtoothObj = `{"Behaviour":"Sawtooth Function","Amplitude":${amplitude},"Sine Period":${sine_period}}`;
+                deviceTwin.signalArray.push(sawtoothObj);
+                setAmplitude("");
+                setSine_period("");
             }
             setBehaviour("");
             setRenderState(deviceTwin.signalArray);
@@ -372,7 +457,7 @@ export function DeviceTwin(props) {
             arr.push(index);
         }
     }
-    else {
+    else if (behaviour === 'Noise Function') {
         let mean = 0;
         let standard_deviation = parseFloat(deviceTwin.noiseSd);
         for (let index = 0; index <= 50; index++) {
@@ -380,6 +465,20 @@ export function DeviceTwin(props) {
             let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
             let noise_mag = noise_magnitude * Math.sign((Math.random() - 0.5) * 2);
             let currData = noise * noise_mag;
+            ar.push(currData);
+            arr.push(index);
+        }
+    }
+    else if (behaviour === 'Triangular Function') {
+        for (let index = 0; index <= 50; index++) {
+            let currData = 4 * parseFloat(amplitude) / (parseFloat(sine_period) / 1000) * Math.abs((((index - (parseFloat(sine_period) / 1000) / 4) % (parseFloat(sine_period) / 1000)) + (parseFloat(sine_period) / 1000)) % (parseFloat(sine_period) / 1000) - (parseFloat(sine_period) / 1000) / 2) - parseFloat(amplitude);
+            ar.push(currData);
+            arr.push(index);
+        }
+    }
+    else {
+        for (let index = 0; index <= 50; index++) {
+            let currData = 2 * parseFloat(amplitude) * (index / (parseFloat(sine_period) / 1000) - Math.floor(1 / 2 + index / (parseFloat(sine_period) / 1000)));
             ar.push(currData);
             arr.push(index);
         }
@@ -404,7 +503,7 @@ export function DeviceTwin(props) {
                             <LabeledInput label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
                             <LabeledInput label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
                             <LabeledInput label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                            <ToggleSwitch label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: [] }); getCurrentDataForBoolean(); }} />
+                            <ToggleSwitch label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: [], currDataArray: Array.from({ length: 51 }, () => deviceTwin.valueIsBool ? 0 : Math.floor(Math.random() * 2)) }); }} />
                             <LabeledInput label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
                             <div className="behaviour-label" style={{ display: deviceTwin.valueIsBool ? 'none' : 'flex' }} ><Label>Behaviour</Label>
                                 <div className="button-config" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div>
@@ -717,7 +816,103 @@ export function DeviceTwin(props) {
                                         />
                                     </div>
                                     <Button className="buttons" styleType="cta" onClick={configureBehaviour} disabled={(noise_magnitude !== '' && deviceTwin.noiseSd !== '') ? false : true}> Accept </Button>
-                                </Modal> : null
+                                </Modal> : (behaviour === 'Triangular Function' && triangularConfig) ?
+                                    <Modal
+                                        closeOnExternalClick={false}
+                                        isOpen={triangularConfig}
+                                        onClose={handleCloseTriangularWave}
+                                        title='Configure Triangular Function'
+                                        style={{ margin: "0px 441px 0px 441px" }}
+                                    >
+                                        <LabeledInput type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
+                                        <LabeledInput type='number' label='Period(ms)' name='sine_period' value={sine_period} onChange={changeSine_period} />
+                                        <div className="preview">
+                                            <Line
+                                                data={{
+                                                    labels: arr,
+                                                    datasets: [
+                                                        {
+                                                            label: deviceTwin.phenomenon === '' ? "Phenomenon Vs Time" : deviceTwin.phenomenon.concat(" Vs ".concat("Time")),
+                                                            data: ar,
+                                                            fill: false,
+                                                            borderColor: "green",
+                                                            borderWidth: 2,
+                                                            lineTension: 0,
+                                                            pointRadius: 0,
+                                                        },
+                                                    ],
+                                                }}
+                                                options={{
+                                                    maintainAspectRatio: true,
+                                                    scales: {
+                                                        yAxes: [
+                                                            {
+
+                                                                ticks: {
+                                                                    beginAtZero: true,
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    legend: {
+                                                        labels: {
+                                                            fontSize: 25,
+                                                            fontColor: "green",
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        </div>
+                                        <Button className="buttons" styleType="cta" onClick={configureBehaviour} disabled={(amplitude !== '' && sine_period !== '') ? false : true}> Accept </Button>
+                                    </Modal> : (behaviour === 'Sawtooth Function' && sawtoothConfig) ?
+                                        <Modal
+                                            closeOnExternalClick={false}
+                                            isOpen={sawtoothConfig}
+                                            onClose={handleCloseSawtoothWave}
+                                            title='Configure Sawtooth Function'
+                                            style={{ margin: "0px 441px 0px 441px" }}
+                                        >
+                                            <LabeledInput type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
+                                            <LabeledInput type='number' label='Period(ms)' name='sine_period' value={sine_period} onChange={changeSine_period} />
+                                            <div className="preview">
+                                                <Line
+                                                    data={{
+                                                        labels: arr,
+                                                        datasets: [
+                                                            {
+                                                                label: deviceTwin.phenomenon === '' ? "Phenomenon Vs Time" : deviceTwin.phenomenon.concat(" Vs ".concat("Time")),
+                                                                data: ar,
+                                                                fill: false,
+                                                                borderColor: "green",
+                                                                borderWidth: 2,
+                                                                lineTension: 0,
+                                                                pointRadius: 0,
+                                                            },
+                                                        ],
+                                                    }}
+                                                    options={{
+                                                        maintainAspectRatio: true,
+                                                        scales: {
+                                                            yAxes: [
+                                                                {
+
+                                                                    ticks: {
+                                                                        beginAtZero: true,
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        legend: {
+                                                            labels: {
+                                                                fontSize: 25,
+                                                                fontColor: "green",
+                                                            },
+                                                        },
+                                                    }}
+                                                />
+                                            </div>
+                                            <Button className="buttons" styleType="cta" onClick={configureBehaviour} disabled={(amplitude !== '' && sine_period !== '') ? false : true}> Accept </Button>
+                                        </Modal> : null
             }
             {
                 (behaviour === 'Sine Function' && sineInfo) ?
@@ -752,7 +947,23 @@ export function DeviceTwin(props) {
                                     isDismissible={false}
                                 >
                                     <div>A noise wave is an unwanted random disturbance of a signal.</div>
-                                </Modal> : null
+                                </Modal> : (behaviour === 'Triangular Function' && triangularInfo) ?
+                                    <Modal
+                                        closeOnExternalClick={true}
+                                        isOpen={triangularInfo}
+                                        style={{ margin: "258px 200px 0px 180px" }}
+                                        isDismissible={false}
+                                    >
+                                        <div>A triangular wave or triangle wave is a non-sinusoidal waveform named for its triangular shape.</div>
+                                    </Modal> : (behaviour === 'Sawtooth Function' && sawtoothInfo) ?
+                                        <Modal
+                                            closeOnExternalClick={true}
+                                            isOpen={sawtoothInfo}
+                                            style={{ margin: "258px 200px 0px 180px" }}
+                                            isDismissible={false}
+                                        >
+                                            <div>The sawtooth wave is a kind of non-sinusoidal waveform named for its resemblance to the teeth of a plain-toothed saw with a zero rake angle.</div>
+                                        </Modal> : null
             }
             {(behaviourConfig) ?
                 <Modal closeOnExternalClick={false}
@@ -760,8 +971,9 @@ export function DeviceTwin(props) {
                     onClose={handleCloseBehaviour}
                     title='Select Behaviour'
                     style={{ margin: "180px auto auto 30px" }}><div className="behaviour-prop"><Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "310px" }} ></Select>
-                        <div className="button-config" onClick={(behaviour === 'Sine Function') ? setSineConfigurer : (behaviour === 'Constant Function') ? setConstantConfigurer : (behaviour === 'Strictly Increasing Function') ? setIncreasingConfigurer : (behaviour === 'Noise Function') ? setNoiseConfigurer : setAlert} ><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m16 9.42256v-2.85566l-2.20352-.44435a6.05356 6.05356 0 0 0 -.37645-.903l1.2427-1.87048-2.01923-2.01931-1.86669 1.24016a6.047 6.047 0 0 0 -.91294-.38153l-.44131-2.18839h-2.85566l-.44131 2.18839a6.0501 6.0501 0 0 0 -.91778.38383l-1.85881-1.23495-2.01924 2.01923 1.2388 1.86464a6.05267 6.05267 0 0 0 -.38067.91511l-2.18789.44119v2.85566l2.20054.44373a6.059 6.059 0 0 0 .37924.90383l-1.24251 1.87034 2.01923 2.01924 1.88089-1.24959a6.049 6.049 0 0 0 .8949.372l.44515 2.20735h2.85566l.44683-2.21567a6.05213 6.05213 0 0 0 .88907-.37186l1.882 1.25026 2.01923-2.01923-1.25089-1.88287a6.04854 6.04854 0 0 0 .37291-.89285zm-8.0053 1.61456a3.04782 3.04782 0 1 1 3.04782-3.04782 3.04781 3.04781 0 0 1 -3.04782 3.04782z" /></svg></div>
-                        <div className="button-config" onMouseOver={(behaviour === 'Sine Function') ? setSineInfoDisplay : (behaviour === 'Constant Function') ? setConstantInfoDisplay : (behaviour === 'Strictly Increasing Function') ? setIncreasingInfoDisplay : setNoiseInfoDisplay} onMouseOut={(behaviour === 'Sine Function') ? handleCloseSineInfo : (behaviour === 'Constant Function') ? handleCloseConstantInfo : (behaviour === 'Strictly Increasing Function') ? handleCloseIncreasingInfo : handleCloseNoiseInfo}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,1.5A6.5,6.5,0,1,1,1.5,8,6.50736,6.50736,0,0,1,8,1.5M8,0a8,8,0,1,0,8,8A8.02352,8.02352,0,0,0,8,0ZM9.2,3.2a.92336.92336,0,0,1,1,.9A1.30936,1.30936,0,0,1,8.9,5.3a.94477.94477,0,0,1-1-1A1.22815,1.22815,0,0,1,9.2,3.2Zm-2,9.6c-.5,0-.9-.3-.5-1.7l.6-2.4c.1-.4.1-.5,0-.5-.2-.1-.9.2-1.3.5l-.2-.5A6.49723,6.49723,0,0,1,9.1,6.6c.5,0,.6.6.3,1.6l-.7,2.6c-.1.5-.1.6.1.6a2.00284,2.00284,0,0,0,1.1-.6l.3.4A5.76883,5.76883,0,0,1,7.2,12.8Z" fill="#2b9be3" /></svg></div></div></Modal> : null}
+                        <div className="button-config" onClick={(behaviour === 'Sine Function') ? setSineConfigurer : (behaviour === 'Constant Function') ? setConstantConfigurer : (behaviour === 'Strictly Increasing Function') ? setIncreasingConfigurer : (behaviour === 'Noise Function') ? setNoiseConfigurer : (behaviour === 'Triangular Function') ? setTriangularConfigurer : (behaviour === 'Sawtooth Function') ? setSawtoothConfigurer : setAlert} ><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m16 9.42256v-2.85566l-2.20352-.44435a6.05356 6.05356 0 0 0 -.37645-.903l1.2427-1.87048-2.01923-2.01931-1.86669 1.24016a6.047 6.047 0 0 0 -.91294-.38153l-.44131-2.18839h-2.85566l-.44131 2.18839a6.0501 6.0501 0 0 0 -.91778.38383l-1.85881-1.23495-2.01924 2.01923 1.2388 1.86464a6.05267 6.05267 0 0 0 -.38067.91511l-2.18789.44119v2.85566l2.20054.44373a6.059 6.059 0 0 0 .37924.90383l-1.24251 1.87034 2.01923 2.01924 1.88089-1.24959a6.049 6.049 0 0 0 .8949.372l.44515 2.20735h2.85566l.44683-2.21567a6.05213 6.05213 0 0 0 .88907-.37186l1.882 1.25026 2.01923-2.01923-1.25089-1.88287a6.04854 6.04854 0 0 0 .37291-.89285zm-8.0053 1.61456a3.04782 3.04782 0 1 1 3.04782-3.04782 3.04781 3.04781 0 0 1 -3.04782 3.04782z" /></svg></div>
+                        <div className="button-config" onMouseOver={(behaviour === 'Sine Function') ? setSineInfoDisplay : (behaviour === 'Constant Function') ? setConstantInfoDisplay : (behaviour === 'Strictly Increasing Function') ? setIncreasingInfoDisplay : (behaviour === 'Noise Function') ? setNoiseInfoDisplay : (behaviour === 'Triangular Function') ? setTriangularInfoDisplay : setSawtoothInfoDisplay} onMouseOut={(behaviour === 'Sine Function') ? handleCloseSineInfo : (behaviour === 'Constant Function') ? handleCloseConstantInfo : (behaviour === 'Strictly Increasing Function') ? handleCloseIncreasingInfo : (behaviour === 'Noise Function') ? handleCloseNoiseInfo : (behaviour === 'Triangular Function') ? handleCloseTriangularInfo : handleCloseSawtoothInfo}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,1.5A6.5,6.5,0,1,1,1.5,8,6.50736,6.50736,0,0,1,8,1.5M8,0a8,8,0,1,0,8,8A8.02352,8.02352,0,0,0,8,0ZM9.2,3.2a.92336.92336,0,0,1,1,.9A1.30936,1.30936,0,0,1,8.9,5.3a.94477.94477,0,0,1-1-1A1.22815,1.22815,0,0,1,9.2,3.2Zm-2,9.6c-.5,0-.9-.3-.5-1.7l.6-2.4c.1-.4.1-.5,0-.5-.2-.1-.9.2-1.3.5l-.2-.5A6.49723,6.49723,0,0,1,9.1,6.6c.5,0,.6.6.3,1.6l-.7,2.6c-.1.5-.1.6.1.6a2.00284,2.00284,0,0,0,1.1-.6l.3.4A5.76883,5.76883,0,0,1,7.2,12.8Z" fill="#2b9be3" /></svg></div></div></Modal> : null
+            }
         </>
     )
 }

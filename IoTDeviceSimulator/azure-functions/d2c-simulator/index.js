@@ -142,15 +142,31 @@ module.exports = async function (context, req) {
     }
   }
 
-  // generateTriangularValues(device, t) {
-  //   let tempData = 4 * parseFloat(device.amplitude) / (parseFloat(device.sine_period) / 1000) * Math.abs((((t - (parseFloat(device.sine_period) / 1000) / 4) % (parseFloat(device.sine_period) / 1000)) + (parseFloat(device.sine_period) / 1000)) % (parseFloat(device.sine_period) / 1000) - (parseFloat(device.sine_period) / 1000) / 2) - parseFloat(device.amplitude);
-  //   return tempData;
-  // }
+  class triangularGenerator extends generator {
+    constructor(amplitude, sine_period) {
+      super();
+      this.amplitude = amplitude;
+      this.sine_period = sine_period;
+    }
 
-  // generateSawtoothValues(device, t) {
-  //   let tempData = 2 * parseFloat(device.amplitude) * (t / (parseFloat(device.sine_period) / 1000) - Math.floor(1 / 2 + t / (parseFloat(device.sine_period) / 1000)));
-  //   return tempData;
-  // }
+    generateValues(t) {
+      let tempData = 4 * parseFloat(this.amplitude) / (parseFloat(this.sine_period) / 1000) * Math.abs((((t - (parseFloat(this.sine_period) / 1000) / 4) % (parseFloat(this.sine_period) / 1000)) + (parseFloat(this.sine_period) / 1000)) % (parseFloat(this.sine_period) / 1000) - (parseFloat(this.sine_period) / 1000) / 2) - parseFloat(this.amplitude);
+      return tempData;
+    }
+  }
+
+  class sawtoothGenerator extends generator {
+    constructor(amplitude, sine_period) {
+      super();
+      this.amplitude = amplitude;
+      this.sine_period = sine_period;
+    }
+
+    generateValues(t) {
+      let tempData = 2 * parseFloat(this.amplitude) * (t / (parseFloat(this.sine_period) / 1000) - Math.floor(1 / 2 + t / (parseFloat(this.sine_period) / 1000)));
+      return tempData;
+    }
+  }
 
   class GenericDevice {
     constructor() {
@@ -201,8 +217,14 @@ module.exports = async function (context, req) {
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Strictly Increasing Function") {
           obj = new increasingGenerator(JSON.parse(signalArray[index])["Slope"]);
         }
-        else {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise Function") {
           obj = new noiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular Function") {
+          obj = new triangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"]);
+        }
+        else {
+          obj = new sawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"]);
         }
         res += obj.generateValues(time);
       }
@@ -213,7 +235,13 @@ module.exports = async function (context, req) {
       this.device = device;
       this.currTime = Date.now();
       let time = (this.currTime - this.startTime) / 1000;
-      this.currData = this.generateSignal(device.signalArray, time);
+      if (device.valueIsBool) {
+        const boolObj = new booleanGenerator();
+        this.currdata = boolObj.generateValues(time);
+      }
+      else {
+        this.currData = this.generateSignal(device.signalArray, time);
+      }
       return this;
     }
 
@@ -221,10 +249,8 @@ module.exports = async function (context, req) {
       this.device = device;
       this.currTime = Date.now();
       let time = (this.currTime - this.startTime) / 1000;
-      let randomObj = new randomGenerator(device.min, device.max);
-      let signalArray = [];
-      signalArray.push(randomObj);
-      this.currData = this.generateSignal(signalArray, time);
+      const randomObj = new randomGenerator(device.min, device.max);
+      this.currData = randomObj.generateValues(time);
       return this;
     }
   }
