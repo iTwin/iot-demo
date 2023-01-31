@@ -7,13 +7,21 @@ import { DeviceActionId } from "../app/AppState";
 import { ITwinViewerApp } from "../app/ITwinViewerApp";
 import { SmartDevice } from "../SmartDevice";
 import { IoTConnection } from "./IotConnection";
-import * as awsCLient from "../clients/AWSClient";
 import { Amplify } from "@aws-amplify/core";
+import API, { graphqlOperation } from "@aws-amplify/api";
 
 const subscriptions: any[] = [];
 
 export class AwsConnection extends IoTConnection {
 
+  private _subscribeDoc = /* GraphQL */ `
+  subscription Subscribe($name: String!) {
+    subscribe(name: $name) {
+      name
+      data
+    }
+  }
+`;
   constructor(connectionUrl: string) {
     super(connectionUrl);
     if (connectionUrl) {
@@ -24,7 +32,6 @@ export class AwsConnection extends IoTConnection {
           aws_appsync_authenticationType: "API_KEY",
           aws_appsync_apiKey: process.env.IMJS_AWS_APPSYNC_APIKEY,
         });
-        console.log(this._connection);
       } catch (error) {
         console.log(error);
       }
@@ -80,11 +87,19 @@ export class AwsConnection extends IoTConnection {
     return true;
   }
 
+  public subscribe = (name: string, next: any, error: any) => {
+    return (API.graphql(graphqlOperation(this._subscribeDoc, { name })) as any).subscribe({
+      next: ({ provider, value }: any) => {
+        next(value.data.subscribe, provider, value);
+      },
+      error: error || console.log,
+    });
+  };
+
   public async listen() {
     this._isListening = true;
     // execute the GraphQL subscribe operation to receive real-time data from AWS IoT Core
-    subscriptions.push(awsCLient.subscribe(process.env.IMJS_AWS_IOT_MQTT_TOPIC ?? "", ({ data }: any) => {
-      console.log(JSON.parse(data));
+    subscriptions.push(this.subscribe(process.env.IMJS_AWS_IOT_MQTT_TOPIC ?? "", ({ data }: any) => {
       const callBacks = ITwinViewerApp.store.getState().consumerState.consumerCallbacks;
       if (callBacks.size === 0) {
         this.stopMonitoring();
@@ -93,7 +108,6 @@ export class AwsConnection extends IoTConnection {
           value(data);
         }
       }
-      console.log(typeof (data));
     }, ""));
   }
 

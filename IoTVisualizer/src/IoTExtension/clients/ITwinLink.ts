@@ -62,13 +62,12 @@ export class ITwinLink {
     return devices;
   };
 
-  public static async getLevels(): Promise<Story[]> {
+  public static getLevels = async (): Promise<Story[]> => {
     if (ITwinLink.stories)
       return ITwinLink.stories;
 
     const query = `select distinct Round(LEVEL_ELEV, 5) as LEVEL_ELEV, DATUM_TEXT from RevitDynamic.level ORDER BY LEVEL_ELEV`;
     const a = await ITwinLink.executeQuery(query);
-    console.log(a);
     const rows: any[] = [];
     let i = 0;
     for await (const row of a)
@@ -90,7 +89,7 @@ export class ITwinLink {
     });
 
     return ITwinLink.stories;
-  }
+  };
 
   private static executeQuery = async (query: string) => {
     const rows = [];

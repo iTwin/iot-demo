@@ -4,9 +4,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { displayToaster } from "../../App";
 import { IoTConnectionManager } from "../IoTConnection/IoTConnectionManager";
-import { getConfiguration } from "../Utils";
+import { displayToaster, getConfiguration } from "../Utils";
 
 interface Reading {
   IoTId: string;

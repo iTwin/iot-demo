@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { combineReducers, createStore, Store } from "redux";
+import { combineReducers, legacy_createStore as createStore, Store } from "redux";
 import { ActionsUnion, createAction, DeepReadonly, FrameworkReducer, FrameworkState } from "@itwin/appui-react";
 import { SmartDevice } from "../SmartDevice";
 import { callbackType } from "../IoTConnection/IoTConnectionManager";
@@ -13,7 +13,7 @@ export interface ConsumerState {
 }
 export interface DeviceState {
   deviceList: SmartDevice[];
-  changeDeviceStatus: boolean;
+  isDeviceStatusChanged: boolean;
   phenomenonList: string[];
 }
 
@@ -23,7 +23,7 @@ const initialConsumerState: ConsumerState = {
 
 const initialDeviceState: DeviceState = {
   deviceList: [],
-  changeDeviceStatus: false,
+  isDeviceStatusChanged: false,
   phenomenonList: [],
 
 };
@@ -33,7 +33,7 @@ export enum ConsumerActionId {
 
 export enum DeviceActionId {
   setDeviceList = "SET_DEVICE_LIST",
-  setChangeDeviceStatus = "SET_DEVICE_STATUS",
+  setIsDeviceStatusChanged = "SET_DEVICE_STATUS",
   setPhenomenonList = "SET_PHENOMENON_ARRAY",
 }
 
@@ -45,8 +45,8 @@ export const ConsumerActions = {
 export const DeviceActions = {
   setDeviceList: (deviceList: []) =>
     createAction(DeviceActionId.setDeviceList, deviceList),
-  setChangeDeviceStatus: (changeDeviceStatus: boolean) =>
-    createAction(DeviceActionId.setChangeDeviceStatus, changeDeviceStatus),
+  setIsDeviceStatusChanged: (isDeviceStatusChanged: boolean) =>
+    createAction(DeviceActionId.setIsDeviceStatusChanged, isDeviceStatusChanged),
   setPhenomenonList: (phenomenonList: string[]) =>
     createAction(DeviceActionId.setPhenomenonList, phenomenonList),
 
@@ -80,10 +80,10 @@ export function deviceReducer(
         ...state,
         deviceList: action.payload,
       };
-    case DeviceActionId.setChangeDeviceStatus:
+    case DeviceActionId.setIsDeviceStatusChanged:
       return {
         ...state,
-        changeDeviceStatus: action.payload,
+        isDeviceStatusChanged: action.payload,
       };
     case DeviceActionId.setPhenomenonList:
       return {
@@ -111,7 +111,7 @@ export class AppState {
   private _rootReducer: any;
 
   constructor() {
-    // this is the rootReducer for the application.
+
     this._rootReducer = combineReducers<RootState>({
       frameworkState: FrameworkReducer,
       deviceState: deviceReducer,

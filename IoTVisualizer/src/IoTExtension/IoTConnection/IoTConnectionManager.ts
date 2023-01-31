@@ -85,7 +85,7 @@ export class IoTConnectionManager {
     });
   };
 
-  public static handleConnectionChange(connection: IoTConnection) { // when connection checkboxes are switched on/off after starting consumers, notify the listen method
+  public static connectionChangedNotification(connection: IoTConnection) { // when connection checkboxes are switched on/off after starting consumers, notify the listen method
     if (connection && connection.get() && !connection.connectionListening()) {
       connection.listen();
     }

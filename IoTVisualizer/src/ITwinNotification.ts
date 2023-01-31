@@ -5,7 +5,7 @@
 
 import { IModelApp, MessageBoxIconType, MessageBoxType } from "@itwin/core-frontend";
 import { HubConnectionState } from "@microsoft/signalr";
-import { checkNamedVersionCreated } from "./App";
+import { checkNamedVersionCreated } from "./IoTExtension/Utils";
 import { IoTConnectionManager } from "./IoTExtension/IoTConnection/IoTConnectionManager";
 
 export class ITwinNotification {

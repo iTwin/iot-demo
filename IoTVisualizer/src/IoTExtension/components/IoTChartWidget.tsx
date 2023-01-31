@@ -31,7 +31,7 @@ export const IoTChartWidget = () => {
   const [deviceList, setDeviceList] = useState<SmartDevice[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<Story>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [chartDataChanged, setChartDataChanged] = useState(false);
+  const [isChartDataChanged, setIsChartDataChanged] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState<ChartData>({} as ChartData);
   const [phenomenonList, setPhenomenonList] = useState<SelectOption<string>[]>([]);
@@ -76,7 +76,7 @@ export const IoTChartWidget = () => {
   const ConnectionChanged = (e: any) => {
     const callbacks = ITwinViewerApp.store.getState().consumerState.consumerCallbacks;
     if (callbacks.size !== 0) {
-      IoTConnectionManager.handleConnectionChange(e.detail);
+      IoTConnectionManager.connectionChangedNotification(e.detail);
     }
   };
 
@@ -87,7 +87,7 @@ export const IoTChartWidget = () => {
     };
   }, []);
 
-  const createTile = () => {
+  const handleCreateTile = () => {
     const chartdata = chartData;
     let chartName = "";
     if (selectedLevel === undefined) {
@@ -104,7 +104,7 @@ export const IoTChartWidget = () => {
       chartType: "",
     } as ChartData);
     setChartData(chartdata);
-    setChartDataChanged(!chartDataChanged);
+    setIsChartDataChanged(!isChartDataChanged);
   };
 
   const deleteChart = (chart: ChartData, close: () => void) => {
@@ -117,7 +117,7 @@ export const IoTChartWidget = () => {
     }
     chartdata.splice(chartdata.findIndex((item) => item.chartId === chart.chartId), 1);
     setChartData(chartdata);
-    setChartDataChanged(!chartDataChanged);
+    setIsChartDataChanged(!isChartDataChanged);
     close();
   };
 
@@ -127,11 +127,11 @@ export const IoTChartWidget = () => {
     close();
   };
 
-  const closeModal = () => {
+  const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  const configureChart = (phenomenon: string, deviceIds: string[], charttype: string) => {
+  const handleConfigureChart = (phenomenon: string, deviceIds: string[], charttype: string) => {
     const chartdata = chartData;
     let devicesForChart: SmartDevice[] = [];
     let devicesToRemove: string | any[] | SmartDevice = [];
@@ -162,7 +162,7 @@ export const IoTChartWidget = () => {
     }
 
     setChartData(chartData);
-    setChartDataChanged(!chartDataChanged);
+    setIsChartDataChanged(!isChartDataChanged);
     devicesForChart = getDevicesByDeviceId(deviceIds, deviceList);
     IoTConnectionManager.monitor((msg: any) => {
       const realTimeData = getDeviceDataFromTelemetry(msg, devicesForChart);
@@ -205,17 +205,17 @@ export const IoTChartWidget = () => {
 
     <div style={{ textAlign: "center", overflow: "auto", margin: "10px 10px 10px 10px" }}>
       <MenuDivider style={{ margin: "10px 10px 10px 10px" }} />
-      <Button styleType="default" title="Add a new chart" size="large" onClick={createTile} style={{ width: "100%" }} startIcon={<Icon iconSpec="icon-add" />}> Add a new chart</Button>
+      <Button styleType="default" title="Add a new chart" size="large" onClick={handleCreateTile} style={{ width: "100%" }} startIcon={<Icon iconSpec="icon-add" />}> Add a new chart</Button>
       <MenuDivider style={{ margin: "10px 10px 10px 10px" }} />
       <br></br>
       <FluidGrid minItemWidth={560}>{chartData.map((chart: any) => renderCharts(chart))}</FluidGrid>
       <Modal
         isOpen={isModalOpen}
         title="Configure Chart"
-        onClose={closeModal}
+        onClose={handleCloseModal}
         style={{ overflow: "scroll" }}
       >
-        <ChartConfigurationComponent chart={data} phenomenonList={phenomenonList} deviceList={deviceList} closeModal={closeModal} configureChart={configureChart} />
+        <ChartConfigurationComponent chart={data} phenomenonList={phenomenonList} deviceList={deviceList} onCloseModal={handleCloseModal} onConfigureChart={handleConfigureChart} />
       </Modal>
     </div>
 

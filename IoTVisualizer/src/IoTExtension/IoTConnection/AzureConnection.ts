@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
+import { HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { DeviceActionId } from "../app/AppState";
 import { ITwinViewerApp } from "../app/ITwinViewerApp";
 import { SmartDevice } from "../SmartDevice";
@@ -17,6 +17,7 @@ export class AzureConnection extends IoTConnection {
         this._connection = new HubConnectionBuilder()
           .withUrl(connectionUrl)
           .withAutomaticReconnect()
+          .configureLogging(LogLevel.None)
           .build();
       } catch (error) {
         console.log(error);
@@ -103,7 +104,6 @@ export class AzureConnection extends IoTConnection {
       void signalRConnection.start()
         .then(() => {
           isConnected = true;
-          console.log("Connected...");
         });
     }
 
