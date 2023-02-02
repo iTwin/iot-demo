@@ -107,6 +107,7 @@ function App() {
   };
 
   const stopSimulator = async () => {
+    // stop simulator
     clearTimeout(timeout);
     toaster.informational("Stopping simulator...", { type: "persisting" });
     toaster.closeAll();

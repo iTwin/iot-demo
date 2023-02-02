@@ -51,10 +51,12 @@ SKIP_PREFLIGHT_CHECK=true
 ```text
 REACT_APP_FUNCTION_URL = ""
 REACT_APP_AZURE_STORAGE_SAS_URL=""
+REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY =""
 ```
 
-- The Function app URL is the Azure function URL for Simulator Azure functions appended with /api. You can find it in the Azure portal under your Simulator function app.
+- The Function app URL is the Azure function URL for Simulator Azure functions appended with /api. You can find it in the Azure portal under your Simulator Function App.
 - REACT_APP_AZURE_STORAGE_SAS_URL - Azure storage SAS URL
+- REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY - Function App master key. You can find it in the Azure portal under your Simulator function app -> App Keys.
 
 ***Note: This project uses Azure blob storage for storing configuration files. If you wish to use only AWS resources, the S3 bucket can be used as a storage location instead of the Azure storage account.***
 

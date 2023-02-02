@@ -143,6 +143,7 @@ module.exports = async function (context, req) {
     }, (parseInt(device.telemetrySendInterval)))
   }
 
+  // Run Simulator
   async function runSimulator() {
     let stop = false;
     const containerName = "simulatorcontainer";
