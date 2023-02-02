@@ -87,6 +87,7 @@ jobs:
           echo REACT_APP_AUTHORITY = ${{ secrets.REACT_APP_AUTHORITY }}>> .env
           echo REACT_APP_IOT_CONNECTION_NAME = ${{secrets.REACT_APP_IOT_CONNECTION_NAME }}>> .env
           echo REACT_APP_AZURE_STORAGE_SAS_URL = ${{secrets.REACT_APP_AZURE_STORAGE_SAS_URL}} >> .env
+          echo REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY = ${{secrets.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY}} >> .env
           echo REACT_APP_AWS_API_GATEWAY_APIKEY = ${{secrets.REACT_APP_AWS_API_GATEWAY_APIKEY}} >> .env
           echo REACT_APP_AWS_API_GATEWAY_URL = ${{secrets.REACT_APP_AWS_API_GATEWAY_URL}} >> .env
           ls -l
@@ -334,6 +335,9 @@ jobs:
           echo IMJS_AUTH_CLIENT_SCOPES = ${{secrets.IMJS_AUTH_CLIENT_SCOPES }}>> .env
           echo IMJS_AUTH_AUTHORITY = ${{secrets.IMJS_AUTH_AUTHORITY}} >> .env
           echo IMJS_FUNCTION_APP_URL = ${{secrets.IMJS_FUNCTION_APP_URL}} >> .env
+          echo IMJS_SIMULATOR_FUNCTION_APP_KEY = ${{secrets.IMJS_SIMULATOR_FUNCTION_APP_KEY}} >> .env
+          echo IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1 = ${{secrets.IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1}} >> .env
+          echo IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2 = ${{secrets.IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2}} >> .env
           echo IMJS_AWS_API_GATEWAY_APIKEY = ${{secrets.IMJS_AWS_API_GATEWAY_APIKEY}} >> .env
           echo IMJS_AWS_APPSYNC_APIKEY = ${{secrets.IMJS_AWS_APPSYNC_APIKEY}} >> .env
           echo IMJS_AWS_REGION = ${{secrets.IMJS_AWS_REGION}} >> .env
