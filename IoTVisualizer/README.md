@@ -86,6 +86,20 @@ IMJS_AZURE_STORAGE_SAS_URL=""
 
 ***Note: This project uses Azure blob storage for storing configuration files. If you wish to use only AWS resources, the S3 bucket can be used as a storage location instead of the Azure storage account.***
 
+```text
+# ---- Azure Settings ----
+IMJS_FUNCTION_APP_URL=""
+IMJS_SIMULATOR_FUNCTION_APP_KEY=""
+IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1=""
+IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2=""
+```
+
+- IMJS_FUNCTION_APP_URL - The Function App URL is the Azure function URL for Simulator Azure functions appended with /api. You can find it in the Azure portal under your Simulator Function App.
+- IMJS_SIMULATOR_FUNCTION_APP_KEY - Simulator Function app master key. You can find it in the Azure portal under your Simulator Function App -> App Keys.
+- IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1 - IoT Service Function App master key. You can find it in the Azure portal under your IoT Service Function App -> App Keys.
+- IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2 - IoT Service Function App master key, if using more than one Azure IoT Hubs.
+
+
 If an AWS IoT connection is to be used, the environment variables mentioned below need to be filled, or else these can be left empty.
 
 ```text
