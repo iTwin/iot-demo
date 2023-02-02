@@ -140,12 +140,7 @@ Following are some ways to add security to the Azure function app. This project 
 
 ### Function App keys : 
 
-- Each function app has three different keys :- admin, host and function.
-- You can find these keys from the Azure portal as shown.
-
-![admin-host key](./assets/admin-host-key.png)
-![function key](./assets/function-key.png)
-
+- Each function app has three different keys :- admin, host and function. You can find these keys from the Azure portal.
 - The function.json file for an azure function has a property called *authlevel*, which can be set to "anonymous", "admin" or "function".
 - Refer the table below to find out what keys can be used with respect to the authlevel assigned.
 
