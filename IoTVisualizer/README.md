@@ -127,9 +127,10 @@ IotVisualizerConfiguration File: [IotVisualizerConfigurationFile](./src/IoTExten
     "type": "AZURE_IOT_HUB",
     "name": "",
     "connectionUrl1": "",                                    // Function App URL from IoTService, something like https://fn-owqp7dcbdkba6.azurewebsites.net/api. 
-                                                             //  This URL you would find in Function App's Overview blade
-    "connectionUrl2": ""                                     // Function App URL from IoTDeviceSimulator,something like https://fn-owqp7dcbdkba6.azurewebsites.net/api.
                                                              // This URL you would find in Function App's Overview blade
+    "connectionUrl2": "",                                    // The key value assigned to iothubconnection string in simulator function app configuration
+                                                             // This is the name of the key in function app configuration that stores the IoTHub connection string
+    "key":""                                                 // name of the env variable that stores admin key for the function                                       app                                                         
   },
   {
     "id": 2,
@@ -137,14 +138,16 @@ IotVisualizerConfiguration File: [IotVisualizerConfigurationFile](./src/IoTExten
     "name": "",
     "connectionUrl1": "",                                    // Connection URL to mock data, something like  https://iotdemostorage1a.z13.web.core.windows.net/ is your 
                                                              //  Primary endpoint for the static website hosted in Azure Storage account
-    "connectionUrl2": ""                                     // This is Optional
+    "connectionUrl2": "",                                    // This is Optional
+    "key":""                                                 // This is optional
   }
   {
       "id": 4,
       "type": "AWS",
       "name": "AWS Connection",
       "connectionUrl1": "" ,                                  // App Sync graphql endpoint url,
-      "connectionUrl2": ""                                    // API gateway invoke Url
+      "connectionUrl2": "",                                    // API gateway invoke Url
+      "key":""                                                // name of the env variable that stores api key for appsync
   }
 ]
 

@@ -5,13 +5,15 @@
 
 export abstract class IoTConnection {
   protected _connectionUrl: string;
+  protected _key: string;
   protected _connection: any;
   protected _isActive: boolean;
   protected _isListening: boolean;
   protected _connectionVerified: boolean;
 
-  constructor(connectionUrl: string) {
+  constructor(connectionUrl: string, key: string) {
     this._connectionUrl = connectionUrl;
+    this._key = key;
     this._isActive = false;
     this._isListening = false;
     this._connectionVerified = false;
