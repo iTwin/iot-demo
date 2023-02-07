@@ -10,7 +10,8 @@ module.exports = async function (context, req) {
   var Client = require('azure-iothub').Client;
   var Message = require('azure-iot-common').Message;
 
-  var targetDevice = req.body.deviceId;
+  var targetDeviceId = req.body.deviceId;
+  var targetDeviceInterfaceId= req.body.deviceInterfaceId; 
   var serviceClient = Client.fromConnectionString(process.env[req.body.connectionStringId]);
 
   function printResultFor(op) {
@@ -20,16 +21,19 @@ module.exports = async function (context, req) {
     };
   }
   
-  serviceClient.open(function (err) {
+  serviceClient.open();
+
+  var methodParams = {
+    methodName: "stop",
+    payload: {},
+    timeoutInSeconds: 30
+};
+
+serviceClient.invokeDeviceMethod(targetDeviceInterfaceId, targetDeviceId, methodParams, function(err, result) {
     if (err) {
-      context.error('Could not connect: ' + err.message);
+        console.error("Direct method error: "+err.message);
     } else {
-      context.log('Service client connected');      
-      var message = new Message('Cloud to device message.');
-      message.ack = 'full';
-      message.messageId = `My Message ID: ${Date.now()}`;
-      context.log('Sending message: ' + message.getData());
-      serviceClient.send(targetDevice, message, printResultFor('send'));
+        console.log("Successfully invoked the device to reboot.");  
     }
-  });
+});
 }

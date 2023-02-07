@@ -8,18 +8,34 @@ module.exports = async function (context, req) {
         var iothub = require('azure-iothub');
         var registry = iothub.Registry.fromConnectionString(process.env[req.query.connectionStringId]);
         const response = await registry.list();
+
         const devices = response.responseBody.map((device) => {
             return { deviceId: device.deviceId, authentication: device.authentication }
         });
-        const deviceTwins = [];
+
+        const dataSet = [];
         for (const device of devices) {
-            const twin = await registry.getTwin(device.deviceId);
-            twin.responseBody.authentication = device.authentication;
-            deviceTwins.push(twin.responseBody);
+
+            const deviceData = { deviceId: device.deviceId, telemetryPoints: [] };
+
+            const modules = await registry.getModulesOnDevice(device.deviceId);
+
+            const moduleIdentity = modules.responseBody.map((moduleT) => {
+                return { moduleId: moduleT.moduleId, authentication: moduleT.authentication }
+            });
+
+            for (const modIdentity of moduleIdentity) {
+                const moduleTwin = await registry.getModuleTwin(device.deviceId, modIdentity.moduleId);
+
+                moduleTwin.responseBody.authentication = modIdentity.authentication;
+                deviceData.telemetryPoints.push(moduleTwin.responseBody);
+            }
+            if (deviceData.telemetryPoints.length !== 0) {
+                dataSet.push(deviceData);
+            }
         }
         return {
-            // status: 200, /* Defaults to 200 */
-            body: deviceTwins
+            body: dataSet
         };
     } catch (error) {
         return {

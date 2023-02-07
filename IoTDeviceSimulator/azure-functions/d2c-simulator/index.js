@@ -26,7 +26,7 @@ module.exports = async function (context, req) {
       phenomenon: deviceTwin.phenomenon,
       valueIsBool: deviceTwin.valueIsBool,
       deviceSecurityType: "connectionString",
-      connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
+      connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceInterfaceId};ModuleId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
       phase: Math.random() * Math.PI,
       behaviour: deviceTwin.behaviour,
       noise_magnitude: deviceTwin.noise_magnitude,
@@ -104,6 +104,10 @@ module.exports = async function (context, req) {
           let tempData = parseFloat(device.mean);
           this.currData = tempData + this.generateNoise();
         }
+        else if (device.behaviour === 'Strictly Increasing Function' && device.mean !== undefined && device.mean !== '') {
+          let tempData = parseFloat(device.min)*((this.currTime-this.startTime)/1000);
+          this.currData = tempData + this.generateNoise();
+        }
         else {
           this.currData = min + (Math.random() * (max - min));
         }
@@ -143,7 +147,6 @@ module.exports = async function (context, req) {
     }, (parseInt(device.telemetrySendInterval)))
   }
 
-  // Run Simulator
   async function runSimulator() {
     let stop = false;
     const containerName = "simulatorcontainer";
@@ -201,18 +204,16 @@ module.exports = async function (context, req) {
         }
         // fromConnectionString must specify a transport, coming from any transport package.
         try {
-          const client = Client.fromConnectionString(deviceConnectionString, Protocol);
-
+          const client = Client.fromConnectionString(deviceConnectionString, Protocol);        
           try {
             // Add the modelId here
             await client.setOptions(modelIdObject);
 
-            await client.open();
-            intervalTokens.push(SetInterval(client, device));
-
-            client.on('message', async function (msg) {
+            await client.open();          
+            client.onDeviceMethod("stop",async (request, response)=>{
               stop = true;
-              intervalTokens.forEach((value) => clearInterval(value));
+              console.log("inside stop")
+              intervalTokens.forEach((value) => clearInterval(value.interval));
               intervalTokens = [];
               if (req.body.enableLogging) {
                 const blockBlobClient = containerClient.getBlockBlobClient(blobName);
@@ -220,15 +221,17 @@ module.exports = async function (context, req) {
                 // Upload data to the blob              
                 const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
               }
-              client.complete(msg, function (err) {
+              client.complete(request, function (err) {
                 if (err) {
                   context.log('Complete error: ' + err.toString());
                 } else {
                   context.log('Complete sent');
                 }
               });
-              // client.close();
+              response.send(200,"stopped the simulator")
             });
+            intervalTokens.push({deviceId:device.deviceId, interval:SetInterval(client, device)});
+            console.log("open connection")            
             client.close();
           }
           catch (ex) {
@@ -241,7 +244,7 @@ module.exports = async function (context, req) {
     }
 
     if (stop) {
-      intervalTokens.forEach((value) => clearInterval(value));
+      intervalTokens.forEach((value) => clearInterval(value.interval));
     }
   }
 

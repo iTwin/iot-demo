@@ -107,7 +107,6 @@ function App() {
   };
 
   const stopSimulator = async () => {
-    // stop simulator
     clearTimeout(timeout);
     toaster.informational("Stopping simulator...", { type: "persisting" });
     toaster.closeAll();
@@ -181,20 +180,21 @@ function App() {
         const twins = deviceTwins;
         for (const twin of deviceTwins) {
           if (twin.deviceId === device.deviceId) {
-            twin.properties.desired.deviceName = device.deviceName;
-            twin.properties.desired.mean = device.mean;
-            twin.properties.desired.amplitude = device.amplitude;
-            twin.properties.desired.phenomenon = device.phenomenon;
-            twin.properties.desired.unit = device.unit;
-            twin.properties.desired.valueIsBool = device.valueIsBool;
-            twin.properties.desired.telemetrySendInterval = device.telemetrySendInterval;
-            twin.properties.desired.behaviour = device.behaviour;
-            twin.properties.desired.noise_magnitude = device.noise_magnitude;
-            twin.properties.desired.noiseSd = device.noiseSd;
-            twin.properties.desired.sine_period = device.sine_period;
-            twin.properties.desired.min = device.min;
-            twin.properties.desired.max = device.max;
-            twin.properties.desired.isRunning = device.isRunning
+            twin.deviceName = device.deviceName;
+            twin.deviceInterfaceId=device.deviceInterfaceId;
+            twin.mean = device.mean;
+            twin.amplitude = device.amplitude;
+            twin.phenomenon = device.phenomenon;
+            twin.unit = device.unit;
+            twin.valueIsBool = device.valueIsBool;
+            twin.telemetrySendInterval = device.telemetrySendInterval;
+            twin.behaviour = device.behaviour;
+            twin.noise_magnitude = device.noise_magnitude;
+            twin.noiseSd = device.noiseSd;
+            twin.sine_period = device.sine_period;
+            twin.min = device.min;
+            twin.max = device.max;
+            twin.isRunning = device.isRunning
             break;
           }
         }
@@ -207,20 +207,21 @@ function App() {
       setDeviceTwins([...deviceTwins, device]);
       const newDevice = {
         deviceId: device.deviceId,
-        deviceName: device.properties.desired.deviceName,
-        amplitude: device.properties.desired.amplitude,
-        mean: device.properties.desired.mean,
-        phenomenon: device.properties.desired.phenomenon,
-        telemetrySendInterval: device.properties.desired.telemetrySendInterval,
-        unit: device.properties.desired.unit,
-        valueIsBool: device.properties.desired.valueIsBool,
-        behaviour: device.properties.desired.behaviour,
-        noise_magnitude: device.properties.desired.noise_magnitude,
-        noiseSd: device.properties.desired.noiseSd,
-        sine_period: device.properties.desired.sine_period,
-        min: device.properties.desired.min,
-        max: device.properties.desired.max,
-        isRunning: device.properties.desired.isRunning,
+        deviceInterfaceId:device.deviceInterfaceId,
+        deviceName: device.deviceName,
+        amplitude: device.amplitude,
+        mean: device.mean,
+        phenomenon: device.phenomenon,
+        telemetrySendInterval: device.telemetrySendInterval,
+        unit: device.unit,
+        valueIsBool: device.valueIsBool,
+        behaviour: device.behaviour,
+        noise_magnitude: device.noise_magnitude,
+        noiseSd: device.noiseSd,
+        sine_period: device.sine_period,
+        min: device.min,
+        max: device.max,
+        isRunning: device.isRunning,
       }
       setData([...data, newDevice]);
     }
@@ -238,7 +239,7 @@ function App() {
     let deviceString = "devices are";
     if (selectedConnection.includes("Azure")) {
       const azureDevices = await getAzureDeviceTwins(selectedConnectionStringId);
-      setDeviceTwins(azureDevices.deviceTwins);
+      setDeviceTwins(azureDevices.rows);
       rows = azureDevices.rows;
     } else {
       const AWSThings = await getAWSThings();
@@ -361,22 +362,23 @@ function App() {
           const deviceTwin = deviceTwins.find((device) => device.deviceId === row.deviceId);
           selectedDeviceIds.push({
             deviceId: deviceTwin.deviceId,
-            deviceName: deviceTwin.properties.desired.deviceName,
+            deviceInterfaceId:deviceTwin.deviceInterfaceId,
+            deviceName: deviceTwin.deviceName,
             deviceAction: "UPDATE",
-            amplitude: deviceTwin.properties.desired.amplitude,
-            mean: deviceTwin.properties.desired.mean,
-            phenomenon: deviceTwin.properties.desired.phenomenon,
-            telemetrySendInterval: deviceTwin.properties.desired.telemetrySendInterval,
-            unit: deviceTwin.properties.desired.unit,
-            valueIsBool: deviceTwin.properties.desired.valueIsBool,
-            behaviour: deviceTwin.properties.desired.behaviour,
-            noise_magnitude: deviceTwin.properties.desired.noise_magnitude,
-            noiseSd: deviceTwin.properties.desired.noiseSd,
-            sine_period: deviceTwin.properties.desired.sine_period,
-            isRunning: deviceTwin.properties.desired.isRunning,
-            min: deviceTwin.properties.desired.min,
-            max: deviceTwin.properties.desired.max,
-            primaryKey: deviceTwin.authentication.symmetricKey.primaryKey
+            amplitude: deviceTwin.amplitude,
+            mean: deviceTwin.mean,
+            phenomenon: deviceTwin.phenomenon,
+            telemetrySendInterval: deviceTwin.telemetrySendInterval,
+            unit: deviceTwin.unit,
+            valueIsBool: deviceTwin.valueIsBool,
+            behaviour: deviceTwin.behaviour,
+            noise_magnitude: deviceTwin.noise_magnitude,
+            noiseSd: deviceTwin.noiseSd,
+            sine_period: deviceTwin.sine_period,
+            isRunning: deviceTwin.isRunning,
+            min: deviceTwin.min,
+            max: deviceTwin.max,
+            primaryKey: deviceTwin.primaryKey
           });
         } else {
           selectedDeviceIds.push(row)
