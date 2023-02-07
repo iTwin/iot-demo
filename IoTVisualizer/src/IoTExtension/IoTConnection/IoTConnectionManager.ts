@@ -65,17 +65,17 @@ export class IoTConnectionManager {
     connections.map(async (connection: any) => {
       if (connection.type === "AZURE_IOT_HUB") {
 
-        const azureConnection = new AzureConnection(connection.connectionUrl1);
+        const azureConnection = new AzureConnection(connection.connectionUrl1, connection.key);
         IoTConnectionManager._connectionList?.set(connection.id.toString(), azureConnection);
         await azureConnection.populateDevices(IoTConnectionManager._deviceListFromIModel, connection);
 
       } else if (connection.type === "MOCK_API_CONNECTION") {
-        const mockConnection = new MockAPIConnection(connection.connectionUrl1);
+        const mockConnection = new MockAPIConnection(connection.connectionUrl1, connection.key);
         IoTConnectionManager._connectionList?.set(connection.id.toString(), mockConnection);
         mockConnection.populateDevices(IoTConnectionManager._deviceListFromIModel, connection);
 
       } else if (connection.type === "AWS") {
-        const awsConnection = new AwsConnection(connection.connectionUrl1);
+        const awsConnection = new AwsConnection(connection.connectionUrl1, connection.key);
         IoTConnectionManager._connectionList?.set(connection.id.toString(), awsConnection);
         await awsConnection.populateDevices(IoTConnectionManager._deviceListFromIModel, connection);
 

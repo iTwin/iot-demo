@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Modal, LabeledInput, ToggleSwitch, toaster, Button, Label, Select } from "@itwin/itwinui-react";
 import { DeviceAction } from "./Utils";
 import { Line } from 'react-chartjs-2'
-import { editDeviceTwins } from "./AzureUtilities";
+import { editDeviceTwins, getHeaders } from "./AzureUtilities";
 import { editAWSThings } from "./AWSUtililities";
 
 let ar = [];
@@ -125,6 +125,7 @@ export function DeviceTwin(props) {
         const data = { deviceId: deviceTwin.deviceId, connectionStringId: props.connectionStringId }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
+            headers: getHeaders(),
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) {

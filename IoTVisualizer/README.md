@@ -86,6 +86,20 @@ IMJS_AZURE_STORAGE_SAS_URL=""
 
 ***Note: This project uses Azure blob storage for storing configuration files. If you wish to use only AWS resources, the S3 bucket can be used as a storage location instead of the Azure storage account.***
 
+```text
+# ---- Azure Settings ----
+IMJS_FUNCTION_APP_URL=""
+IMJS_SIMULATOR_FUNCTION_APP_KEY=""
+IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1=""
+IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2=""
+```
+
+- IMJS_FUNCTION_APP_URL - The Function App URL is the Azure function URL for Simulator Azure functions appended with /api. You can find it in the Azure portal under your Simulator Function App.
+- IMJS_SIMULATOR_FUNCTION_APP_KEY - Simulator Function app master key. You can find it in the Azure portal under your Simulator Function App -> App Keys.
+- IMJS_IOT_SERVICE_FUNCTION_APP_KEY_1 - IoT Service Function App master key. You can find it in the Azure portal under your IoT Service Function App -> App Keys.
+- IMJS_IOT_SERVICE_FUNCTION_APP_KEY_2 - IoT Service Function App master key, if using more than one Azure IoT Hubs.
+
+
 If an AWS IoT connection is to be used, the environment variables mentioned below need to be filled, or else these can be left empty.
 
 ```text
@@ -127,9 +141,10 @@ IotVisualizerConfiguration File: [IotVisualizerConfigurationFile](./src/IoTExten
     "type": "AZURE_IOT_HUB",
     "name": "",
     "connectionUrl1": "",                                    // Function App URL from IoTService, something like https://fn-owqp7dcbdkba6.azurewebsites.net/api. 
-                                                             //  This URL you would find in Function App's Overview blade
-    "connectionUrl2": ""                                     // Function App URL from IoTDeviceSimulator,something like https://fn-owqp7dcbdkba6.azurewebsites.net/api.
                                                              // This URL you would find in Function App's Overview blade
+    "connectionUrl2": "",                                    // The key value assigned to iothubconnection string in simulator function app configuration
+                                                             // This is the name of the key in function app configuration that stores the IoTHub connection string
+    "key":""                                                 // name of the env variable that stores admin key for the function                                       app                                                         
   },
   {
     "id": 2,
@@ -137,14 +152,16 @@ IotVisualizerConfiguration File: [IotVisualizerConfigurationFile](./src/IoTExten
     "name": "",
     "connectionUrl1": "",                                    // Connection URL to mock data, something like  https://iotdemostorage1a.z13.web.core.windows.net/ is your 
                                                              //  Primary endpoint for the static website hosted in Azure Storage account
-    "connectionUrl2": ""                                     // This is Optional
+    "connectionUrl2": "",                                    // This is Optional
+    "key":""                                                 // This is optional
   }
   {
       "id": 4,
       "type": "AWS",
       "name": "AWS Connection",
       "connectionUrl1": "" ,                                  // App Sync graphql endpoint url,
-      "connectionUrl2": ""                                    // API gateway invoke Url
+      "connectionUrl2": "",                                    // API gateway invoke Url
+      "key":""                                                // name of the env variable that stores api key for appsync
   }
 ]
 
