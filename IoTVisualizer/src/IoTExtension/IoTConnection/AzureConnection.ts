@@ -40,7 +40,12 @@ export class AzureConnection extends IoTConnection {
     try {
       // populateDevices
       // fetch Azure device twins from Azure IoT hub
-      const response = await fetch(`${process.env.IMJS_FUNCTION_APP_URL}/get-deviceTwins?connectionStringId=${connection.connectionUrl2}` ?? "").catch((error) => console.log(`Request failed: ${error}`));
+      const response = await fetch(`${process.env.IMJS_FUNCTION_APP_URL}/get-deviceTwins?connectionStringId=${connection.connectionUrl2}` ?? "", {
+        method: "get",
+        headers: new Headers({
+          "x-functions-key": process.env.IMJS_SIMULATOR_FUNCTION_APP_KEY ?? "",
+        }),
+      }).catch((error) => console.log(`Request failed: ${error}`));
       let deviceTwins: any[];
       const telemetryPoints: any[] = [];
       if (response && response.status === 200) {
