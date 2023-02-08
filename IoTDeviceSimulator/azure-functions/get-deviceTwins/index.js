@@ -15,8 +15,8 @@ module.exports = async function (context, req) {
 
         const dataSet = [];
         for (const device of devices) {
-
-            const deviceData = { deviceId: device.deviceId, telemetryPoints: [] };
+            const twin = await registry.getTwin(device.deviceId);
+            const deviceData = { deviceId: device.deviceId, deviceName:twin.responseBody.properties.desired.deviceName, telemetryPoints: [] };
 
             const modules = await registry.getModulesOnDevice(device.deviceId);
 

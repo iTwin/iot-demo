@@ -22,7 +22,7 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
         rows.push({
           deviceId: telemetry.moduleId,
           deviceInterfaceId:telemetry.deviceId,
-          deviceName: telemetry.properties.desired.deviceName,
+          deviceName: telemetry.properties.desired.name,
           amplitude: telemetry.properties.desired.amplitude,
           mean: telemetry.properties.desired.mean,
           phenomenon: telemetry.properties.desired.phenomenon,
