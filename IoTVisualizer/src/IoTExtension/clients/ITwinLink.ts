@@ -32,7 +32,7 @@ export class ITwinLink {
 
     if (!devices) {
       const query = `
-      SELECT physicalDevice.UserLabel as label, physicalDevice.ECInstanceId as id, physicalDevice.Origin as origin, deviceType.UserLabel as type, pointType.phenomenon as phenomenon, datapoint.codeValue as iotId, obsElement.TargetECInstanceId as observedElement 
+      SELECT datapoint.UserLabel as label, physicalDevice.ECInstanceId as id, physicalDevice.Origin as origin, deviceType.UserLabel as type, pointType.phenomenon as phenomenon, datapoint.codeValue as iotId, obsElement.TargetECInstanceId as observedElement 
       FROM IoTDeviceFunctional.MeasurementPointObservesSpatialElement obsElement
        JOIN IoTDeviceFunctional.MeasurementPoint datapoint 
        ON datapoint.ECInstanceId=obsElement.SourceECInstanceId 
