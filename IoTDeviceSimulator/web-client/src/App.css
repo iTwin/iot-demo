@@ -122,16 +122,17 @@ header button {
   margin: 20%;
 }
 
-.behaviour-prop {
+.behaviour-func {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  width: 400px;
+  align-items: center;
 }
 
 .button-config {
-  width: 20px;
-  height: 20px;
-  margin: auto;
-  margin-left: 9px;
+  width: 16px;
+  height: 16px;
+  margin: 10px 5px auto 5px;
 }
 
 .button-config:hover {
@@ -140,17 +141,12 @@ header button {
 
 .buttons {
   margin-left: 0px !important;
+  margin-right: 0px !important;
+  width: 760px;
 }
 
 .iui-backdrop {
   height: 1860.78px !important;
-}
-
-.preview {
-  display: block !important;
-  height: 174px !important;
-  width: 348px !important;
-  margin: 0px 0px 0px 0px !important;
 }
 
 .iui-toggle-switch-wrapper {
@@ -167,16 +163,6 @@ header button {
   flex-direction: row;
 }
 
-.behaviour-label {
-  display: flex;
-  justify-content: center;
-}
-
-.funcElement {
-  display: flex !important;
-  justify-content: center;
-}
-
 .mainBox {
   display: flex;
   justify-content: center;
@@ -185,4 +171,133 @@ header button {
 .iui-modal>.iui-modal-dialog {
   max-width: 80% !important;
   width: MAX-CONTENT !important;
+}
+
+.behaviour-prop {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+}
+
+.iui-tab {
+  margin: 0px !important;
+}
+
+.behaviour-area {
+  margin-left: 30px;
+  width: 400px !important;
+}
+
+.tab-label {
+  display: flex;
+  justify-content: center;
+  /* border: solid rgba(0, 0, 0, 0.1) 1px; */
+  margin: 0px !important;
+  padding: 0px !important;
+}
+
+.tab-label:hover {
+  /* background-color: rgba(var(--iui-color-foreground-primary-rgb), var(--iui-opacity-6)); */
+}
+
+.cancel-button {
+  width: 14px;
+  height: 16px;
+  margin: auto;
+  padding: 2px;
+}
+
+.cancel-button:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.iui-tabs.iui-borderless .iui-tab {
+  padding: 0 10px !important;
+  background-color: transparent !important;
+}
+
+.add-button {
+  width: 16px;
+  height: 16px;
+  margin-top: 12px;
+  margin-left: 2px;
+}
+
+.add-button:hover {
+  cursor: pointer;
+}
+
+.behaviour-area>div:nth-child(n+2) {
+  border: solid rgba(0, 0, 0, 0.5) 0.1px;
+}
+
+.basic-prop {
+  width: 330px;
+}
+
+.behaviour-value {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.behaviour-value>* {
+  margin-right: 5px;
+}
+
+.behaviour-value>:last-child {
+  margin-right: 0px !important;
+}
+
+.accept-button {
+  width: 100px;
+  margin-top: 0px !important;
+  margin-left: 10px !important;
+}
+
+.top-level {
+  display: flex;
+  justify-content: center;
+}
+
+
+.iui-modal>.iui-modal-dialog {
+  max-height: 100%;
+}
+
+.basic {
+  margin-bottom: 15px;
+}
+
+.iui-modal>.iui-modal-dialog {
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.iui-tabs~.iui-tabs-content {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.behaviour-list {
+  display: flex;
+  justify-content: center;
+  width: 400px;
+  margin-top: 2px;
+}
+
+.labels {
+  width: 300px !important;
+}
+
+.iui-tabs-wrapper.iui-horizontal {
+  height: 355.8px;
+}
+
+.iui-tabs.iui-default~.iui-tabs-content {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }

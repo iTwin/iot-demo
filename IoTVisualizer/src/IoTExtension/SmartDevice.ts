@@ -16,6 +16,7 @@ export interface SmartDevice {
   isActive: ActivityStatus;
   connectionId: string;
   noOfConsumers: number;
+  isChecked: boolean;
 }
 export enum ActivityStatus {
   "Connected",

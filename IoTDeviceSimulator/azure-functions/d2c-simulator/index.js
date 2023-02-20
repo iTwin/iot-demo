@@ -51,16 +51,16 @@ module.exports = async function (context, req) {
   }
 
   class sineGenerator extends generator {
-    constructor(mean, amplitude, sine_period, phase) {
+    constructor(mean, amplitude, wave_period, phase) {
       super();
       this.mean = mean;
       this.amplitude = amplitude;
-      this.sine_period = sine_period;
+      this.wave_period = wave_period;
       this.phase = phase;
     }
 
     generateValues(t) {
-      let tempData = parseFloat(this.mean) + Math.sin(t * (2 * Math.PI) / (parseFloat(this.sine_period) / 1000) + parseFloat(this.phase)) * parseFloat(this.amplitude);
+      let tempData = parseFloat(this.mean) + Math.sin(t * (2 * Math.PI) / (parseFloat(this.wave_period) / 1000) + parseFloat(this.phase)) * parseFloat(this.amplitude);
       return tempData;
     }
   }
@@ -114,8 +114,7 @@ module.exports = async function (context, req) {
     }
 
     generateValues(t) {
-      const randomBoolean = () => Math.random() >= 0.5;
-      let tempData = randomBoolean();
+      let tempData = (Math.random() >= 0.5 ? 0 : 1);
       return tempData;
     }
   }
@@ -143,27 +142,40 @@ module.exports = async function (context, req) {
   }
 
   class triangularGenerator extends generator {
-    constructor(amplitude, sine_period) {
+    constructor(amplitude, wave_period) {
       super();
       this.amplitude = amplitude;
-      this.sine_period = sine_period;
+      this.wave_period = wave_period;
     }
 
     generateValues(t) {
-      let tempData = 4 * parseFloat(this.amplitude) / (parseFloat(this.sine_period) / 1000) * Math.abs((((t - (parseFloat(this.sine_period) / 1000) / 4) % (parseFloat(this.sine_period) / 1000)) + (parseFloat(this.sine_period) / 1000)) % (parseFloat(this.sine_period) / 1000) - (parseFloat(this.sine_period) / 1000) / 2) - parseFloat(this.amplitude);
+      let tempData = 4 * parseFloat(this.amplitude) / (parseFloat(this.wave_period) / 1000) * Math.abs((((t - (parseFloat(this.wave_period) / 1000) / 4) % (parseFloat(this.wave_period) / 1000)) + (parseFloat(this.wave_period) / 1000)) % (parseFloat(this.wave_period) / 1000) - (parseFloat(this.wave_period) / 1000) / 2) - parseFloat(this.amplitude);
       return tempData;
     }
   }
 
   class sawtoothGenerator extends generator {
-    constructor(amplitude, sine_period) {
+    constructor(amplitude, wave_period) {
       super();
       this.amplitude = amplitude;
-      this.sine_period = sine_period;
+      this.wave_period = wave_period;
     }
 
     generateValues(t) {
-      let tempData = 2 * parseFloat(this.amplitude) * (t / (parseFloat(this.sine_period) / 1000) - Math.floor(1 / 2 + t / (parseFloat(this.sine_period) / 1000)));
+      let tempData = 2 * parseFloat(this.amplitude) * (t / (parseFloat(this.wave_period) / 1000) - Math.floor(1 / 2 + t / (parseFloat(this.wave_period) / 1000)));
+      return tempData;
+    }
+  }
+
+  class squareGenerator extends generator {
+    constructor(amplitude, wave_period) {
+      super();
+      this.amplitude = amplitude;
+      this.wave_period = wave_period;
+    }
+
+    generateValues(t) {
+      let tempData = parseFloat(this.amplitude) * Math.sign(Math.sin((2 * Math.PI * t) / (parseFloat(this.wave_period) / 1000)));
       return tempData;
     }
   }
@@ -208,23 +220,26 @@ module.exports = async function (context, req) {
       let res = 0;
       let obj;
       for (let index = 0; index < signalArray.length; index++) {
-        if (JSON.parse(signalArray[index])["Behaviour"] === "Sine Function") {
-          obj = new sineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"], JSON.parse(signalArray[index])["Phase"]);
+        if (JSON.parse(signalArray[index])["Behaviour"] === "Sine") {
+          obj = new sineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"], JSON.parse(signalArray[index])["Phase"]);
         }
-        else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant Function") {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant") {
           obj = new constantGenerator(JSON.parse(signalArray[index])["Mean"]);
         }
-        else if (JSON.parse(signalArray[index])["Behaviour"] === "Strictly Increasing Function") {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Linear") {
           obj = new increasingGenerator(JSON.parse(signalArray[index])["Slope"]);
         }
-        else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise Function") {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise") {
           obj = new noiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
         }
-        else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular Function") {
-          obj = new triangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"]);
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular") {
+          obj = new triangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
+          obj = new sawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
         else {
-          obj = new sawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Sine Period"]);
+          obj = new squareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
         res += obj.generateValues(time);
       }
@@ -237,7 +252,7 @@ module.exports = async function (context, req) {
       let time = (this.currTime - this.startTime) / 1000;
       if (device.valueIsBool) {
         const boolObj = new booleanGenerator();
-        this.currdata = boolObj.generateValues(time);
+        this.currData = boolObj.generateValues(time);
       }
       else {
         this.currData = this.generateSignal(device.signalArray, time);
