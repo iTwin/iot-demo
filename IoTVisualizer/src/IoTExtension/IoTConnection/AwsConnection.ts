@@ -14,15 +14,15 @@ const subscriptions: any[] = [];
 
 export class AwsConnection extends IoTConnection {
 
-  constructor(connectionUrl: string) {
-    super(connectionUrl);
+  constructor(connectionUrl: string, key: string) {
+    super(connectionUrl, key);
     if (connectionUrl) {
       try {
         this._connection = Amplify.configure({
           aws_appsync_graphqlEndpoint: connectionUrl,
           aws_appsync_region: process.env.IMJS_AWS_REGION,
           aws_appsync_authenticationType: "API_KEY",
-          aws_appsync_apiKey: process.env.IMJS_AWS_APPSYNC_APIKEY,
+          aws_appsync_apiKey: process.env[key],
         });
         console.log(this._connection);
       } catch (error) {

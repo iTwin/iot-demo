@@ -311,6 +311,14 @@ module.exports = async function (context, req) {
     }, (parseInt(device.telemetrySendInterval)))
   }
 
+  function SetIntervalForResolve(client, device) {
+    let index = 0;
+    return setInterval(async () => {
+      await sendTelemetryForResolve(client, index, device).catch((err) => context.log('error', err.toString()));
+      index += 1;
+    }, (parseInt(device.telemetrySendInterval)))
+  }
+
   async function runSimulator() {
     let stop = false;
     const containerName = "simulatorcontainer";

@@ -3,19 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
+import { HubConnectionBuilder, HubConnectionState, IHttpConnectionOptions } from "@microsoft/signalr";
 import { DeviceActionId } from "../app/AppState";
 import { ITwinViewerApp } from "../app/ITwinViewerApp";
 import { SmartDevice } from "../SmartDevice";
 import { IoTConnection } from "./IotConnection";
 
 export class AzureConnection extends IoTConnection {
-  constructor(connectionUrl: string) {
-    super(connectionUrl);
+  constructor(connectionUrl: string, key: string) {
+    super(connectionUrl, key);
     if (connectionUrl) {
       try {
         this._connection = new HubConnectionBuilder()
-          .withUrl(connectionUrl)
+          .withUrl(connectionUrl, {
+            headers: {
+              "x-functions-key": process.env[key],
+            },
+          } as IHttpConnectionOptions)
           .withAutomaticReconnect()
           .build();
       } catch (error) {
@@ -36,7 +40,12 @@ export class AzureConnection extends IoTConnection {
     try {
       // populateDevices
       // fetch Azure device twins from Azure IoT hub
-      const response = await fetch(`${process.env.IMJS_FUNCTION_APP_URL}/get-deviceTwins?connectionStringId=${connection.connectionUrl2}` ?? "").catch((error) => console.log(`Request failed: ${error}`));
+      const response = await fetch(`${process.env.IMJS_FUNCTION_APP_URL}/get-deviceTwins?connectionStringId=${connection.connectionUrl2}` ?? "", {
+        method: "get",
+        headers: new Headers({
+          "x-functions-key": process.env.IMJS_SIMULATOR_FUNCTION_APP_KEY ?? "",
+        }),
+      }).catch((error) => console.log(`Request failed: ${error}`));
       let deviceTwins: any[];
 
       if (response && response.status === 200) {
@@ -69,7 +78,10 @@ export class AzureConnection extends IoTConnection {
     // check whether connection url is valid
     const response = await fetch(`${this._connectionUrl}/negotiate?negotiateVersion=1`, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "x-functions-key": process.env[this._key] ?? "",
+      },
     }).catch((error) => { console.log(error); });
     if (response && response.status === 200 && this._connectionVerified) {
       return true;
