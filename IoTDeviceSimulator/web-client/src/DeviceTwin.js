@@ -31,7 +31,6 @@ export function DeviceTwin(props) {
         signalArray: props.device.signalArray,
     });
 
-    const [behaviourConfig, setBehaviourConfig] = useState(false);
     const [mean, setMean] = useState("");
     const [amplitude, setAmplitude] = useState("");
     const [wave_period, setWave_period] = useState("");
@@ -141,7 +140,6 @@ export function DeviceTwin(props) {
             setWave_period("");
         }
         deviceTwin.signalArray.push("");
-        setBehaviourConfig(true);
         setBehaviour("");
     }
 
@@ -195,9 +193,6 @@ export function DeviceTwin(props) {
 
     const onClose = useCallback(() => {
         props.handleClose();
-        // setIndex(0);
-        // setBehaviour("Noise");
-        // setLength("");
     }, [props]);
 
     const options = [
@@ -343,6 +338,14 @@ export function DeviceTwin(props) {
                     deviceTwin.currDataArray[j] += 0;
                 }
             }
+        }
+    }
+
+    if (deviceTwin.valueIsBool) {
+        deviceTwin.currDataArray = [];
+        for (let i = 0; i < len; i++) {
+            let currData = Math.round(Math.random());
+            deviceTwin.currDataArray.push(currData);
         }
     }
 
@@ -608,7 +611,7 @@ export function DeviceTwin(props) {
                                 <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
                                 <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
                                 <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                                <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [], currDataArray: Array.from({ length: len }, () => deviceTwin.valueIsBool ? 0 : Math.round(Math.random())) }); }} />
+                                <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
                                 <LabeledInput className="basic" label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
                             </div>
                             <div className="behaviour-area">
