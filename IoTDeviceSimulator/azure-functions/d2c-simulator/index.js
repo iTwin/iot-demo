@@ -399,7 +399,7 @@ module.exports = async function (context, req) {
                   const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
                 }
               }
-              else {
+              else if (msg.messageId.includes("resolve")) {
                 clearInterval(intervalTokens[device.deviceId]);
                 intervalTokens[device.deviceId] = SetIntervalForResolve(client, device);
               }

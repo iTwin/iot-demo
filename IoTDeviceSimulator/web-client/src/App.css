@@ -274,3 +274,9 @@ header button {
   padding-left: 0px !important;
   padding-right: 0px !important;
 }
+
+.option {
+  width: 274px;
+  height: 28px;
+  margin: 5px 0px;
+}

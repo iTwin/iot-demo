@@ -12,6 +12,7 @@ import { editAWSThings } from "./AWSUtililities";
 
 let ar = [];
 let arr = [];
+let currDataArray = [];
 
 export function DeviceTwin(props) {
     const [deviceTwin, setDeviceTwin] = useState({
@@ -27,7 +28,6 @@ export function DeviceTwin(props) {
         min: props.device.min,
         max: props.device.max,
         thingTypeName: props.device.thingTypeName,
-        currDataArray: props.device.currDataArray,
         signalArray: props.device.signalArray,
     });
 
@@ -56,7 +56,6 @@ export function DeviceTwin(props) {
             min: props.device.min ?? '',
             max: props.device.max ?? '',
             thingTypeName: props.device.thingTypeName ?? '',
-            currDataArray: props.device.currDataArray ?? [],
             signalArray: props.device.signalArray ?? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`],
         });
         setTabCount(props.device.signalArray?.length ?? 2);
@@ -95,7 +94,6 @@ export function DeviceTwin(props) {
     }
 
     const setBehaviourConfigurer = () => {
-        setTabCount(deviceTwin.signalArray.length + 1);
         if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === '') {
             deviceTwin.signalArray.pop();
         }
@@ -139,6 +137,10 @@ export function DeviceTwin(props) {
             setAmplitude("");
             setWave_period("");
         }
+        else {
+            toaster.negative(`Required values are not provided!`);
+        }
+        setTabCount(deviceTwin.signalArray.length + 1);
         deviceTwin.signalArray.push("");
         setBehaviour("");
     }
@@ -278,28 +280,28 @@ export function DeviceTwin(props) {
     }
 
     if (deviceTwin.signalArray && !deviceTwin.valueIsBool) {
-        deviceTwin.currDataArray = [];
+        currDataArray = [];
         for (let i = 0; i < len; i++) {
-            deviceTwin.currDataArray[i] = (ar[i] ? ar[i] : 0);
+            currDataArray[i] = (ar[i] ? ar[i] : 0);
         }
         for (let i = 0; i < deviceTwin.signalArray.length; i++) {
             if (deviceTwin.signalArray[i] !== '') {
                 if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Sine") {
                     for (let j = 0; j < len; j++) {
                         let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Mean"]) + Math.sin((j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000) + JSON.parse(deviceTwin.signalArray[i])["Phase"]) * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]);
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Constant") {
                     for (let j = 0; j < len; j++) {
                         let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Mean"]);
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Linear") {
                     for (let j = 0; j < len; j++) {
                         let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Slope"]) * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000));
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Noise") {
@@ -310,42 +312,42 @@ export function DeviceTwin(props) {
                         let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
                         let noise_mag = JSON.parse(deviceTwin.signalArray[i])["Noise Magnitude"] * Math.sign((Math.random() - 0.5) * 2);
                         let currData = noise * noise_mag;
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Triangular") {
                     for (let j = 0; j < len; j++) {
                         let currData = (2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)))) / Math.PI;
                         ar.push(currData);
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Sawtooth") {
                     for (let j = 0; j < len; j++) {
                         let currData = 2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * ((j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000) - Math.floor(1 / 2 + (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)));
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Square") {
                     for (let j = 0; j < len; j++) {
                         let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.sign(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)));
-                        deviceTwin.currDataArray[j] += currData;
+                        currDataArray[j] += currData;
                     }
                 }
             }
             else {
                 for (let j = 0; j < len; j++) {
-                    deviceTwin.currDataArray[j] += 0;
+                    currDataArray[j] += 0;
                 }
             }
         }
     }
 
     if (deviceTwin.valueIsBool) {
-        deviceTwin.currDataArray = [];
+        currDataArray = [];
         for (let i = 0; i < len; i++) {
             let currData = Math.round(Math.random());
-            deviceTwin.currDataArray.push(currData);
+            currDataArray.push(currData);
         }
     }
 
@@ -362,7 +364,7 @@ export function DeviceTwin(props) {
             return (<div className="behaviour-func">
                 <div className="behaviour-list">
                     <Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "300px" }} itemRenderer={(option) => (
-                        < MenuItem><Tooltip placement="right" content={option.value === 'Sine' ? sineInfo : option.value === 'Constant' ? constantInfo : option.value === 'Linear' ? increasingInfo : option.value === 'Noise' ? noiseInfo : option.value === 'Triangular' ? triangularInfo : option.value === 'Sawtooth' ? sawtoothInfo : squareInfo}><div>{option.label}</div></Tooltip></MenuItem>
+                        < MenuItem><Tooltip placement="right" content={option.value === 'Sine' ? sineInfo : option.value === 'Constant' ? constantInfo : option.value === 'Linear' ? increasingInfo : option.value === 'Noise' ? noiseInfo : option.value === 'Triangular' ? triangularInfo : option.value === 'Sawtooth' ? sawtoothInfo : squareInfo}><div className="option">{option.label}</div></Tooltip></MenuItem>
                     )} >
                     </Select>
                 </div>
@@ -611,7 +613,7 @@ export function DeviceTwin(props) {
                                 <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
                                 <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
                                 <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                                <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
+                                <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, unit: "", signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
                                 <LabeledInput className="basic" label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
                             </div>
                             <div className="behaviour-area">
@@ -627,7 +629,7 @@ export function DeviceTwin(props) {
                                             datasets: [
                                                 {
                                                     label: "Composite Signal",
-                                                    data: deviceTwin.currDataArray,
+                                                    data: currDataArray,
                                                     fill: false,
                                                     borderColor: "rgb(0,139,225)",
                                                     borderWidth: 2,
