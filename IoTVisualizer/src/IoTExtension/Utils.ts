@@ -177,7 +177,7 @@ export const resolveAlert = async (iotId: any, connectionId: any) => {
 };
 
 export const func = async (elementId: any) => {
-  const temp = resolveAlert(elementId, "IOT_HUB_CONNECTION_STRING2");
+  const temp = resolveAlert(elementId, "IOT_HUB_CONNECTION_STRING1");
   return temp;
 };
 
@@ -201,9 +201,27 @@ function getLoc(myArray: any[], iotId: any) {
   return loc;
 }
 
+const handleAlert = (device: any, data: any, deviceList: any) => {
+  if (device.isChecked === undefined) {
+    device.isChecked = false;
+  }
+  if (parseFloat(data[0].value) > 110 && device.isChecked === false) {
+    const label = getLabel(deviceList, data[0].iotId);
+    const loc = getLoc(deviceList, data[0].iotId);
+    alert = new IotAlert(data[0].iotId, loc, label);
+    alert.display();
+    device.isChecked = true;
+  } else if (parseFloat(data[0].value) < 110 && device.isChecked === true) {
+    const label = getLabel(deviceList, data[0].iotId);
+    toaster.closeAll();
+    toaster.positive(`Temperature is normalised for '${label}'`);
+    device.isChecked = false;
+  }
+};
+
 export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[]) => {
 
-  const data: { iotId: string, value: string, unit: string, phenomenon: string, timeStamp: Date, isChecked: boolean }[] = []; // Todo: can Queue data str. be used??
+  const data: { iotId: string, value: string, unit: string, phenomenon: string, timeStamp: Date }[] = []; // Todo: can Queue data str. be used??
 
   if (msg !== "no data") {
     const msgJson = JSON.parse(msg);
@@ -220,23 +238,11 @@ export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[])
           } else {
             realTimeData = msgJson.data;
           }
-          if (device.isChecked === undefined) {
-            device.isChecked = false;
-          }
           data.push({
-            iotId: device?.iotId, value: realTimeData, unit: device?.unit, phenomenon: device?.phenomenon, timeStamp: msgJson.timeStamp, isChecked: device?.isChecked,
+            iotId: device?.iotId, value: realTimeData, unit: device?.unit, phenomenon: device?.phenomenon, timeStamp: msgJson.timeStamp,
           });
-          if (parseFloat(data[0].value) > 110 && device.isChecked === false) {
-            const label = getLabel(deviceList, data[0].iotId);
-            const loc = getLoc(deviceList, data[0].iotId);
-            alert = new IotAlert(data[0].iotId, loc, label);
-            alert.display();
-            device.isChecked = true;
-          } else if (parseFloat(data[0].value) < 110 && device.isChecked === true) {
-            const label = getLabel(deviceList, data[0].iotId);
-            toaster.closeAll();
-            toaster.positive(`Temperature is normalised for '${label}'`);
-            device.isChecked = false;
+          if (process.env.IMJS_ENABLE_ALERT === "true") {
+            handleAlert(device, data, deviceList);
           }
           return data;
         }
@@ -245,7 +251,7 @@ export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[])
 
   } else if (msg === "no data") {
     deviceList?.forEach((device) => {
-      data.push({ iotId: device.iotId, value: msg, unit: "", phenomenon: "", timeStamp: new Date(), isChecked: device?.isChecked });
+      data.push({ iotId: device.iotId, value: msg, unit: "", phenomenon: "", timeStamp: new Date() });
     });
   }
   return data;

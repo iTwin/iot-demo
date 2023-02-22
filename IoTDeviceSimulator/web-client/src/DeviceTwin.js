@@ -94,7 +94,9 @@ export function DeviceTwin(props) {
     }
 
     const setBehaviourConfigurer = () => {
+        let k = 0;
         if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === '') {
+            k = 1;
             deviceTwin.signalArray.pop();
         }
         if (behaviour === 'Sine' && mean !== '' && amplitude !== '' && wave_period !== '') {
@@ -138,7 +140,9 @@ export function DeviceTwin(props) {
             setWave_period("");
         }
         else {
-            toaster.negative(`Required values are not provided!`);
+            if (k === 1) {
+                toaster.negative(`Required values are not provided!`);
+            }
         }
         setTabCount(deviceTwin.signalArray.length + 1);
         deviceTwin.signalArray.push("");
