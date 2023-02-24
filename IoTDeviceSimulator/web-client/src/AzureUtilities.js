@@ -3,14 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export const getHeaders=()=>{
-  return new Headers({      
-    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""      
+export const getHeaders = () => {
+  return new Headers({
+    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""
   })
 }
 
 export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
-  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "",{
+  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "", {
     method: "get",
     headers: getHeaders(),
   }).catch(error => console.log("Request failed: " + error));
@@ -29,7 +29,6 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
-        currDataArray: device.properties.desired.currDataArray,
         signalArray: device.properties.desired.signalArray,
       })
     });
@@ -55,7 +54,7 @@ export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionS
   let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/c2d-simulator`, {
     method: "POST",
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {
@@ -69,7 +68,7 @@ export const editDeviceTwins = async (deviceArray, connectionStringId) => {
   const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
     method: 'POST',
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {

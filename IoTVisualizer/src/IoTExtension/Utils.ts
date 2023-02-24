@@ -10,11 +10,11 @@ import { callbackType, IoTConnectionManager } from "./IoTConnection/IoTConnectio
 import { ActivityStatus, Roles, SmartDevice } from "./SmartDevice";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { toaster } from "@itwin/itwinui-react";
-import { IotAlert } from "./IotAlert";
+import { IoTAlert } from "./IoTAlert";
 import { Point3d } from "@itwin/core-geometry";
 
 let configuration: any = [];
-let alert: IotAlert;
+let alert: IoTAlert;
 
 let userRole: Roles | undefined = Roles.Unauthorized;
 export const getConnection = (deviceProps: SmartDevice) => {
@@ -208,7 +208,7 @@ const handleAlert = (device: any, data: any, deviceList: any) => {
   if (parseFloat(data[0].value) > 110 && device.isChecked === false) {
     const label = getLabel(deviceList, data[0].iotId);
     const loc = getLoc(deviceList, data[0].iotId);
-    alert = new IotAlert(data[0].iotId, loc, label);
+    alert = new IoTAlert(data[0].iotId, loc, label);
     alert.display();
     device.isChecked = true;
   } else if (parseFloat(data[0].value) < 110 && device.isChecked === true) {

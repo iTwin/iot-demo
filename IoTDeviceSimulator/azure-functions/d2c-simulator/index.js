@@ -11,7 +11,7 @@ module.exports = async function (context, req) {
   const Message = require('azure-iot-device').Message;
   const ConnectionString = require('azure-iot-common').ConnectionString;
   const { BlobServiceClient } = require('@azure/storage-blob');
-  const { sineGenerator, constantGenerator, increasingGenerator, noiseGenerator, triangularGenerator, sawtoothGenerator, squareGenerator, randomGenerator, booleanGenerator } = require('../signalGenerator.js');
+  const { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator } = require('../signalGenerator.js');
   require('dotenv').config()
 
   const jsonData = [];
@@ -30,7 +30,6 @@ module.exports = async function (context, req) {
       isRunning: deviceTwin.isRunning,
       min: deviceTwin.min,
       max: deviceTwin.max,
-      currDataArray: deviceTwin.currDataArray,
       signalArray: deviceTwin.signalArray,
     }
   });
@@ -78,25 +77,25 @@ module.exports = async function (context, req) {
       let obj;
       for (let index = 0; index < signalArray.length; index++) {
         if (JSON.parse(signalArray[index])["Behaviour"] === "Sine") {
-          obj = new sineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"], JSON.parse(signalArray[index])["Phase"]);
+          obj = new SineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"], JSON.parse(signalArray[index])["Phase"]);
         }
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant") {
-          obj = new constantGenerator(JSON.parse(signalArray[index])["Mean"]);
+          obj = new ConstantGenerator(JSON.parse(signalArray[index])["Mean"]);
         }
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Linear") {
-          obj = new increasingGenerator(JSON.parse(signalArray[index])["Slope"]);
+          obj = new IncreasingGenerator(JSON.parse(signalArray[index])["Slope"]);
         }
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise") {
-          obj = new noiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
+          obj = new NoiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
         }
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular") {
-          obj = new triangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+          obj = new TriangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
-          obj = new sawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+          obj = new SawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
         else {
-          obj = new squareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+          obj = new SquareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
         res += obj.generateValues(time);
       }
@@ -108,7 +107,7 @@ module.exports = async function (context, req) {
       this.currTime = Date.now();
       let time = (this.currTime - this.startTime) / 1000;
       if (device.valueIsBool) {
-        const boolObj = new booleanGenerator();
+        const boolObj = new BooleanGenerator();
         this.currData = boolObj.generateValues(time);
       }
       else {
@@ -122,7 +121,7 @@ module.exports = async function (context, req) {
       this.device = device;
       this.currTime = Date.now();
       let time = (this.currTime - this.startTime) / 1000;
-      const randomObj = new randomGenerator(device.min, device.max);
+      const randomObj = new RandomGenerator(device.min, device.max);
       this.currData = randomObj.generateValues(time);
       return this;
     }

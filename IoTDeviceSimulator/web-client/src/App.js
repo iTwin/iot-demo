@@ -189,7 +189,6 @@ function App() {
             twin.properties.desired.min = device.min;
             twin.properties.desired.max = device.max;
             twin.properties.desired.isRunning = device.isRunning;
-            twin.properties.desired.currDataArray = device.currDataArray;
             twin.properties.desired.signalArray = device.signalArray;
             break;
           }
@@ -212,7 +211,6 @@ function App() {
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
-        currDataArray: device.properties.desired.currDataArray,
         signalArray: device.properties.desired.signalArray,
       }
       setData([...data, newDevice]);
@@ -365,7 +363,6 @@ function App() {
             min: deviceTwin.properties.desired.min,
             max: deviceTwin.properties.desired.max,
             primaryKey: deviceTwin.authentication.symmetricKey.primaryKey,
-            currDataArray: deviceTwin.properties.desired.currDataArray,
             signalArray: deviceTwin.properties.desired.signalArray,
           });
         } else {

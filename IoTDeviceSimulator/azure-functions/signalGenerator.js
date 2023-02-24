@@ -1,6 +1,6 @@
-class generator {
+class Generator {
     constructor() {
-        if (this.constructor === generator) {
+        if (this.constructor === Generator) {
             const error = new Error("Can't instantiate abstract class!");
             console.log(error);
         }
@@ -12,7 +12,7 @@ class generator {
     }
 }
 
-class sineGenerator extends generator {
+class SineGenerator extends Generator {
     constructor(mean, amplitude, wave_period, phase) {
         super();
         this.mean = mean;
@@ -27,7 +27,7 @@ class sineGenerator extends generator {
     }
 }
 
-class constantGenerator extends generator {
+class ConstantGenerator extends Generator {
     constructor(mean) {
         super();
         this.mean = mean;
@@ -39,7 +39,7 @@ class constantGenerator extends generator {
     }
 }
 
-class increasingGenerator extends generator {
+class IncreasingGenerator extends Generator {
     constructor(slope) {
         super();
         this.slope = slope;
@@ -51,7 +51,7 @@ class increasingGenerator extends generator {
     }
 }
 
-class randomGenerator extends generator {
+class RandomGenerator extends Generator {
     constructor(min, max) {
         super();
         this.min = min;
@@ -60,17 +60,17 @@ class randomGenerator extends generator {
 
     generateValues(t) {
         const mean = (parseFloat(this.min) + parseFloat(this.max)) / 2;
-        const constObj = new constantGenerator(mean);
+        const constObj = new ConstantGenerator(mean);
         let tempData = constObj.generateValues(t);
         const noise_magnitude = (Math.random() * (parseFloat(this.max) - parseFloat(this.min))) / 2;
         const noiseSd = 0.45;
-        const noiseObj = new noiseGenerator(noise_magnitude, noiseSd);
+        const noiseObj = new NoiseGenerator(noise_magnitude, noiseSd);
         tempData += noiseObj.generateValues(t);
         return tempData;
     }
 }
 
-class booleanGenerator extends generator {
+class BooleanGenerator extends Generator {
     constructor() {
         super();
     }
@@ -81,7 +81,7 @@ class booleanGenerator extends generator {
     }
 }
 
-class noiseGenerator extends generator {
+class NoiseGenerator extends Generator {
     constructor(noise_magnitude, noiseSd) {
         super();
         this.noise_magnitude = noise_magnitude;
@@ -103,7 +103,7 @@ class noiseGenerator extends generator {
     }
 }
 
-class triangularGenerator extends generator {
+class TriangularGenerator extends Generator {
     constructor(amplitude, wave_period) {
         super();
         this.amplitude = amplitude;
@@ -116,7 +116,7 @@ class triangularGenerator extends generator {
     }
 }
 
-class sawtoothGenerator extends generator {
+class SawtoothGenerator extends Generator {
     constructor(amplitude, wave_period) {
         super();
         this.amplitude = amplitude;
@@ -129,7 +129,7 @@ class sawtoothGenerator extends generator {
     }
 }
 
-class squareGenerator extends generator {
+class SquareGenerator extends Generator {
     constructor(amplitude, wave_period) {
         super();
         this.amplitude = amplitude;
@@ -142,4 +142,4 @@ class squareGenerator extends generator {
     }
 }
 
-module.exports = { sineGenerator, constantGenerator, increasingGenerator, noiseGenerator, triangularGenerator, sawtoothGenerator, squareGenerator, randomGenerator, booleanGenerator }
+module.exports = { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator }

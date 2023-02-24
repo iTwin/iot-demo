@@ -175,14 +175,14 @@ header button {
 
 .behaviour-area {
   margin-left: 30px;
-  width: 400px !important;
+  width: 400px;
 }
 
 .tab-label {
   display: flex;
   justify-content: center;
-  margin: 0px !important;
-  padding: 0px !important;
+  margin: 0px;
+  padding: 0px;
 }
 
 .cancel-button {
@@ -234,7 +234,7 @@ header button {
 }
 
 .behaviour-value>:last-child {
-  margin-right: 0px !important;
+  margin-right: 0px;
 }
 
 .iui-modal>.iui-modal-dialog {
@@ -263,7 +263,7 @@ header button {
 }
 
 .labels {
-  width: 300px !important;
+  width: 300px;
 }
 
 .iui-tabs-wrapper.iui-horizontal {
