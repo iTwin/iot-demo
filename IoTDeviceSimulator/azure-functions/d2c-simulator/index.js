@@ -94,8 +94,11 @@ module.exports = async function (context, req) {
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
           obj = new SawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
-        else {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Square") {
           obj = new SquareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Random") {
+          obj = new RandomGenerator(JSON.parse(signalArray[index])["Min"], JSON.parse(signalArray[index])["Max"]);
         }
         res += obj.generateValues(time);
       }
@@ -113,16 +116,6 @@ module.exports = async function (context, req) {
       else {
         this.currData = this.generateSignal(device.signalArray, time);
       }
-      console.log(this.currData);
-      return this;
-    }
-
-    updateSensorForResolve(device) {
-      this.device = device;
-      this.currTime = Date.now();
-      let time = (this.currTime - this.startTime) / 1000;
-      const randomObj = new RandomGenerator(device.min, device.max);
-      this.currData = randomObj.generateValues(time);
       return this;
     }
   }
@@ -141,37 +134,10 @@ module.exports = async function (context, req) {
     await deviceClient.sendEvent(msg);
   }
 
-  async function sendTelemetryForResolve(deviceClient, index, device) {
-    const msg = new Message(
-      JSON.stringify(
-        deviceObj.updateSensorForResolve(device).getCurrentDataObject()
-      )
-    );
-    msg.contentType = 'application/json';
-    msg.contentEncoding = 'utf-8';
-    await deviceClient.sendEvent(msg);
-  }
-
   function SetInterval(client, device) {
     let index = 0;
     return setInterval(async () => {
       await sendTelemetry(client, index, device).catch((err) => context.log('error', err.toString()));
-      index += 1;
-    }, (parseInt(device.telemetrySendInterval)))
-  }
-
-  function SetIntervalForResolve(client, device) {
-    let index = 0;
-    return setInterval(async () => {
-      await sendTelemetryForResolve(client, index, device).catch((err) => context.log('error', err.toString()));
-      index += 1;
-    }, (parseInt(device.telemetrySendInterval)))
-  }
-
-  function SetIntervalForResolve(client, device) {
-    let index = 0;
-    return setInterval(async () => {
-      await sendTelemetryForResolve(client, index, device).catch((err) => context.log('error', err.toString()));
       index += 1;
     }, (parseInt(device.telemetrySendInterval)))
   }
@@ -258,7 +224,8 @@ module.exports = async function (context, req) {
               }
               else if (msg.messageId.includes("resolve")) {
                 clearInterval(intervalTokens[device.deviceId]);
-                intervalTokens[device.deviceId] = SetIntervalForResolve(client, device);
+                device.signalArray = [`{"Behaviour":"Random","Min":${device.min},"Max":${device.max}}`]
+                intervalTokens[device.deviceId] = SetInterval(client, device);
               }
               client.complete(msg, function (err) {
                 if (err) {

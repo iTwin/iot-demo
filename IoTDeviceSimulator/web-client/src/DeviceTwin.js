@@ -156,10 +156,10 @@ export function DeviceTwin(props) {
     const updateDeviceTwin = useCallback(async (event) => {
         event.preventDefault();
         let updatedDevice = false;
+        if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
+            deviceTwin.signalArray.pop();
+        }
         if (props.connection.includes("Azure")) {
-            if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
-                deviceTwin.signalArray.pop();
-            }
             let deviceArray = [deviceTwin];
             const response = await editDeviceTwins(deviceArray, props.connectionStringId)
             updatedDevice = response.updated;
