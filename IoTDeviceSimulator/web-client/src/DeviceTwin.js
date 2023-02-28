@@ -80,13 +80,13 @@ export function DeviceTwin(props) {
             deviceSignalArray.pop();
         }
                 
-            if (k===1 && newBehaviour==="") {
-                toaster.negative(`Required values are not provided!`);
-            }else if(newBehaviour!=="")
-            {
-                deviceSignalArray.push(newBehaviour);
-                setNewBehaviour("");
-            }
+        if (k===1 && newBehaviour==="") {
+            toaster.negative(`Required values are not provided!`);
+        }else if(newBehaviour!=="")
+        {
+            deviceSignalArray.push(newBehaviour);
+            setNewBehaviour("");
+        }
         
         setTabCount(deviceTwin.signalArray.length+1);
         deviceSignalArray.push("");
@@ -168,7 +168,7 @@ export function DeviceTwin(props) {
             }
         }
         if (k === 1 && i === 0) {
-            toaster.negative(`There should be atleast one behaviour`)
+            toaster.negative(`Behaviour cannot be empty!`)
         }
         else {
             
