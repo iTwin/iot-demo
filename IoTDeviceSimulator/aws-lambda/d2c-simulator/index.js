@@ -2,6 +2,7 @@
  * Copyright © Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
+const { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator } = require('../signalGenerator.js');
 
 var AWS = require('aws-sdk');
 let interval = [];
@@ -32,7 +33,7 @@ const checkSimulatorStopped = (device) => {
             }
         }).promise();
 
-        const things = listOfThings;      
+        const things = listOfThings;
         const thing = things.find((thing) => thing.thingName === device.deviceId);
         if (thing.attributes.isRunning === "false") {
             stop = true;
@@ -45,18 +46,37 @@ const checkSimulatorStopped = (device) => {
     }, 10000));
 }
 
-const generateNoise = (noiseSd, noisemagnitude) => {
-    if (noisemagnitude !== undefined && noiseSd !== undefined) {
-        let mean = 0;
-        let standard_deviation = parseFloat(noiseSd);
-        // Taken reference from this link for range of x->https://en.wikipedia.org/wiki/Normal_distribution#/media/File:Normal_Distribution_PDF.svg
-        let x = (Math.random() - 0.5) * 2;
-        // Taken reference from this link for noise value->https://en.wikipedia.org/wiki/Normal_distribution
-        let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-        let noise_magnitude = noisemagnitude * Math.sign((Math.random() - 0.5) * 2);
-        return noise * noise_magnitude;
+const generateSignal = (signalArray, time) => {
+    let res = 0;
+    let obj;
+    for (let index = 0; index < signalArray.length; index++) {
+        if (JSON.parse(signalArray[index])["Behaviour"] === "Sine") {
+            obj = new SineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"], JSON.parse(signalArray[index])["Phase"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant") {
+            obj = new ConstantGenerator(JSON.parse(signalArray[index])["Mean"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Linear") {
+            obj = new IncreasingGenerator(JSON.parse(signalArray[index])["Slope"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise") {
+            obj = new NoiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular") {
+            obj = new TriangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
+            obj = new SawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Square") {
+            obj = new SquareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Random") {
+            obj = new RandomGenerator(JSON.parse(signalArray[index])["Min"], JSON.parse(signalArray[index])["Max"]);
+        }
+        res += obj.generateValues(time);
     }
-    return 0;
+    return res;
 }
 
 const publishData = async (device, callback) => {
@@ -81,30 +101,13 @@ const publishData = async (device, callback) => {
         }
         const currTime = Date.now();
         let currData = 0;
-        const min = parseFloat(device.min);
-        const max = parseFloat(device.max);
-        if (device.behaviour !== undefined && device.behaviour !== '') {
-            if (device.behaviour === 'Sine Function' && device.mean !== undefined && device.amplitude !== undefined && device.phase !== undefined && device.sine_period !== undefined && device.mean !== '' && device.amplitude !== '' && device.phase !== '' && device.sine_period !== '') {
-                let t = (currTime - startTime) / 1000;
-                let tempData = parseFloat(device.mean) + Math.sin(t * (2 * Math.PI) / (parseFloat(device.sine_period) / 1000) + parseFloat(device.phase)) * parseFloat(device.amplitude);
-                currData = tempData + generateNoise(parseFloat(device.noiseSd), parseFloat(device.noise_magnitude));
-            }
-            else if (device.behaviour === 'Constant Function' && device.mean !== undefined && device.mean !== '') {
-                let tempData = parseFloat(device.mean);
-                currData = tempData + generateNoise(parseFloat(device.noiseSd), parseFloat(device.noise_magnitude));
-            }
-            else {
-                currData = min + (Math.random() * (max - min));
-            }
+        let time = (currTime - startTime) / 1000;
+        if (device.valueIsBool) {
+            const boolObj = new BooleanGenerator();
+            currData = boolObj.generateValues(time);
         }
         else {
-            if (device.valueIsBool) {
-                const randomBoolean = () => Math.random() >= 0.5;
-                currData = randomBoolean();
-            }
-            else {
-                currData = min + (Math.random() * (max - min));
-            }
+            currData = generateSignal(device.signalArray, time);
         }
         var params = {
             topic: process.env.AWS_MQTT_TOPIC,
