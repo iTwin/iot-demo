@@ -3,6 +3,23 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
+const transformIntoArray = (signalArray) => {
+  signalArray = signalArray?.replaceAll('#', '{');
+  signalArray = signalArray?.replaceAll('/', '}');
+  signalArray = signalArray?.replaceAll('_', ' ');
+  signalArray = signalArray?.replaceAll('@', '"');
+  signalArray = '[' + signalArray + ']';
+  if (signalArray !== "[undefined]") {
+    signalArray = JSON.parse(signalArray);
+    signalArray = signalArray.map(obj => JSON.stringify(obj));
+  }
+  else
+  {
+    signalArray=undefined;
+  }
+  return signalArray;
+}
+
 export const getAWSThings = async () => {
   let response = await fetch(`${process.env.REACT_APP_AWS_API_GATEWAY_URL}/getthings` ?? "", {
     method: "get",
@@ -19,18 +36,14 @@ export const getAWSThings = async () => {
       rows.push({
         deviceId: thing.thingName,
         deviceName: thing.thingName,
-        amplitude: thing.attributes.Amplitude,
-        mean: thing.attributes.Mean,
         phenomenon: thing.attributes.Phenomenon,
         telemetrySendInterval: thing.attributes.TelemetrySendInterval,
         unit: thing.attributes.Unit,
         valueIsBool: thing.attributes.ValueIsBool === "true" ? true : false,
-        behaviour: thing.attributes.Behaviour.toString().replace("_", " "),
-        noise_magnitude: thing.attributes.Noise_magnitude,
         noiseSd: thing.attributes.NoiseSd,
-        sine_period: thing.attributes.Sine_period,
         isRunning: thing.attributes.isRunning,
-        thingTypeName: thing.thingTypeName
+        thingTypeName: thing.thingTypeName,
+        signalArray: transformIntoArray(thing.attributes.signalArray)
       })
     });
     return { rows: rows };
@@ -65,7 +78,7 @@ export const editAWSThings = async (selectedDevices) => {
 
   const response = await fetch(`${process.env.REACT_APP_AWS_API_GATEWAY_URL}/updatethings` ?? "", {
     method: "post",
-    keepalive:true,
+    keepalive: true,
     headers: new Headers({
       "x-api-key": process.env.REACT_APP_AWS_API_GATEWAY_APIKEY ?? "",
       "Content-Type": "application/json",

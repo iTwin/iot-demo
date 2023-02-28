@@ -94,8 +94,11 @@ module.exports = async function (context, req) {
         else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
           obj = new SawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
         }
-        else {
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Square") {
           obj = new SquareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Random") {
+          obj = new RandomGenerator(JSON.parse(signalArray[index])["Min"], JSON.parse(signalArray[index])["Max"]);
         }
         res += obj.generateValues(time);
       }
@@ -156,22 +159,6 @@ module.exports = async function (context, req) {
     let index = 0;
     return setInterval(async () => {
       await sendTelemetry(client, index, device).catch((err) => context.log('error', err.toString()));
-      index += 1;
-    }, (parseInt(device.telemetrySendInterval)))
-  }
-
-  function SetIntervalForResolve(client, device) {
-    let index = 0;
-    return setInterval(async () => {
-      await sendTelemetryForResolve(client, index, device).catch((err) => context.log('error', err.toString()));
-      index += 1;
-    }, (parseInt(device.telemetrySendInterval)))
-  }
-
-  function SetIntervalForResolve(client, device) {
-    let index = 0;
-    return setInterval(async () => {
-      await sendTelemetryForResolve(client, index, device).catch((err) => context.log('error', err.toString()));
       index += 1;
     }, (parseInt(device.telemetrySendInterval)))
   }
@@ -258,7 +245,8 @@ module.exports = async function (context, req) {
               }
               else if (msg.messageId.includes("resolve")) {
                 clearInterval(intervalTokens[device.deviceId]);
-                intervalTokens[device.deviceId] = SetIntervalForResolve(client, device);
+                device.signalArray = [`{"Behaviour":"Random","Min":${device.min},"Max":${device.max}}`]
+                intervalTokens[device.deviceId] = SetInterval(client, device);
               }
               client.complete(msg, function (err) {
                 if (err) {
