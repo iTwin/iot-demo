@@ -15,25 +15,25 @@ import { BehaviourComponent } from "./BehaviourComponent";
 let ar = [];
 let arr = [];
 export let currDataArray = [];
-let isAddOrUpdate=false;
-let initialDeviceTwinSignalArray=[];
+
 export function DeviceTwin(props) {
     const [deviceTwin, setDeviceTwin] = useState({
-        deviceAction: props.device.deviceAction,
-        deviceId: props.device.deviceId,
-        deviceName: props.device.deviceName,
-        phenomenon: props.device.phenomenon,
-        unit: props.device.unit,
-        valueIsBool: props.device.valueIsBool,
-        telemetrySendInterval: props.device.telemetrySendInterval,
-        noiseSd: props.device.noiseSd,
-        isRunning: props.device.isRunning,
-        min: props.device.min,
-        max: props.device.max,
-        thingTypeName: props.device.thingTypeName,
-        signalArray: props.device.signalArray,
+        deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
+        deviceId: props.device.deviceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceId)) :"" ,
+        deviceName: props.device.deviceName!==undefined ? JSON.parse(JSON.stringify(props.device.deviceName)) :"",
+        unit: props.device.unit!==undefined? JSON.parse(JSON.stringify(props.device.unit)):"" ,
+        phenomenon: props.device.phenomenon!==undefined ? JSON.parse(JSON.stringify(props.device.phenomenon)) :"",
+        valueIsBool: props.device.valueIsBool!==undefined? JSON.parse(JSON.stringify(props.device.valueIsBool)):false ,
+        telemetrySendInterval: props.device.telemetrySendInterval!==undefined ? JSON.parse(JSON.stringify(props.device.telemetrySendInterval)) :"" ,
+        noiseSd: 0.45,
+        isRunning: props.device.isRunning!==undefined ? JSON.parse(JSON.stringify(props.device.isRunning)) : false ,
+        min: props.device.min!==undefined ? JSON.parse(JSON.stringify(props.device.min)):"",
+        max: props.device.max!==undefined ? JSON.parse(JSON.stringify(props.device.max)) :"" ,
+        thingTypeName: props.device.thingTypeName!==undefined ? JSON.parse(JSON.stringify(props.device.thingTypeName)) :"" ,
+        signalArray: props.device.signalArray!==undefined ? JSON.parse(JSON.stringify(props.device.signalArray)) :"" ,
+    
     });
-    initialDeviceTwinSignalArray=deviceTwin.signalArray;
+    
     const [behaviour, setBehaviour] = useState("");
     const [index, setIndex] = useState(0);
     const [len, setLen] = useState(50);
@@ -44,23 +44,23 @@ export function DeviceTwin(props) {
 
     useEffect(() => {
         setDeviceTwin({
-            deviceAction: props.device.deviceAction,
-            deviceId: props.device.deviceId ?? '',
-            deviceName: props.device.deviceName ?? '',
-            unit: props.device.unit ?? '',
-            phenomenon: props.device.phenomenon ?? '',
-            valueIsBool: props.device.valueIsBool ?? false,
-            telemetrySendInterval: props.device.telemetrySendInterval ?? '',
+            deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
+            deviceId: props.device.deviceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceId)) :"" ,
+            deviceName: props.device.deviceName!==undefined ? JSON.parse(JSON.stringify(props.device.deviceName)) :"",
+            unit: props.device.unit!==undefined? JSON.parse(JSON.stringify(props.device.unit)):"" ,
+            phenomenon: props.device.phenomenon!==undefined ? JSON.parse(JSON.stringify(props.device.phenomenon)) :"",
+            valueIsBool: props.device.valueIsBool!==undefined? JSON.parse(JSON.stringify(props.device.valueIsBool)):false ,
+            telemetrySendInterval: props.device.telemetrySendInterval!==undefined ? JSON.parse(JSON.stringify(props.device.telemetrySendInterval)) :"" ,
             noiseSd: 0.45,
-            isRunning: props.device.isRunning ?? false,
-            min: props.device.min ?? '',
-            max: props.device.max ?? '',
-            thingTypeName: props.device.thingTypeName ?? '',
-            signalArray: props.device.signalArray ?? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`],
-        });
+            isRunning: props.device.isRunning!==undefined ? JSON.parse(JSON.stringify(props.device.isRunning)) : false ,
+            min: props.device.min!==undefined ? JSON.parse(JSON.stringify(props.device.min)):"",
+            max: props.device.max!==undefined ? JSON.parse(JSON.stringify(props.device.max)) :"" ,
+            thingTypeName: props.device.thingTypeName!==undefined ? JSON.parse(JSON.stringify(props.device.thingTypeName)) :"" ,
+            signalArray: props.device.signalArray!==undefined ? JSON.parse(JSON.stringify(props.device.signalArray)) : [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`],
+        });                
         setTabCount(props.device.signalArray?.length ?? 2);
     }, [props]);
-
+   
     const handleChange = useCallback((event) => {
         event.preventDefault();
         setDeviceTwin({
@@ -113,11 +113,10 @@ export function DeviceTwin(props) {
             
         } else {
             updatedDevice = await editAWSThings([deviceTwin]);
-        }
-        isAddOrUpdate=true;
+        }        
         if (updatedDevice) {
             toaster.informational(`Updated device twin : ${deviceTwin.deviceId}`);
-            props.handleClose();
+            props.handleClose(deviceTwin);
         }
     }, [props, deviceTwin]);
 
@@ -129,8 +128,7 @@ export function DeviceTwin(props) {
             headers: getHeaders(),
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
-        if (response && response.status === 200) {
-            isAddOrUpdate=true;
+        if (response && response.status === 200) {            
             if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
                 deviceTwin.signalArray.pop();
             }
@@ -146,11 +144,7 @@ export function DeviceTwin(props) {
         }
     }, [deviceTwin, props, url]);
 
-    const onClose = useCallback(() => { 
-        if(!isAddOrUpdate)
-        {
-            setDeviceTwin({...deviceTwin, signalArray:initialDeviceTwinSignalArray});
-        }       
+    const onClose = useCallback(() => {               
         props.handleClose();
     }, [props]);
 
@@ -258,13 +252,10 @@ export function DeviceTwin(props) {
                     currDataArray[j] += 0;
                 }
             }
-        }
-        // setCompositeSignalDataArray(currDataArray);
+        }        
     }
   
-    const setCurrDataArray=(behaviourDataArray, behaviourObject)=>{
-        console.log("setCurrDAtaArray");        
-        console.log("Before Modification"+ currDataArray);
+    const setCurrDataArray=(behaviourDataArray, behaviourObject)=>{        
         if (deviceTwin.signalArray && !deviceTwin.valueIsBool) {
             currDataArray = [];
             for (let i = 0; i < len; i++) {
@@ -342,9 +333,9 @@ export function DeviceTwin(props) {
                             </div>
                             <div className="behaviour-area">
                                 <InputGroup label='No. of datapoints' displayStyle="inline">
-                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={len === 10}/>
-                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={len === 50}/>
-                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={len === 100}/>
+                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={parseFloat(len) === 10?true:false}/>
+                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={parseFloat(len) === 50?true:false}/>
+                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={parseFloat(len) === 100?true:false}/>
                                 </InputGroup>
 
                                 <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal"/>
