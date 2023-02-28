@@ -11,34 +11,31 @@ module.exports = async function (context, req) {
   const Message = require('azure-iot-device').Message;
   const ConnectionString = require('azure-iot-common').ConnectionString;
   const { BlobServiceClient } = require('@azure/storage-blob');
+  const { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator } = require('../signalGenerator.js');
   require('dotenv').config()
 
   const jsonData = [];
   const iotHubName = ConnectionString.parse(process.env[req.body.connectionStringId], ["HostName"]).HostName;
   let deviceArray = req.body.selectedDevices.map((deviceTwin) => {
     return {
-
       deviceId: deviceTwin.deviceId,
       telemetrySendInterval: deviceTwin.telemetrySendInterval ?? 5000,
       unit: deviceTwin.unit,
-      mean: deviceTwin.mean,
-      amplitude: deviceTwin.amplitude,
       phenomenon: deviceTwin.phenomenon,
       valueIsBool: deviceTwin.valueIsBool,
       deviceSecurityType: "connectionString",
       connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
       phase: Math.random() * Math.PI,
-      behaviour: deviceTwin.behaviour,
-      noise_magnitude: deviceTwin.noise_magnitude,
       noiseSd: deviceTwin.noiseSd,
-      sine_period: deviceTwin.sine_period,
       isRunning: deviceTwin.isRunning,
       min: deviceTwin.min,
       max: deviceTwin.max,
+      signalArray: deviceTwin.signalArray,
     }
   });
 
   const modelIdObject = { modelId: 'dtmi:com:example:Thermostat;1' };
+
   class GenericDevice {
     constructor() {
       this.currData = 50 + (Math.random() * 46);
@@ -75,47 +72,49 @@ module.exports = async function (context, req) {
       return telemetry;
     }
 
-    generateNoise() {
-      if (this.device.noise_magnitude !== undefined && this.device.noiseSd !== undefined) {
-        let mean = 0;
-        let standard_deviation = parseFloat(this.device.noiseSd);
-        // Taken reference from this link for range of x->https://en.wikipedia.org/wiki/Normal_distribution#/media/File:Normal_Distribution_PDF.svg
-        let x = (Math.random() - 0.5) * 2;
-        // Taken reference from this link for noise value->https://en.wikipedia.org/wiki/Normal_distribution
-        let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-        let noise_magnitude = this.device.noise_magnitude * Math.sign((Math.random() - 0.5) * 2);
-        return noise * noise_magnitude;
+    generateSignal(signalArray, time) {
+      let res = 0;
+      let obj;
+      for (let index = 0; index < signalArray.length; index++) {
+        if (JSON.parse(signalArray[index])["Behaviour"] === "Sine") {
+          obj = new SineGenerator(JSON.parse(signalArray[index])["Mean"], JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"], JSON.parse(signalArray[index])["Phase"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Constant") {
+          obj = new ConstantGenerator(JSON.parse(signalArray[index])["Mean"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Linear") {
+          obj = new IncreasingGenerator(JSON.parse(signalArray[index])["Slope"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Noise") {
+          obj = new NoiseGenerator(JSON.parse(signalArray[index])["Noise Magnitude"], JSON.parse(signalArray[index])["Noise Standard-deviation"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Triangular") {
+          obj = new TriangularGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Sawtooth") {
+          obj = new SawtoothGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Square") {
+          obj = new SquareGenerator(JSON.parse(signalArray[index])["Amplitude"], JSON.parse(signalArray[index])["Wave Period"]);
+        }
+        else if (JSON.parse(signalArray[index])["Behaviour"] === "Random") {
+          obj = new RandomGenerator(JSON.parse(signalArray[index])["Min"], JSON.parse(signalArray[index])["Max"]);
+        }
+        res += obj.generateValues(time);
       }
-      return 0;
+      return res;
     }
 
     updateSensor(device) {
       this.device = device;
       this.currTime = Date.now();
-      const min = parseFloat(device.min);
-      const max = parseFloat(device.max);
-      if (device.behaviour !== undefined && device.behaviour !== '') {
-        if (device.behaviour === 'Sine Function' && device.mean !== undefined && device.amplitude !== undefined && device.phase !== undefined && device.sine_period !== undefined && device.mean !== '' && device.amplitude !== '' && device.phase !== '' && device.sine_period !== '') {
-          let t = (this.currTime - this.startTime) / 1000;
-          let tempData = parseFloat(device.mean) + Math.sin(t * (2 * Math.PI) / (parseFloat(device.sine_period) / 1000) + parseFloat(device.phase)) * parseFloat(device.amplitude);
-          this.currData = tempData + this.generateNoise();
-        }
-        else if (device.behaviour === 'Constant Function' && device.mean !== undefined && device.mean !== '') {
-          let tempData = parseFloat(device.mean);
-          this.currData = tempData + this.generateNoise();
-        }
-        else {
-          this.currData = min + (Math.random() * (max - min));
-        }
+      let time = (this.currTime - this.startTime) / 1000;
+      if (device.valueIsBool) {
+        const boolObj = new BooleanGenerator();
+        this.currData = boolObj.generateValues(time);
       }
       else {
-        if (device.valueIsBool) {
-          const randomBoolean = () => Math.random() >= 0.5;
-          this.currData = randomBoolean();
-        }
-        else {
-          this.currData = min + (Math.random() * (max - min));
-        }
+        this.currData = this.generateSignal(device.signalArray, time);
       }
       return this;
     }
@@ -143,7 +142,6 @@ module.exports = async function (context, req) {
     }, (parseInt(device.telemetrySendInterval)))
   }
 
-  // Run Simulator
   async function runSimulator() {
     let stop = false;
     const containerName = "simulatorcontainer";
@@ -208,17 +206,26 @@ module.exports = async function (context, req) {
             await client.setOptions(modelIdObject);
 
             await client.open();
-            intervalTokens.push(SetInterval(client, device));
+            intervalTokens[device.deviceId] = SetInterval(client, device);
 
             client.on('message', async function (msg) {
-              stop = true;
-              intervalTokens.forEach((value) => clearInterval(value));
-              intervalTokens = [];
-              if (req.body.enableLogging) {
-                const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-                const data = JSON.stringify(jsonData);
-                // Upload data to the blob              
-                const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
+              if (msg.messageId.includes("stop")) {
+                stop = true;
+                for (const key in intervalTokens) {
+                  clearInterval(intervalTokens[key]);
+                }
+                intervalTokens = [];
+                if (req.body.enableLogging) {
+                  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+                  const data = JSON.stringify(jsonData);
+                  // Upload data to the blob              
+                  const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
+                }
+              }
+              else if (msg.messageId.includes("resolve")) {
+                clearInterval(intervalTokens[device.deviceId]);
+                device.signalArray = [`{"Behaviour":"Random","Min":${device.min},"Max":${device.max}}`]
+                intervalTokens[device.deviceId] = SetInterval(client, device);
               }
               client.complete(msg, function (err) {
                 if (err) {
@@ -241,7 +248,9 @@ module.exports = async function (context, req) {
     }
 
     if (stop) {
-      intervalTokens.forEach((value) => clearInterval(value));
+      for (const key in intervalTokens) {
+        clearInterval(intervalTokens[key]);
+      }
     }
   }
 

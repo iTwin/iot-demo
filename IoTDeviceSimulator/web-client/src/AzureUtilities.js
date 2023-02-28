@@ -3,14 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export const getHeaders=()=>{
-  return new Headers({      
-    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""      
+export const getHeaders = () => {
+  return new Headers({
+    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""
   })
 }
 
 export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
-  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "",{
+  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "", {
     method: "get",
     headers: getHeaders(),
   }).catch(error => console.log("Request failed: " + error));
@@ -21,19 +21,15 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
       rows.push({
         deviceId: device.deviceId,
         deviceName: device.properties.desired.deviceName,
-        amplitude: device.properties.desired.amplitude,
-        mean: device.properties.desired.mean,
         phenomenon: device.properties.desired.phenomenon,
         telemetrySendInterval: device.properties.desired.telemetrySendInterval,
         unit: device.properties.desired.unit,
         valueIsBool: device.properties.desired.valueIsBool,
-        behaviour: device.properties.desired.behaviour,
-        noise_magnitude: device.properties.desired.noise_magnitude,
         noiseSd: device.properties.desired.noiseSd,
-        sine_period: device.properties.desired.sine_period,
         min: device.properties.desired.min,
         max: device.properties.desired.max,
         isRunning: device.properties.desired.isRunning,
+        signalArray: device.properties.desired.signalArray,
       })
     });
     return { deviceTwins: devices, rows: rows };
@@ -54,11 +50,11 @@ export const startSimulatorForAzure = async (selectedDevices, enableLogging, sel
 }
 
 export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionStringId) => {
-  const data = { deviceId: selectedDevices[0].deviceId, connectionStringId: selectedConnectionStringId }
+  const data = { deviceId: selectedDevices[0].deviceId, connectionStringId: selectedConnectionStringId, action: "stop" }
   let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/c2d-simulator`, {
     method: "POST",
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {
@@ -72,7 +68,7 @@ export const editDeviceTwins = async (deviceArray, connectionStringId) => {
   const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
     method: 'POST',
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {

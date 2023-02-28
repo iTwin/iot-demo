@@ -10,6 +10,19 @@ AWS.config.update({
     region: region
 });
 
+const transformIntoAWSStructure = (res) => {
+    if (res !== undefined) {
+        res = res.toString();
+        res = res.replaceAll('[', "");
+        res = res.replaceAll(']', "");
+        res = res.replaceAll('{', '#');
+        res = res.replaceAll('}', '/');
+        res = res.replaceAll(' ', '_');
+        res = res.replaceAll('"', '@');
+        return res;
+    }
+}
+
 const iotClient = new AWS.Iot();
 exports.handler = async (event) => {
 
@@ -22,14 +35,10 @@ exports.handler = async (event) => {
                     'Phenomenon': thing.phenomenon,
                     'Unit': thing.unit,
                     'isRunning': thing.isRunning,
-                    'Amplitude': thing.amplitude,
-                    'Mean': thing.mean,
                     'TelemetrySendInterval': thing.telemetrySendInterval,
                     'ValueIsBool': thing.valueIsBool.toString(),
-                    'Behaviour': thing.behaviour.replace(" ", "_"),
-                    'Noise_magnitude': thing.noise_magnitude,
                     'NoiseSd': thing.noiseSd.toString(),
-                    'Sine_period': thing.sine_period
+                    'signalArray': transformIntoAWSStructure(thing.signalArray)
                     /* '<AttributeName>': ... */
                 },
                 merge: true || false

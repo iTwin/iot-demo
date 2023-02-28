@@ -19,15 +19,15 @@ module.exports = async function (context, req) {
       if (res) context.log(op + ' status: ' + res.constructor.name);
     };
   }
-  
+
   serviceClient.open(function (err) {
     if (err) {
       context.error('Could not connect: ' + err.message);
     } else {
-      context.log('Service client connected');      
+      context.log('Service client connected');
       var message = new Message('Cloud to device message.');
       message.ack = 'full';
-      message.messageId = `My Message ID: ${Date.now()}`;
+      message.messageId = `My Message ID: ${Date.now()} for action: ${req.body.action}`;
       context.log('Sending message: ' + message.getData());
       serviceClient.send(targetDevice, message, printResultFor('send'));
     }
