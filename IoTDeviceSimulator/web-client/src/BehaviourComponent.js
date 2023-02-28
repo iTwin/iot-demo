@@ -198,8 +198,8 @@ export function TriangularComponent(props){
     return(
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
             </div>
             <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
         </>
@@ -242,8 +242,8 @@ export function SawToothComponent(props){
     return(
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
             </div>
             <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
         </>
@@ -285,8 +285,8 @@ export function SquareComponent(props){
     return(
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
             </div>
             <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
         </>

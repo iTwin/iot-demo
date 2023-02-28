@@ -6,13 +6,11 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Modal, LabeledInput, ToggleSwitch, toaster, Button, Label, Select, HorizontalTabs, Tab, InputGroup, Radio, MenuItem, Tooltip } from "@itwin/itwinui-react";
 import { DeviceAction } from "./Utils";
-import { Line } from 'react-chartjs-2'
 import { editDeviceTwins, getHeaders } from "./AzureUtilities";
 import { editAWSThings } from "./AWSUtililities";
 import { ChartComponent } from "./ChartComponent";
 import { BehaviourComponent } from "./BehaviourComponent";
 
-let ar = [];
 let arr = [];
 export let currDataArray = [];
 
@@ -232,8 +230,7 @@ export function DeviceTwin(props) {
                 }
                 else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Triangular") {
                     for (let j = 0; j < len; j++) {
-                        let currData = (2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)))) / Math.PI;
-                        ar.push(currData);
+                        let currData = (2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)))) / Math.PI;                        
                         currDataArray[j] += currData;
                     }
                 }
