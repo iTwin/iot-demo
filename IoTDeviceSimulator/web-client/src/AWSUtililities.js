@@ -13,6 +13,10 @@ const transformIntoArray = (signalArray) => {
     signalArray = JSON.parse(signalArray);
     signalArray = signalArray.map(obj => JSON.stringify(obj));
   }
+  else
+  {
+    signalArray=undefined;
+  }
   return signalArray;
 }
 
