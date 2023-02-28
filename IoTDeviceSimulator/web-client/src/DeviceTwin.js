@@ -9,11 +9,14 @@ import { DeviceAction } from "./Utils";
 import { Line } from 'react-chartjs-2'
 import { editDeviceTwins, getHeaders } from "./AzureUtilities";
 import { editAWSThings } from "./AWSUtililities";
+import { ChartComponent } from "./ChartComponent";
+import { BehaviourComponent } from "./BehaviourComponent";
 
 let ar = [];
 let arr = [];
-let currDataArray = [];
-
+export let currDataArray = [];
+let isAddOrUpdate=false;
+let initialDeviceTwinSignalArray=[];
 export function DeviceTwin(props) {
     const [deviceTwin, setDeviceTwin] = useState({
         deviceAction: props.device.deviceAction,
@@ -30,16 +33,13 @@ export function DeviceTwin(props) {
         thingTypeName: props.device.thingTypeName,
         signalArray: props.device.signalArray,
     });
-
-    const [mean, setMean] = useState("");
-    const [amplitude, setAmplitude] = useState("");
-    const [wave_period, setWave_period] = useState("");
-    const [noise_magnitude, setNoise_magnitude] = useState("");
-    const [slope, setSlope] = useState("");
-    const [behaviour, setBehaviour] = useState("Noise");
+    initialDeviceTwinSignalArray=deviceTwin.signalArray;
+    const [behaviour, setBehaviour] = useState("");
     const [index, setIndex] = useState(0);
-    const [len, setLen] = useState(0);
+    const [len, setLen] = useState(50);
     const [tabCount, setTabCount] = useState(0)
+    const [compositeSignalDataArrayChanged, setCompositeSignalDataArrayChanged]=useState(false);
+    const [newBehaviour, setNewBehaviour]=useState("");
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
 
     useEffect(() => {
@@ -68,26 +68,7 @@ export function DeviceTwin(props) {
             [event.target.name]: event.target.value,
         });
     }, [deviceTwin]);
-
-    const changeMean = (event) => {
-        setMean(event.target.value);
-    }
-
-    const changeAmplitude = (event) => {
-        setAmplitude(event.target.value);
-    }
-
-    const changeWave_period = (event) => {
-        setWave_period(event.target.value);
-    }
-
-    const changeNoise_magnitude = (event) => {
-        setNoise_magnitude(event.target.value);
-    }
-
-    const changeSlope = (event) => {
-        setSlope(event.target.value);
-    }
+    
 
     const changeBehaviour = (event) => {
         setBehaviour(event);
@@ -95,57 +76,23 @@ export function DeviceTwin(props) {
 
     const setBehaviourConfigurer = () => {
         let k = 0;
+        const deviceSignalArray= deviceTwin.signalArray;
         if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === '') {
             k = 1;
-            deviceTwin.signalArray.pop();
+            deviceSignalArray.pop();
         }
-        if (behaviour === 'Sine' && mean !== '' && amplitude !== '' && wave_period !== '') {
-            const sineObj = `{"Behaviour":"Sine","Mean":${mean},"Amplitude":${amplitude},"Wave Period":${wave_period},"Phase":"0"}`;
-            deviceTwin.signalArray.push(sineObj);
-            setMean("");
-            setAmplitude("");
-            setWave_period("");
-        }
-        else if (behaviour === 'Constant' && mean !== '') {
-            const constObj = `{"Behaviour":"Constant","Mean":${mean}}`;
-            deviceTwin.signalArray.push(constObj);
-            setMean("");
-        }
-        else if (behaviour === 'Linear' && slope !== '') {
-            const increasingObj = `{"Behaviour":"Linear","Slope":${slope}}`;
-            deviceTwin.signalArray.push(increasingObj);
-            setSlope("");
-        }
-        else if (behaviour === 'Noise' && noise_magnitude !== '') {
-            const noiseObj = `{"Behaviour":"Noise","Noise Magnitude":${noise_magnitude},"Noise Standard-deviation":${deviceTwin.noiseSd}}`;
-            deviceTwin.signalArray.push(noiseObj);
-            setNoise_magnitude("");
-        }
-        else if (behaviour === 'Triangular' && amplitude !== '' && wave_period !== '') {
-            const triangularObj = `{"Behaviour":"Triangular","Amplitude":${amplitude},"Wave Period":${wave_period}}`;
-            deviceTwin.signalArray.push(triangularObj);
-            setAmplitude("");
-            setWave_period("");
-        }
-        else if (behaviour === 'Sawtooth' && amplitude !== '' && wave_period !== '') {
-            const sawtoothObj = `{"Behaviour":"Sawtooth","Amplitude":${amplitude},"Wave Period":${wave_period}}`;
-            deviceTwin.signalArray.push(sawtoothObj);
-            setAmplitude("");
-            setWave_period("");
-        }
-        else if (behaviour === 'Square' && amplitude !== '' && wave_period !== '') {
-            const squareObj = `{"Behaviour":"Square","Amplitude":${amplitude},"Wave Period":${wave_period}}`;
-            deviceTwin.signalArray.push(squareObj);
-            setAmplitude("");
-            setWave_period("");
-        }
-        else {
-            if (k === 1) {
+                
+            if (k==1 && newBehaviour==="") {
                 toaster.negative(`Required values are not provided!`);
+            }else if(newBehaviour!=="")
+            {
+                deviceSignalArray.push(newBehaviour);
+                setNewBehaviour("");
             }
-        }
-        setTabCount(deviceTwin.signalArray.length + 1);
-        deviceTwin.signalArray.push("");
+        
+        setTabCount(deviceTwin.signalArray.length+1);
+        deviceSignalArray.push("");
+        setDeviceTwin({...deviceTwin,signalArray:deviceSignalArray});
         setBehaviour("");
     }
 
@@ -163,13 +110,14 @@ export function DeviceTwin(props) {
             let deviceArray = [deviceTwin];
             const response = await editDeviceTwins(deviceArray, props.connectionStringId)
             updatedDevice = response.updated;
+            
         } else {
             updatedDevice = await editAWSThings([deviceTwin]);
         }
-
+        isAddOrUpdate=true;
         if (updatedDevice) {
             toaster.informational(`Updated device twin : ${deviceTwin.deviceId}`);
-            props.handleClose(deviceTwin);
+            props.handleClose();
         }
     }, [props, deviceTwin]);
 
@@ -182,6 +130,7 @@ export function DeviceTwin(props) {
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) {
+            isAddOrUpdate=true;
             if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
                 deviceTwin.signalArray.pop();
             }
@@ -197,7 +146,11 @@ export function DeviceTwin(props) {
         }
     }, [deviceTwin, props, url]);
 
-    const onClose = useCallback(() => {
+    const onClose = useCallback(() => { 
+        if(!isAddOrUpdate)
+        {
+            setDeviceTwin({...deviceTwin, signalArray:initialDeviceTwinSignalArray});
+        }       
         props.handleClose();
     }, [props]);
 
@@ -213,6 +166,7 @@ export function DeviceTwin(props) {
 
     const removeBehaviour = (i) => {
         let k = 0;
+        const deviceSignalArray=deviceTwin.signalArray;
         for (let i = 0; i < deviceTwin.signalArray.length; i++) {
             if (deviceTwin.signalArray[i] !== '') {
                 k += 1;
@@ -222,72 +176,32 @@ export function DeviceTwin(props) {
             toaster.negative(`There should be atleast one behaviour`)
         }
         else {
-            setTabCount(deviceTwin.signalArray.length - 1);
-            deviceTwin.signalArray.splice(i, 1);
+            
+            deviceSignalArray.splice(i, 1);                      
+            setTabCount(deviceSignalArray.length);
+            setDeviceTwin({...deviceTwin,signalArray:deviceSignalArray});
+            setBehaviour("");
+            setNewBehaviour("");
         }
-    }
-
-    ar = [];
+    }       
     arr = [];
 
     for (let i = 0; i < len; i++) {
         arr.push(i * (deviceTwin.telemetrySendInterval) / 1000);
-    }
+    } 
+    
+    useEffect(()=>{
+        currDataArray=[];
+        for(let i=0;i<len;i++)
+        {
+            currDataArray[i]=0;
+        }
+        getCompositeSignalDataArray();
+        setCompositeSignalDataArrayChanged(!compositeSignalDataArrayChanged);
+    },[deviceTwin,len]);
 
-    if (behaviour === 'Sine') {
-        const phase = 0;
-        for (let i = 0; i < len; i++) {
-            let currData = parseFloat(mean) + Math.sin((i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(wave_period) / 1000) + phase) * parseFloat(amplitude);
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Constant') {
-        for (let i = 0; i < len; i++) {
-            let currData = parseFloat(mean);
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Linear') {
-        for (let i = 0; i < len; i++) {
-            let currData = parseFloat(slope) * ((i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)));
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Noise') {
-        let mean = 0;
-        let standard_deviation = parseFloat(deviceTwin.noiseSd);
-        for (let i = 0; i < len; i++) {
-            let x = (Math.random() - 0.5) * 2;
-            let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-            let noise_mag = noise_magnitude * Math.sign((Math.random() - 0.5) * 2);
-            let currData = noise * noise_mag;
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Triangular') {
-        for (let i = 0; i < len; i++) {
-            let currData = (2 * parseFloat(amplitude) * Math.asin(Math.sin((2 * Math.PI * (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(wave_period) / 1000)))) / Math.PI;
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Sawtooth') {
-        for (let i = 0; i < len; i++) {
-            let currData = 2 * parseFloat(amplitude) * ((i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(wave_period) / 1000) - Math.floor(1 / 2 + (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(wave_period) / 1000)));
-            ar.push(currData);
-        }
-    }
-    else if (behaviour === 'Square') {
-        for (let i = 0; i < len; i++) {
-            let currData = parseFloat(amplitude) * Math.sign(Math.sin((2 * Math.PI * (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(wave_period) / 1000)));
-            ar.push(currData);
-        }
-    }
-
-    if (deviceTwin.signalArray && !deviceTwin.valueIsBool) {
-        currDataArray = [];
-        for (let i = 0; i < len; i++) {
-            currDataArray[i] = (ar[i] ? ar[i] : 0);
-        }
+    const getCompositeSignalDataArray=()=>{
+        if(deviceTwin.signalArray===undefined)return [];
         for (let i = 0; i < deviceTwin.signalArray.length; i++) {
             if (deviceTwin.signalArray[i] !== '') {
                 if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Sine") {
@@ -345,8 +259,22 @@ export function DeviceTwin(props) {
                 }
             }
         }
+        // setCompositeSignalDataArray(currDataArray);
     }
-
+  
+    const setCurrDataArray=(behaviourDataArray, behaviourObject)=>{
+        console.log("setCurrDAtaArray");        
+        console.log("Before Modification"+ currDataArray);
+        if (deviceTwin.signalArray && !deviceTwin.valueIsBool) {
+            currDataArray = [];
+            for (let i = 0; i < len; i++) {
+                currDataArray[i] = (behaviourDataArray[i] ? behaviourDataArray[i] : 0);
+            }
+            getCompositeSignalDataArray();            
+        }
+        setNewBehaviour(behaviourObject);                
+    }
+                
     if (deviceTwin.valueIsBool) {
         currDataArray = [];
         for (let i = 0; i < len; i++) {
@@ -354,7 +282,7 @@ export function DeviceTwin(props) {
             currDataArray.push(currData);
         }
     }
-
+    
     const sineInfo = "A sinusoidal wave is a mathematical curve defined in terms of the sine trigonometric function, of which it is the graph.";
     const constantInfo = "A constant wave is a wave that is same everywhere & having the same value of range for different values of the domain.";
     const increasingInfo = "A stricty increasing wave is a wave in which Y-value increases with the increasing value on X-axis.";
@@ -372,232 +300,24 @@ export function DeviceTwin(props) {
                     )} >
                     </Select>
                 </div>
-                <div className="behaviour-prop">
-                    {
-                        behaviour === "Sine" ?
-                            <div className="behaviour-value">
-                                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={mean} onChange={changeMean} />
-                                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
-                                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} />
-                            </div >
-                            : behaviour === "Constant" ?
-                                <div className="behaviour-value">
-                                    <LabeledInput className="labels" type='number' label='Mean' name='mean' value={mean} onChange={changeMean} />
-                                </div>
-                                : behaviour === "Linear" ?
-                                    <div className="behaviour-value">
-                                        <LabeledInput className="labels" type='number' label='Slope' name='slope' value={slope} onChange={changeSlope} />
-                                    </div>
-                                    : behaviour === "Noise" ?
-                                        <div className="behaviour-value">
-                                            <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={noise_magnitude} onChange={changeNoise_magnitude} />
-                                            <LabeledInput className="labels" type='number' label='Deviation' name='noiseSd' value={0.45} disabled={true} />
-                                        </div>
-                                        : behaviour === "Triangular" ?
-                                            <div className="behaviour-value">
-                                                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
-                                                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} />
-                                            </div>
-                                            : behaviour === "Sawtooth" ?
-                                                <div className="behaviour-value">
-                                                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
-                                                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} />
-                                                </div>
-                                                : behaviour === "Square" ?
-                                                    <div className="behaviour-value">
-                                                        <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={amplitude} onChange={changeAmplitude} />
-                                                        <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={wave_period} onChange={changeWave_period} />
-                                                    </div>
-                                                    : null
-                    }
-                    {
-                        behaviour !== "" ?
-                            <div className="preview">
-                                <Line
-                                    data={{
-                                        labels: arr,
-                                        datasets: [
-                                            {
-                                                label: "Component Signal",
-                                                data: ar,
-                                                fill: false,
-                                                borderColor: "rgb(0,139,225)",
-                                                borderWidth: 2,
-                                                pointRadius: 0,
-                                            },
-                                        ],
-                                    }}
-                                    options={{
-                                        maintainAspectRatio: true,
-                                        scales: {
-                                            yAxes: [
-                                                {
-                                                    ticks: {
-                                                        beginAtZero: true,
-                                                    },
-                                                },
-                                            ],
-                                            xAxes: [
-                                                {
-                                                    scaleLabel: {
-                                                        display: true,
-                                                        labelString: 'Time (second)',
-                                                        fontColor: "rgb(0,139,225)"
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        legend: {
-                                            labels: {
-                                                fontSize: 15,
-                                                fontColor: "rgb(0,139,225)",
-                                            },
-                                        },
-                                    }}
-                                />
-                            </div> : null
-                    }
-                </div>
+                <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray}/>
             </div >);
         }
-        else {
-            let arr2 = [];
+        else {            
             if (deviceTwin.signalArray[index] === undefined) {
                 setIndex(0);
             }
-            else {
-                if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Sine") {
-                    const phase = 0;
-                    for (let i = 0; i < len; i++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Mean"]) + Math.sin((i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Wave Period"]) / 1000) + phase) * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]);
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Constant") {
-                    for (let i = 0; i < len; i++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Mean"]);
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Linear") {
-                    for (let i = 0; i < len; i++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Slope"]) * (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000));
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Noise") {
-                    let mean = 0;
-                    let standard_deviation = parseFloat(deviceTwin.noiseSd);
-                    for (let i = 0; i < len; i++) {
-                        let x = (Math.random() - 0.5) * 2;
-                        let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-                        let noise_mag = JSON.parse(deviceTwin.signalArray[index])["Noise Magnitude"] * Math.sign((Math.random() - 0.5) * 2);
-                        let currData = noise * noise_mag;
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Triangular") {
-                    for (let i = 0; i < len; i++) {
-                        let currData = (2 * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Wave Period"]) / 1000)))) / Math.PI;
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Sawtooth") {
-                    for (let i = 0; i < len; i++) {
-                        let currData = 2 * parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]) * ((i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Wave Period"]) / 1000) - Math.floor(1 / 2 + (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Wave Period"]) / 1000)));
-                        arr2.push(currData);
-                    }
-                }
-                else if (JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Square") {
-                    for (let i = 0; i < len; i++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[index])["Amplitude"]) * Math.sign(Math.sin((2 * Math.PI * (i * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[index])["Wave Period"]) / 1000)));
-                        arr2.push(currData);
-                    }
-                }
+            else {            
                 return (<div>
                     <div className="behaviour-list">
                         <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
                     </div>
-                    <div className="behaviour-prop">
-                        {
-                            JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Sine" ?
-                                <div className="behaviour-value">
-                                    <LabeledInput className="labels" type='number' label='Mean' name='mean' value={JSON.parse(deviceTwin.signalArray[index])["Mean"]} disabled={true} />
-                                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={JSON.parse(deviceTwin.signalArray[index])["Amplitude"]} disabled={true} />
-                                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={JSON.parse(deviceTwin.signalArray[index])["Wave Period"]} disabled={true} />
-                                </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Constant" ?
-                                    <div className="behaviour-value">
-                                        <LabeledInput className="labels" type='number' label='Mean' name='mean' value={JSON.parse(deviceTwin.signalArray[index])["Mean"]} disabled={true} />
-                                    </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Linear" ?
-                                        <div className="behaviour-value">
-                                            <LabeledInput className="labels" type='number' label='Slope' name='slope' value={JSON.parse(deviceTwin.signalArray[index])["Slope"]} disabled={true} />
-                                        </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Noise" ?
-                                            <div className="behaviour-value">
-                                                <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={JSON.parse(deviceTwin.signalArray[index])["Noise Magnitude"]} disabled={true} />
-                                                <LabeledInput className="labels" type='number' label='Deviation' name='noiseSd' value={0.45} disabled={true} />
-                                            </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Triangular" ?
-                                                <div className="behaviour-value">
-                                                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={JSON.parse(deviceTwin.signalArray[index])["Amplitude"]} disabled={true} />
-                                                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={JSON.parse(deviceTwin.signalArray[index])["Wave Period"]} disabled={true} />
-                                                </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Sawtooth" ?
-                                                    <div className="behaviour-value">
-                                                        <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={JSON.parse(deviceTwin.signalArray[index])["Amplitude"]} disabled={true} />
-                                                        <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={JSON.parse(deviceTwin.signalArray[index])["Wave Period"]} disabled={true} />
-                                                    </div > : JSON.parse(deviceTwin.signalArray[index])["Behaviour"] === "Square" ?
-                                                        <div className="behaviour-value">
-                                                            <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={JSON.parse(deviceTwin.signalArray[index])["Amplitude"]} disabled={true} />
-                                                            <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={JSON.parse(deviceTwin.signalArray[index])["Wave Period"]} disabled={true} />
-                                                        </div > : null
-                        }
-                        <div className="preview">
-                            <Line
-                                data={{
-                                    labels: arr,
-                                    datasets: [
-                                        {
-                                            label: "Component Signal",
-                                            data: arr2,
-                                            fill: false,
-                                            borderColor: "rgb(0,139,225)",
-                                            borderWidth: 2,
-                                            pointRadius: 0,
-                                        },
-                                    ],
-                                }}
-                                options={{
-                                    maintainAspectRatio: true,
-                                    scales: {
-                                        yAxes: [
-                                            {
-                                                ticks: {
-                                                    beginAtZero: true,
-                                                },
-                                            },
-                                        ],
-                                        xAxes: [
-                                            {
-                                                scaleLabel: {
-                                                    display: true,
-                                                    labelString: 'Seconds',
-                                                    fontColor: "rgb(0,139,225)"
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    legend: {
-                                        labels: {
-                                            fontSize: 15,
-                                            fontColor: "rgb(0,139,225)",
-                                        },
-                                    },
-                                }}
-                            />
-                        </div>
-                    </div >
+                    <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray}/>
                 </div>);
             }
         }
-    };
+    };    
+     
 
     return (
         <>
@@ -622,54 +342,13 @@ export function DeviceTwin(props) {
                             </div>
                             <div className="behaviour-area">
                                 <InputGroup label='No. of datapoints' displayStyle="inline">
-                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} />
-                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} />
-                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} />
+                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={len === 10}/>
+                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={len === 50}/>
+                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={len === 100}/>
                                 </InputGroup>
-                                <div className="main-preview">
-                                    <Line
-                                        data={{
-                                            labels: arr,
-                                            datasets: [
-                                                {
-                                                    label: "Composite Signal",
-                                                    data: currDataArray,
-                                                    fill: false,
-                                                    borderColor: "rgb(0,139,225)",
-                                                    borderWidth: 2,
-                                                    pointRadius: 0,
-                                                },
-                                            ],
-                                        }}
-                                        options={{
-                                            maintainAspectRatio: true,
-                                            scales: {
-                                                yAxes: [
-                                                    {
-                                                        ticks: {
-                                                            beginAtZero: true,
-                                                        },
-                                                    },
-                                                ],
-                                                xAxes: [
-                                                    {
-                                                        scaleLabel: {
-                                                            display: true,
-                                                            labelString: 'Seconds',
-                                                            fontColor: "rgb(0,139,225)"
-                                                        }
-                                                    }
-                                                ]
-                                            },
-                                            legend: {
-                                                labels: {
-                                                    fontSize: 15,
-                                                    fontColor: "rgb(0,139,225)",
-                                                },
-                                            },
-                                        }}
-                                    />
-                                </div>
+
+                                <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal"/>
+                                
                                 {deviceTwin.signalArray && !deviceTwin.valueIsBool ?
                                     <HorizontalTabs
                                         style={{ overflow: "scroll", width: "400px" }}
