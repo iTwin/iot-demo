@@ -80,7 +80,7 @@ export function DeviceTwin(props) {
             deviceSignalArray.pop();
         }
                 
-            if (k==1 && newBehaviour==="") {
+            if (k===1 && newBehaviour==="") {
                 toaster.negative(`Required values are not provided!`);
             }else if(newBehaviour!=="")
             {
@@ -193,6 +193,7 @@ export function DeviceTwin(props) {
         }
         getCompositeSignalDataArray();
         setCompositeSignalDataArrayChanged(!compositeSignalDataArrayChanged);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[deviceTwin,len]);
 
     const getCompositeSignalDataArray=()=>{

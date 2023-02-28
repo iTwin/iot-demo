@@ -1,22 +1,22 @@
-import React, {useState } from "react";
+import React, { useState } from "react";
 import { ChartComponent } from "./ChartComponent";
 import { LabeledInput } from "@itwin/itwinui-react";
-import {currDataArray} from "./DeviceTwin";
+import { currDataArray } from "./DeviceTwin";
 
-export function SineComponent(props){
+export function SineComponent(props) {
     const [mean, setMean] = useState("");
     const [amplitude, setAmplitude] = useState("");
     const [wave_period, setWave_period] = useState("");
     const changeMean = (event) => {
-        setMean(event.target.value);               
+        setMean(event.target.value);
     }
 
     const changeAmplitude = (event) => {
-        setAmplitude(event.target.value);       
+        setAmplitude(event.target.value);
     }
 
     const changeWave_period = (event) => {
-        setWave_period(event.target.value);        
+        setWave_period(event.target.value);
     }
     const ar = [];
     const arr = [];
@@ -24,42 +24,40 @@ export function SineComponent(props){
     for (let i = 0; i < parseFloat(props.arrayLength); i++) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
-    
+
     const phase = 0;
-    const deviceMean=props.signalArray!==""? JSON.parse(props.signalArray)["Mean"] :mean;
-    const deviceAmplitude= props.signalArray!==""? JSON.parse(props.signalArray)["Amplitude"] :amplitude;
-    const deviceWavePeriod=props.signalArray!==""? JSON.parse(props.signalArray)["Wave Period"] :wave_period;
-    if(deviceMean!==""&& deviceAmplitude!=="" && deviceWavePeriod!==""){
+    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"] : mean;
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    if (deviceMean !== "" && deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceMean) + Math.sin((i * (parseFloat(props.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(deviceWavePeriod) / 1000) + phase) * parseFloat(deviceAmplitude);
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const sineObj = `{"Behaviour":"Sine","Mean":${deviceMean},"Amplitude":${deviceAmplitude},"Wave Period":${deviceWavePeriod},"Phase":"0"}`;
-            props.setCurrDataArray(ar,sineObj);
+            props.setCurrDataArray(ar, sineObj);
         }
-        
-        console.log("After Modification "+currDataArray);
+
+        console.log("After Modification " + currDataArray);
     }
-    
-  
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
             </div >
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
-        
+
     );
 }
 
-export function ConstantComponent(props){
+export function ConstantComponent(props) {
     const [mean, setMean] = useState("");
     const changeMean = (event) => {
-        setMean(event.target.value);       
+        setMean(event.target.value);
     }
     const ar = [];
     const arr = [];
@@ -67,29 +65,29 @@ export function ConstantComponent(props){
     for (let i = 0; i < parseFloat(props.arrayLength); i++) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
-    const deviceMean=props.signalArray!==""? JSON.parse(props.signalArray)["Mean"] :mean;
-    if(deviceMean!==""){
+    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"] : mean;
+    if (deviceMean !== "") {
         for (let i = 0; i < props.arrayLength; i++) {
             let currData = parseFloat(deviceMean);
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const constObj = `{"Behaviour":"Constant","Mean":${deviceMean}}`;
-            props.setCurrDataArray(ar,constObj);
+            props.setCurrDataArray(ar, constObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray!==""?true:false} />
+                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
-        
+
     );
 }
 
-export function LinearComponent(props){
+export function LinearComponent(props) {
     const [slope, setSlope] = useState("");
     const changeSlope = (event) => {
         setSlope(event.target.value);
@@ -101,29 +99,29 @@ export function LinearComponent(props){
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceSlope=props.signalArray!==""? JSON.parse(props.signalArray)["Slope"] :slope;
-    if(deviceSlope!==""){
+    const deviceSlope = props.signalArray !== "" ? JSON.parse(props.signalArray)["Slope"] : slope;
+    if (deviceSlope !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceSlope) * ((i * (parseFloat(props.telemetrySendInterval) / 1000)));
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const linearObj = `{"Behaviour":"Linear","Slope":${deviceSlope}}`;
-            props.setCurrDataArray(ar,linearObj);
+            props.setCurrDataArray(ar, linearObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Slope' name='slope' value={deviceSlope} onChange={changeSlope} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Slope' name='slope' value={deviceSlope} onChange={changeSlope} disabled={props.signalArray !== "" ? true : false} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
-        
+
     );
 }
 
-export function NoiseComponent(props){
+export function NoiseComponent(props) {
     const [noise_magnitude, setNoise_magnitude] = useState("");
     const changeNoise_magnitude = (event) => {
         setNoise_magnitude(event.target.value);
@@ -136,8 +134,8 @@ export function NoiseComponent(props){
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceNoiseMagnitude=props.signalArray!==""? JSON.parse(props.signalArray)["Noise Magnitude"]  :noise_magnitude;
-    if(deviceNoiseMagnitude!==""){
+    const deviceNoiseMagnitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Noise Magnitude"] : noise_magnitude;
+    if (deviceNoiseMagnitude !== "") {
         let mean = 0;
         let standard_deviation = 0.45;
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
@@ -147,24 +145,24 @@ export function NoiseComponent(props){
             let currData = noise * noise_mag;
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const noiseObj = `{"Behaviour":"Noise","Noise Magnitude":${deviceNoiseMagnitude},"Noise Standard-deviation":0.45}`;
-            props.setCurrDataArray(ar,noiseObj);
+            props.setCurrDataArray(ar, noiseObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={deviceNoiseMagnitude} onChange={changeNoise_magnitude} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={deviceNoiseMagnitude} onChange={changeNoise_magnitude} disabled={props.signalArray !== "" ? true : false} />
                 <LabeledInput className="labels" type='number' label='Deviation' name='noiseSd' value={0.45} disabled={true} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
     );
 
 }
 
-export function TriangularComponent(props){
+export function TriangularComponent(props) {
     const [amplitude, setAmplitude] = useState("");
     const [wave_period, setWave_period] = useState("");
 
@@ -183,32 +181,32 @@ export function TriangularComponent(props){
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude= props.signalArray!==""? JSON.parse(props.signalArray)["Amplitude"] :amplitude;
-    const deviceWavePeriod=props.signalArray!==""? JSON.parse(props.signalArray)["Wave Period"] :wave_period;
-    if(deviceAmplitude!=="" && deviceWavePeriod!==""){        
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = (2 * parseFloat(deviceAmplitude) * Math.asin(Math.sin((2 * Math.PI * (i * (parseFloat(props.telemetrySendInterval) / 1000))) / (parseFloat(deviceWavePeriod) / 1000)))) / Math.PI;
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const triangularObj = `{"Behaviour":"Triangular","Amplitude":${deviceAmplitude},"Wave Period":${deviceWavePeriod}}`;
-            props.setCurrDataArray(ar,triangularObj);
+            props.setCurrDataArray(ar, triangularObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
     );
 
 }
 
 
-export function SawToothComponent(props){
+export function SawToothComponent(props) {
     const [amplitude, setAmplitude] = useState("");
     const [wave_period, setWave_period] = useState("");
 
@@ -227,31 +225,31 @@ export function SawToothComponent(props){
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude= props.signalArray!==""? JSON.parse(props.signalArray)["Amplitude"] :amplitude;
-    const deviceWavePeriod=props.signalArray!==""? JSON.parse(props.signalArray)["Wave Period"] :wave_period;
-    if(deviceAmplitude!=="" && deviceWavePeriod!==""){        
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = 2 * parseFloat(deviceAmplitude) * ((i * (parseFloat(props.telemetrySendInterval) / 1000)) / (parseFloat(deviceWavePeriod) / 1000) - Math.floor(1 / 2 + (i * (parseFloat(props.telemetrySendInterval) / 1000)) / (parseFloat(deviceWavePeriod) / 1000)));
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const sawtoothObj = `{"Behaviour":"Sawtooth","Amplitude":${deviceAmplitude},"Wave Period":${deviceWavePeriod}}`;
-            props.setCurrDataArray(ar,sawtoothObj);
+            props.setCurrDataArray(ar, sawtoothObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
     );
 
 }
 
-export function SquareComponent(props){
+export function SquareComponent(props) {
     const [amplitude, setAmplitude] = useState("");
     const [wave_period, setWave_period] = useState("");
 
@@ -270,51 +268,51 @@ export function SquareComponent(props){
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude= props.signalArray!==""? JSON.parse(props.signalArray)["Amplitude"] :amplitude;
-    const deviceWavePeriod=props.signalArray!==""? JSON.parse(props.signalArray)["Wave Period"] :wave_period;
-    if(deviceAmplitude!=="" && deviceWavePeriod!==""){        
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceAmplitude) * Math.sign(Math.sin((2 * Math.PI * (i * (parseFloat(props.telemetrySendInterval) / 1000))) / (parseFloat(deviceWavePeriod) / 1000)));
             ar.push(currData);
         }
-        if(props.signalArray===""){
+        if (props.signalArray === "") {
             const squareObj = `{"Behaviour":"Square","Amplitude":${deviceAmplitude},"Wave Period":${deviceWavePeriod}}`;
-            props.setCurrDataArray(ar,squareObj);
+            props.setCurrDataArray(ar, squareObj);
         }
     }
-    return(
+    return (
         <>
             <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray!==""?true:false}/>
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray!==""?true:false}/>
+                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
             </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" /> 
+            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
         </>
     );
 
 }
 
-export function BehaviourComponent(props) {    
+export function BehaviourComponent(props) {
     // const signalArray=`{"Behaviour":"Sine","Mean":100,"Amplitude":10, "Wave Period":20000}`    
     return (
         <div className="behaviour-prop">
-            {   
+            {
                 props.behaviour === "Sine" ?
-                    <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Constant" ?
-                    <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Linear" ?
-                    <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Noise" ?
-                    <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Triangular" ?
-                    <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Sawtooth" ?
-                    <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : props.behaviour === "Square" ?
-                    <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray}/>
+                    <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
                 : null
-            }            
+            }
         </div>
 
     );
