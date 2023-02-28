@@ -2,7 +2,7 @@
  * Copyright © Bentley Systems, Incorporated. All rights reserved.
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
-const { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator } = require('../signalGenerator.js');
+const { SineGenerator, ConstantGenerator, IncreasingGenerator, NoiseGenerator, TriangularGenerator, SawtoothGenerator, SquareGenerator, RandomGenerator, BooleanGenerator } = require('./signalGenerator.js');
 
 var AWS = require('aws-sdk');
 let interval = [];
