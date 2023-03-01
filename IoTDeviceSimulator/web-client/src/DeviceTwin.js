@@ -100,6 +100,7 @@ export function DeviceTwin(props) {
 
     const updateDeviceTwin = useCallback(async (event) => {
         event.preventDefault();
+        setNewBehaviour("");
         let updatedDevice = false;
         if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
             deviceTwin.signalArray.pop();
