@@ -146,7 +146,8 @@ export function DeviceTwin(props) {
         }
     }, [deviceTwin, props, url]);
 
-    const onClose = useCallback(() => {               
+    const onClose = useCallback(() => {  
+        setNewBehaviour("");             
         props.handleClose();
     }, [props]);
 
@@ -293,7 +294,7 @@ export function DeviceTwin(props) {
                     )} >
                     </Select>
                 </div>
-                <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray}/>
+                <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
             </div >);
         }
         else {            
@@ -305,7 +306,7 @@ export function DeviceTwin(props) {
                     <div className="behaviour-list">
                         <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
                     </div>
-                    <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray}/>
+                    <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
                 </div>);
             }
         }

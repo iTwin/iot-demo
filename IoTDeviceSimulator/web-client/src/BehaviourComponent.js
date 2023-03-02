@@ -26,9 +26,9 @@ export function SineComponent(props) {
     }
 
     const phase = 0;
-    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"] : mean;
-    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
-    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"] : mean !==""? mean: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Mean"]: mean;
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude !=="" ? amplitude: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Amplitude"]: amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period !=="" ? wave_period: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Wave Period"]: wave_period;
     if (deviceMean !== "" && deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceMean) + Math.sin((i * (parseFloat(props.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(deviceWavePeriod) / 1000) + phase) * parseFloat(deviceAmplitude);
@@ -65,7 +65,7 @@ export function ConstantComponent(props) {
     for (let i = 0; i < parseFloat(props.arrayLength); i++) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
-    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"] : mean;
+    const deviceMean = props.signalArray !== "" ? JSON.parse(props.signalArray)["Mean"]: mean !==""? mean: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Mean"] : mean;
     if (deviceMean !== "") {
         for (let i = 0; i < props.arrayLength; i++) {
             let currData = parseFloat(deviceMean);
@@ -99,7 +99,7 @@ export function LinearComponent(props) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceSlope = props.signalArray !== "" ? JSON.parse(props.signalArray)["Slope"] : slope;
+    const deviceSlope = props.signalArray !== "" ? JSON.parse(props.signalArray)["Slope"]: slope !==""? slope: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Slope"] : slope;
     if (deviceSlope !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceSlope) * ((i * (parseFloat(props.telemetrySendInterval) / 1000)));
@@ -134,7 +134,7 @@ export function NoiseComponent(props) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceNoiseMagnitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Noise Magnitude"] : noise_magnitude;
+    const deviceNoiseMagnitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Noise Magnitude"]: noise_magnitude !==""? noise_magnitude: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Noise Magnitude"] : noise_magnitude;
     if (deviceNoiseMagnitude !== "") {
         let mean = 0;
         let standard_deviation = 0.45;
@@ -181,8 +181,8 @@ export function TriangularComponent(props) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
-    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude !==""? amplitude: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Amplitude"]: amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period !==""? wave_period: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Wave Period"]: wave_period;
     if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = (2 * parseFloat(deviceAmplitude) * Math.asin(Math.sin((2 * Math.PI * (i * (parseFloat(props.telemetrySendInterval) / 1000))) / (parseFloat(deviceWavePeriod) / 1000)))) / Math.PI;
@@ -225,8 +225,8 @@ export function SawToothComponent(props) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
-    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude !==""? amplitude: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Amplitude"]: amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period !==""? wave_period: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Wave Period"]: wave_period;
     if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = 2 * parseFloat(deviceAmplitude) * ((i * (parseFloat(props.telemetrySendInterval) / 1000)) / (parseFloat(deviceWavePeriod) / 1000) - Math.floor(1 / 2 + (i * (parseFloat(props.telemetrySendInterval) / 1000)) / (parseFloat(deviceWavePeriod) / 1000)));
@@ -268,8 +268,8 @@ export function SquareComponent(props) {
         arr.push(i * (parseFloat(props.telemetrySendInterval)) / 1000);
     }
 
-    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"] : amplitude;
-    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period;
+    const deviceAmplitude = props.signalArray !== "" ? JSON.parse(props.signalArray)["Amplitude"]: amplitude !==""? amplitude: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Amplitude"] : amplitude;
+    const deviceWavePeriod = props.signalArray !== "" ? JSON.parse(props.signalArray)["Wave Period"] : wave_period !==""? wave_period: props.newBehaviour !=="" ? JSON.parse(props.newBehaviour)["Wave Period"]: wave_period;
     if (deviceAmplitude !== "" && deviceWavePeriod !== "") {
         for (let i = 0; i < parseFloat(props.arrayLength); i++) {
             let currData = parseFloat(deviceAmplitude) * Math.sign(Math.sin((2 * Math.PI * (i * (parseFloat(props.telemetrySendInterval) / 1000))) / (parseFloat(deviceWavePeriod) / 1000)));
@@ -298,19 +298,19 @@ export function BehaviourComponent(props) {
         <div className="behaviour-prop">
             {
                 props.behaviour === "Sine" ?
-                    <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour}/>
                 : props.behaviour === "Constant" ?
-                    <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : props.behaviour === "Linear" ?
-                    <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : props.behaviour === "Noise" ?
-                    <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : props.behaviour === "Triangular" ?
-                    <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : props.behaviour === "Sawtooth" ?
-                    <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : props.behaviour === "Square" ?
-                    <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} />
+                    <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
                 : null
             }
         </div>
