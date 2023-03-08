@@ -202,16 +202,16 @@ function App() {
       setDeviceTwins([...deviceTwins, device]);
       const newDevice = {
         deviceId: device.deviceId,
-        deviceName: device.properties.desired.deviceName,
-        phenomenon: device.properties.desired.phenomenon,
-        telemetrySendInterval: device.properties.desired.telemetrySendInterval,
-        unit: device.properties.desired.unit,
-        valueIsBool: device.properties.desired.valueIsBool,
-        noiseSd: device.properties.desired.noiseSd,
-        min: device.properties.desired.min,
-        max: device.properties.desired.max,
-        isRunning: device.properties.desired.isRunning,
-        signalArray: device.properties.desired.signalArray,
+        deviceName: device.properties?.desired?.deviceName,
+        phenomenon: device.properties?.desired?.phenomenon,
+        telemetrySendInterval: device.properties?.desired?.telemetrySendInterval,
+        unit: device.properties?.desired?.unit,
+        valueIsBool: device.properties?.desired?.valueIsBool,
+        noiseSd: device.properties?.desired?.noiseSd,
+        min: device.properties?.desired?.min,
+        max: device.properties?.desired?.max,
+        isRunning: device.properties?.desired?.isRunning,
+        signalArray: device.properties?.desired?.signalArray,
       }
       setData([...data, newDevice]);
     }
