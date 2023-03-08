@@ -1,6 +1,7 @@
 import { Line } from 'react-chartjs-2';
 
 export function ChartComponent(props) {  
+    console.log("Inside chart Component");
     return (
         <div className="preview">
             <Line
