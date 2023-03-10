@@ -52,30 +52,30 @@ button {
 }
 
 .components-signin {
-	font-family: Arial;
-	width: 275px;
-	height: 300px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	box-shadow: 2px 4px 8px 2px rgba(0, 0, 0, 0.25);
+  font-family: Arial;
+  width: 275px;
+  height: 300px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 2px 4px 8px 2px rgba(0, 0, 0, 0.25);
 }
 
 .components-signin-content {
-	flex-direction: column;
-	height: 100%;
-	box-sizing: border-box;
-	position: relative;
-	padding: 1.75em;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  position: relative;
+  padding: 1.75em;
 }
 
 .icon {
-	top: 0;
-	left: 50%;
-	font-size: 5em;
-	background-color: transparent;
-	transform: translate(-50%, -50%);
+  top: 0;
+  left: 50%;
+  font-size: 5em;
+  background-color: transparent;
+  transform: translate(-50%, -50%);
 }
 
 a {
@@ -86,11 +86,11 @@ a {
 }
 
 a:hover {
-	color: #6e40c7;
+  color: #6e40c7;
 }
 
 a:active {
-	color: #3d08a1;
+  color: #3d08a1;
 }
 
 .tableStyle {
@@ -122,35 +122,21 @@ header button {
   margin: 20%;
 }
 
-.behaviour-prop {
+.behaviour-func {
   display: flex;
-  justify-content: center;
-}
-
-.button-config {
-  width: 20px;
-  height: 20px;
-  margin: auto;
-  margin-left: 9px;
-}
-
-.button-config:hover {
-  cursor: pointer;
+  flex-direction: column;
+  width: 400px;
+  align-items: center;
 }
 
 .buttons {
   margin-left: 0px !important;
+  margin-right: 0px !important;
+  width: 760px;
 }
 
 .iui-backdrop {
   height: 1860.78px !important;
-}
-
-.preview {
-  display: block !important;
-  height: 174px !important;
-  width: 348px !important;
-  margin: 0px 0px 0px 0px !important;
 }
 
 .iui-toggle-switch-wrapper {
@@ -158,11 +144,139 @@ header button {
 }
 
 .iui-dialog-default {
-	max-width: 430px !important;
-	min-width: 430px !important;
+  max-width: 430px !important;
+  min-width: 430px !important;
 }
 
 .table-top {
-	display: flex;
-	flex-direction: row;
+  display: flex;
+  flex-direction: row;
+}
+
+.mainBox {
+  display: flex;
+  justify-content: center;
+}
+
+.iui-modal>.iui-modal-dialog {
+  max-width: 80% !important;
+  width: MAX-CONTENT !important;
+}
+
+.behaviour-prop {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+}
+
+.iui-tab {
+  margin: 0px !important;
+}
+
+.behaviour-area {
+  margin-left: 30px;
+  width: 400px;
+}
+
+.tab-label {
+  display: flex;
+  justify-content: center;
+  margin: 0px;
+  padding: 0px;
+}
+
+.cancel-button {
+  width: 14px;
+  height: 16px;
+  margin: auto;
+  padding: 2px;
+}
+
+.cancel-button:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.iui-tabs.iui-borderless .iui-tab {
+  padding: 0 10px !important;
+  background-color: transparent !important;
+}
+
+.add-button {
+  width: 16px;
+  height: 16px;
+  margin-top: 12px;
+  margin-left: 2px;
+}
+
+.add-button:hover {
+  cursor: pointer;
+}
+
+.behaviour-area>div:nth-child(n+2) {
+  border: solid rgba(0, 0, 0, 0.5) 0.1px;
+}
+
+.basic-prop {
+  width: 330px;
+}
+
+.behaviour-value {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.behaviour-value>* {
+  margin-right: 5px;
+}
+
+.behaviour-value>:last-child {
+  margin-right: 0px;
+}
+
+.iui-modal>.iui-modal-dialog {
+  max-height: 100%;
+}
+
+.basic {
+  margin-bottom: 15px;
+}
+
+.iui-modal>.iui-modal-dialog {
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+}
+
+.iui-tabs~.iui-tabs-content {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+
+.behaviour-list {
+  display: flex;
+  justify-content: center;
+  width: 400px;
+  margin-top: 2px;
+}
+
+.labels {
+  width: 300px;
+}
+
+.iui-tabs-wrapper.iui-horizontal {
+  height: 355.8px;
+}
+
+.iui-tabs.iui-default~.iui-tabs-content {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.option {
+  width: 274px;
+  height: 28px;
+  margin: 5px 0px;
 }

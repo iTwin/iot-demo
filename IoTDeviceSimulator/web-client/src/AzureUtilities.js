@@ -3,14 +3,14 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-export const getHeaders=()=>{
-  return new Headers({      
-    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""      
+export const getHeaders = () => {
+  return new Headers({
+    "x-functions-key": process.env.REACT_APP_AZURE_FUNCTION_APP_ADMIN_KEY ?? ""
   })
 }
 
 export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
-  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "",{
+  let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "", {
     method: "get",
     headers: getHeaders(),
   }).catch(error => console.log("Request failed: " + error));
@@ -22,21 +22,18 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
         rows.push({
           deviceId: telemetry.moduleId,
           deviceInterfaceId:telemetry.deviceId,
-          deviceName: telemetry.properties.desired.name,
-          amplitude: telemetry.properties.desired.amplitude,
-          mean: telemetry.properties.desired.mean,
+          deviceName: telemetry.properties.desired.name,          
           phenomenon: telemetry.properties.desired.phenomenon,
           telemetrySendInterval: telemetry.properties.desired.telemetrySendInterval,
           unit: telemetry.properties.desired.unit,
-          valueIsBool: telemetry.properties.desired.valueIsBool,
-          behaviour: telemetry.properties.desired.behaviour,
-          noise_magnitude: telemetry.properties.desired.noise_magnitude,
+          valueIsBool: telemetry.properties.desired.valueIsBool,          
           noiseSd: telemetry.properties.desired.noiseSd,
           sine_period: telemetry.properties.desired.sine_period,
           min: telemetry.properties.desired.min,
           max: telemetry.properties.desired.max,
           isRunning: telemetry.properties.desired.isRunning,
-          primaryKey: telemetry.authentication.symmetricKey.primaryKey
+          primaryKey: telemetry.authentication.symmetricKey.primaryKey,
+          signalArray:telemetry.properties.desired.signalArray
         })
       })
       
@@ -63,7 +60,7 @@ export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionS
   let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/c2d-simulator`, {
     method: "POST",
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {
@@ -77,7 +74,7 @@ export const editDeviceTwins = async (deviceArray, connectionStringId) => {
   const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
     method: 'POST',
     headers: getHeaders(),
-    keepalive:true,
+    keepalive: true,
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {

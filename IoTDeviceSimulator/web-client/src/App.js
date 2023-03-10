@@ -73,7 +73,6 @@ function App() {
   }
 
   const startSimulator = async () => {
-    // startSimulator
     setToggle(true);
     const rows = await getDevices();
     await removeDevices(rows, selectedDevices);
@@ -181,20 +180,16 @@ function App() {
         for (const twin of deviceTwins) {
           if (twin.deviceId === device.deviceId) {
             twin.deviceName = device.deviceName;
-            twin.deviceInterfaceId=device.deviceInterfaceId;
-            twin.mean = device.mean;
-            twin.amplitude = device.amplitude;
+            twin.deviceInterfaceId=device.deviceInterfaceId;            
             twin.phenomenon = device.phenomenon;
             twin.unit = device.unit;
             twin.valueIsBool = device.valueIsBool;
-            twin.telemetrySendInterval = device.telemetrySendInterval;
-            twin.behaviour = device.behaviour;
-            twin.noise_magnitude = device.noise_magnitude;
-            twin.noiseSd = device.noiseSd;
-            twin.sine_period = device.sine_period;
+            twin.telemetrySendInterval = device.telemetrySendInterval;                        
+            twin.noiseSd = device.noiseSd;            
             twin.min = device.min;
             twin.max = device.max;
             twin.isRunning = device.isRunning
+            twin.signalArray= device.signalArray
             break;
           }
         }
@@ -208,20 +203,16 @@ function App() {
       const newDevice = {
         deviceId: device.deviceId,
         deviceInterfaceId:device.deviceInterfaceId,
-        deviceName: device.deviceName,
-        amplitude: device.amplitude,
-        mean: device.mean,
+        deviceName: device.deviceName,        
         phenomenon: device.phenomenon,
         telemetrySendInterval: device.telemetrySendInterval,
         unit: device.unit,
-        valueIsBool: device.valueIsBool,
-        behaviour: device.behaviour,
-        noise_magnitude: device.noise_magnitude,
-        noiseSd: device.noiseSd,
-        sine_period: device.sine_period,
+        valueIsBool: device.valueIsBool,        
+        noiseSd: device.noiseSd,        
         min: device.min,
         max: device.max,
         isRunning: device.isRunning,
+        signalArray: device.signalArray
       }
       setData([...data, newDevice]);
     }
@@ -364,21 +355,17 @@ function App() {
             deviceId: deviceTwin.deviceId,
             deviceInterfaceId:deviceTwin.deviceInterfaceId,
             deviceName: deviceTwin.deviceName,
-            deviceAction: "UPDATE",
-            amplitude: deviceTwin.amplitude,
-            mean: deviceTwin.mean,
+            deviceAction: "UPDATE",            
             phenomenon: deviceTwin.phenomenon,
             telemetrySendInterval: deviceTwin.telemetrySendInterval,
             unit: deviceTwin.unit,
-            valueIsBool: deviceTwin.valueIsBool,
-            behaviour: deviceTwin.behaviour,
-            noise_magnitude: deviceTwin.noise_magnitude,
-            noiseSd: deviceTwin.noiseSd,
-            sine_period: deviceTwin.sine_period,
+            valueIsBool: deviceTwin.valueIsBool,            
+            noiseSd: deviceTwin.noiseSd,            
             isRunning: deviceTwin.isRunning,
             min: deviceTwin.min,
             max: deviceTwin.max,
-            primaryKey: deviceTwin.primaryKey
+            primaryKey: deviceTwin.primaryKey,
+            signalArray: deviceTwin.signalArray
           });
         } else {
           selectedDeviceIds.push(row)
@@ -422,18 +409,6 @@ function App() {
             Filter: tableFilters.TextFilter(),
           },
           {
-            id: "mean",
-            Header: "Mean",
-            minWidth: "20px",
-            accessor: "mean",
-          },
-          {
-            id: "amplitude",
-            Header: "Amplitude",
-            minWidth: "20px",
-            accessor: "amplitude",
-          },
-          {
             id: "phenomenon",
             Header: "Phenomenon",
             minWidth: "240px",
@@ -451,12 +426,6 @@ function App() {
             Header: "Period (ms)",
             minWidth: "30px",
             accessor: "telemetrySendInterval",
-          },
-          {
-            id: "behaviour",
-            Header: "Behaviour",
-            minWidth: "30px",
-            accessor: "behaviour",
           },
           {
             id: "action",
