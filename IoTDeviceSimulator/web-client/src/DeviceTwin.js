@@ -279,7 +279,7 @@ export function DeviceTwin(props) {
     
     const sineInfo = "A sinusoidal wave is a mathematical curve defined in terms of the sine trigonometric function, of which it is the graph.";
     const constantInfo = "A constant wave is a wave that is same everywhere & having the same value of range for different values of the domain.";
-    const increasingInfo = "A stricty increasing wave is a wave in which Y-value increases with the increasing value on X-axis.";
+    const increasingInfo = "A strictly increasing wave is a wave in which Y-value increases with the increasing value on X-axis.";
     const noiseInfo = "A noise wave is an unwanted random disturbance of a signal.";
     const triangularInfo = "A triangular wave or triangle wave is a non-sinusoidal waveform named for its triangular shape.";
     const sawtoothInfo = "The sawtooth wave is a kind of non-sinusoidal waveform named for its resemblance to the teeth of a plain-toothed saw with a zero rake angle.";
@@ -288,14 +288,14 @@ export function DeviceTwin(props) {
     const getContent = () => {
         if (deviceTwin.signalArray[index] === "") {
             return (<div className="behaviour-func">
-                <div className="behaviour-list">
-                    <Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "300px" }} itemRenderer={(option) => (
-                        < MenuItem><Tooltip placement="right" content={option.value === 'Sine' ? sineInfo : option.value === 'Constant' ? constantInfo : option.value === 'Linear' ? increasingInfo : option.value === 'Noise' ? noiseInfo : option.value === 'Triangular' ? triangularInfo : option.value === 'Sawtooth' ? sawtoothInfo : squareInfo}><div className="option">{option.label}</div></Tooltip></MenuItem>
-                    )} >
-                    </Select>
-                </div>
-                <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
-            </div >);
+                        <div className="behaviour-list">
+                            <Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "300px" }} itemRenderer={(option) => (
+                                < MenuItem><Tooltip placement="right" content={option.value === 'Sine' ? sineInfo : option.value === 'Constant' ? constantInfo : option.value === 'Linear' ? increasingInfo : option.value === 'Noise' ? noiseInfo : option.value === 'Triangular' ? triangularInfo : option.value === 'Sawtooth' ? sawtoothInfo : squareInfo}><div className="option">{option.label}</div></Tooltip></MenuItem>
+                            )} >
+                            </Select>
+                        </div>
+                        <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour} isAdmin={props.isAdmin}/>
+                    </div >);
         }
         else {            
             if (deviceTwin.signalArray[index] === undefined) {
@@ -303,16 +303,15 @@ export function DeviceTwin(props) {
             }
             else {            
                 return (<div>
-                    <div className="behaviour-list">
-                        <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
-                    </div>
-                    <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
-                </div>);
+                            <div className="behaviour-list">
+                                <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
+                            </div>
+                            <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour} isAdmin={props.isAdmin}/>
+                        </div>);
             }
         }
-    };    
-     
-
+    };   
+    
     return (
         <>
             <Modal
@@ -336,13 +335,13 @@ export function DeviceTwin(props) {
                             </div>
                             <div className="behaviour-area">
                                 <InputGroup label='No. of datapoints' displayStyle="inline">
-                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={parseFloat(len) === 10?true:false}/>
-                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={parseFloat(len) === 50?true:false}/>
-                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={parseFloat(len) === 100?true:false}/>
+                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={parseFloat(len) === 10 ? true : false} />
+                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={parseFloat(len) === 50 ? true : false} />
+                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={parseFloat(len) === 100 ? true : false} />
                                 </InputGroup>
 
-                                <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal"/>
-                                
+                                <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
+
                                 {deviceTwin.signalArray && !deviceTwin.valueIsBool ?
                                     <HorizontalTabs
                                         style={{ overflow: "scroll", width: "400px" }}
@@ -366,75 +365,60 @@ export function DeviceTwin(props) {
                         {deviceTwin.deviceAction === DeviceAction.ADD ?
                             <Button className="buttons" styleType="high-visibility" onClick={addDevice}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateDeviceTwin}  > Update </Button>}
                     </div>
-                    : <table>
-                        <tr>
-                            <td className="tableLabelStyle"><Label>Device Id</Label></td>
-                            <td className="tableStyle"><Label>{deviceTwin.deviceId}</Label></td>
-                        </tr>
-                        <tr>
-                            <td className="tableLabelStyle"><Label>Device Name</Label></td>
-                            <td className="tableStyle"><Label>{deviceTwin.deviceName}</Label></td>
-                        </tr>
-                        <tr>
-                            <td className="tableLabelStyle"><Label>Phenomenon</Label></td>
-                            <td className="tableStyle"><Label>{deviceTwin.phenomenon}</Label></td>
-                        </tr>
-                        {deviceTwin.unit ?
+                    :
+                    <div style={{width:"500px"}}>
+                        <table>
                             <tr>
-                                <td className="tableLabelStyle"><Label>Unit</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.unit}</Label></td>
-                            </tr> : <></>}
-                        {deviceTwin.valueIsBool ?
+                                <td className="titleStyle" colSpan="100%"><Label>Properties</Label></td>
+                            </tr>
                             <tr>
-                                <td className="tableLabelStyle"><Label>Is value bool</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.valueIsBool.toString()}</Label></td>
-                            </tr> : <></>}
-                        {deviceTwin.behaviour ?
-                            <>
+                                <td className="tableLabelStyle"><Label>Device Id</Label></td>
+                                <td className="tableStyle"><Label>{deviceTwin.deviceId}</Label></td>
+                            </tr>
+                            <tr>
+                                <td className="tableLabelStyle"><Label>Device Name</Label></td>
+                                <td className="tableStyle"><Label>{deviceTwin.deviceName}</Label></td>
+                            </tr>
+                            <tr>
+                                <td className="tableLabelStyle"><Label>Phenomenon</Label></td>
+                                <td className="tableStyle"><Label>{deviceTwin.phenomenon}</Label></td>
+                            </tr>
+                            {deviceTwin.unit ?
                                 <tr>
-                                    <td className="tableLabelStyle"><Label>Behaviour</Label></td>
-                                    <td className="tableStyle"><Label>{deviceTwin.behaviour}</Label></td>
-                                </tr>
-                                {deviceTwin.behaviour === "Sine" ?
-                                    <>
-                                        <tr>
-                                            <td className="tableLabelStyle"><Label>Mean</Label></td>
-                                            <td className="tableStyle"><Label>{deviceTwin.mean}</Label></td>
-                                        </tr>
-                                        <tr>
-                                            <td className="tableLabelStyle"><Label>Amplitude</Label></td>
-                                            <td className="tableStyle"><Label>{deviceTwin.amplitude}</Label></td>
-                                        </tr>
-                                        <tr>
-                                            <td className="tableLabelStyle"><Label>Wave Period(ms)</Label></td>
-                                            <td className="tableStyle"><Label>{deviceTwin.wave_period}</Label></td>
-                                        </tr>
-                                    </> : deviceTwin.behaviour === "Constant" ?
-                                        <>
-                                            <tr>
-                                                <td className="tableLabelStyle"><Label>Mean</Label></td>
-                                                <td className="tableStyle"><Label>{deviceTwin.mean}</Label></td>
-                                            </tr>
-                                        </> :
-                                        <>
-                                            <tr>
-                                                <td className="tableLabelStyle"><Label>Slope</Label></td>
-                                                <td className="tableStyle"><Label>{deviceTwin.slope}</Label></td>
-                                            </tr>
-                                        </>
-                                }
+                                    <td className="tableLabelStyle"><Label>Unit</Label></td>
+                                    <td className="tableStyle"><Label>{deviceTwin.unit}</Label></td>
+                                </tr> : <></>}
+                            {deviceTwin.valueIsBool ?
                                 <tr>
-                                    <td className="tableLabelStyle"><Label>Noise Magnitude</Label></td>
-                                    <td className="tableStyle"><Label>{deviceTwin.noise_magnitude}</Label></td>
-                                </tr>
-                            </>
-                            : <></>
+                                    <td className="tableLabelStyle"><Label>Is value bool</Label></td>
+                                    <td className="tableStyle"><Label>{deviceTwin.valueIsBool.toString()}</Label></td>
+                                </tr> : <></>}
+                            <tr>
+                                <td className="tableLabelStyle"><Label>Period (ms)</Label></td>
+                                <td className="tableStyle"><Label>{deviceTwin.telemetrySendInterval}</Label></td>
+                            </tr>
+                        </table>
+                        
+                        {deviceTwin.signalArray?  
+                         <>       
+                            <table className="scrollBarStyle">
+                                <thead>
+                                    <tr id="Header" >
+                                        <td className="titleStyle"><Label>Behaviour</Label></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {deviceTwin.signalArray.map((type,index) => {
+                                        return(
+                                            <BehaviourComponent key={index} behaviour={JSON.parse(type)["Behaviour"]} signalArray={type} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin}/>
+                                        )
+                                    })} 
+                                </tbody>
+                            </table>
+                         </> 
+                        : <></>
                         }
-                        <tr>
-                            <td className="tableLabelStyle"><Label>Period (ms)</Label></td>
-                            <td className="tableStyle"><Label>{deviceTwin.telemetrySendInterval}</Label></td>
-                        </tr>
-                    </table>
+                    </div>
                 }
             </Modal >
         </>

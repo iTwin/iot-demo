@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChartComponent } from "./ChartComponent";
-import { LabeledInput } from "@itwin/itwinui-react";
+import { LabeledInput, Label } from "@itwin/itwinui-react";
 import { currDataArray } from "./DeviceTwin";
 
 export function SineComponent(props) {
@@ -43,14 +43,32 @@ export function SineComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
-            </div >
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
+                </div >
+            
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" rowSpan={2} ><Label>Sine</Label></td>
+                    <td style={{width:"50%"}} className="behaviourLabelStyle"><Label>Mean</Label></td>
+                    <td style={{width:"50%"}} className="behaviourLabelStyle"><Label>Amplitude</Label></td>
+                    <td style={{width:"50%"}} className="behaviourLabelStyle"><Label>Wave Period(ms)</Label></td>
+                </tr>
+                <tr >
+                    <td className="behaviourValueStyle"><Label>{deviceMean}</Label></td>
+                    <td className="behaviourValueStyle"><Label>{deviceAmplitude}</Label></td>
+                    <td className="behaviourValueStyle"><Label>{deviceWavePeriod}</Label></td>
+                </tr>
+            </>
+            }
         </>
-
     );
 }
 
@@ -78,12 +96,26 @@ export function ConstantComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Mean' name='mean' value={deviceMean} onChange={changeMean} disabled={props.signalArray !== "" ? true : false} />
+                </div>
+            
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+                : 
+            <> 
+                <tr style={{width:"100%"}}>
+                    <td className="behaviourComponentStyle" style={{borderTopStyle:"hidden"}} rowSpan={2}><Label>Constant</Label></td>
+                    <td style={{width: "27.6rem",borderTopStyle:"hidden"}} className="behaviourLabelStyle"><Label>Mean</Label></td>
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle"><Label>{deviceMean}</Label></td>
+                </tr>
+            </>
+            }
         </>
-
     );
 }
 
@@ -112,10 +144,26 @@ export function LinearComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Slope' name='slope' value={deviceSlope} onChange={changeSlope} disabled={props.signalArray !== "" ? true : false} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Slope' name='slope' value={deviceSlope} onChange={changeSlope} disabled={props.signalArray !== "" ? true : false} />
+                </div>
+
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" rowSpan={2}><Label>Linear</Label></td>
+                    <td style={{width: "27.6rem"}} className="behaviourLabelStyle"><Label>Slope</Label></td>
+                    
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle"><Label>{deviceSlope}</Label></td>
+                </tr>
+            </>
+            }
         </>
 
     );
@@ -152,11 +200,29 @@ export function NoiseComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={deviceNoiseMagnitude} onChange={changeNoise_magnitude} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Deviation' name='noiseSd' value={0.45} disabled={true} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Magnitude' name='noise_magnitude' value={deviceNoiseMagnitude} onChange={changeNoise_magnitude} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Deviation' name='noiseSd' value={0.45} disabled={true} />
+                </div>
+
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" rowSpan={2}><Label>Noise</Label></td>
+                    <td style={{width:"50%"}} className="behaviourLabelStyle"><Label>Magnitude</Label></td>
+                    <td style={{width:"50%"}} className="behaviourLabelStyle"><Label>Deviation</Label></td>
+                    
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle"><Label>{deviceNoiseMagnitude}</Label></td>
+                    <td className="behaviourValueStyle"><Label>{0.45}</Label></td>
+                </tr>
+            </>
+            }
         </>
     );
 
@@ -195,11 +261,28 @@ export function TriangularComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
+                </div>
+
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" rowSpan={2}><Label>Triangular</Label></td>
+                    <td style={{width:"50%", paddingRight: "49px"}} className="behaviourLabelStyle"><Label>Amplitude</Label></td>
+                    <td style={{width:"50%", paddingLeft: "0px"}} className="behaviourLabelStyle"><Label>Wave Period(ms)</Label></td>
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle"><Label>{deviceAmplitude}</Label></td>
+                    <td className="behaviourValueStyle"><Label>{deviceWavePeriod}</Label></td>
+                </tr>
+            </>
+            }
         </>
     );
 
@@ -239,11 +322,29 @@ export function SawToothComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
+                </div>
+
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" rowSpan={2}><Label>SawTooth</Label></td>
+                    <td style={{width:"50%",paddingRight: "49px"}} className="behaviourLabelStyle"><Label>Amplitude</Label></td>
+                    <td style={{width:"50%",paddingLeft: "0px"}} className="behaviourLabelStyle"><Label>Wave Period(ms)</Label></td>
+                    
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle"><Label>{deviceAmplitude}</Label></td>
+                    <td className="behaviourValueStyle"><Label>{deviceWavePeriod}</Label></td>
+                </tr>
+            </>
+            }
         </>
     );
 
@@ -282,39 +383,64 @@ export function SquareComponent(props) {
     }
     return (
         <>
-            <div className="behaviour-value">
-                <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
-                <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
-            </div>
-            <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            {props.isAdmin === true ?
+            <>
+                <div className="behaviour-value">
+                    <LabeledInput className="labels" type='number' label='Amplitude' name='amplitude' value={deviceAmplitude} onChange={changeAmplitude} disabled={props.signalArray !== "" ? true : false} />
+                    <LabeledInput className="labels" type='number' label='Period(ms)' name='wave_period' value={deviceWavePeriod} onChange={changeWave_period} disabled={props.signalArray !== "" ? true : false} />
+                </div>
+                
+                <ChartComponent labelsArray={arr} dataArray={ar} chartName="Component Signal" />
+            </>
+            : 
+            <>
+                <tr>
+                    <td className="behaviourComponentStyle" style={{borderBottomStyle:"outset"}} rowSpan={2}><Label>Square</Label></td>
+                    <td style={{width:"50%",paddingRight: "49px"}} className="behaviourLabelStyle"><Label>Amplitude</Label></td>
+                    <td style={{width:"50%",paddingLeft: "0px"}} className="behaviourLabelStyle"><Label>Wave Period(ms)</Label></td>
+                </tr>
+                <tr>
+                    <td className="behaviourValueStyle" style={{borderBottomStyle:"outset"}}><Label>{deviceAmplitude}</Label></td>
+                    <td className="behaviourValueStyle" style={{borderBottomStyle:"outset"}}><Label>{deviceWavePeriod}</Label></td>
+                </tr>
+            </>
+            }
         </>
     );
 
 }
 
 export function BehaviourComponent(props) {
-    // const signalArray=`{"Behaviour":"Sine","Mean":100,"Amplitude":10, "Wave Period":20000}`    
+    let behaviourObject; 
+    switch(props.behaviour){
+        case "Sine":
+            behaviourObject = <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Constant":
+            behaviourObject = <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Linear":
+            behaviourObject =  <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Noise":
+            behaviourObject = <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Triangular":
+            behaviourObject = <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Sawtooth":
+            behaviourObject = <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} />
+            break;
+        case "Square":
+            behaviourObject =  <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin} /> 
+            break;
+        default:
+            behaviourObject = null;
+    }
+            
     return (
-        <div className="behaviour-prop">
-            {
-                props.behaviour === "Sine" ?
-                    <SineComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour}/>
-                : props.behaviour === "Constant" ?
-                    <ConstantComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : props.behaviour === "Linear" ?
-                    <LinearComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : props.behaviour === "Noise" ?
-                    <NoiseComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : props.behaviour === "Triangular" ?
-                    <TriangularComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : props.behaviour === "Sawtooth" ?
-                    <SawToothComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : props.behaviour === "Square" ?
-                    <SquareComponent arrayLength={props.arrayLength} telemetrySendInterval={props.telemetrySendInterval} signalArray={props.signalArray} setCurrDataArray={props.setCurrDataArray} newBehaviour = {props.newBehaviour} />
-                : null
-            }
+        <div className={props.isAdmin?"behaviour-prop":"non-admin-prop"}>
+            {behaviourObject}  
         </div>
-
     );
-
 }
