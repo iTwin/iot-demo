@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { Modal, LabeledInput, ToggleSwitch, toaster, Button, Label, Select, HorizontalTabs, Tab, InputGroup, Radio, MenuItem, Tooltip } from "@itwin/itwinui-react";
+import { Modal, LabeledInput, ToggleSwitch, toaster, Button, Label, Select, HorizontalTabs, Tab, InputGroup, Radio, MenuItem, Tooltip, Table } from "@itwin/itwinui-react";
 import { DeviceAction } from "./Utils";
 import { editDeviceTwins, getHeaders } from "./AzureUtilities";
 import { editAWSThings } from "./AWSUtililities";
 import { ChartComponent } from "./ChartComponent";
 import { BehaviourComponent } from "./BehaviourComponent";
+import { Tabs} from '@itwin/itwinui-react/esm/core/Tabs/Tabs';
 
 let arr = [];
 export let currDataArray = [];
@@ -39,7 +40,7 @@ export function DeviceTwin(props) {
     const [compositeSignalDataArrayChanged, setCompositeSignalDataArrayChanged]=useState(false);
     const [newBehaviour, setNewBehaviour]=useState("");
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
-
+    const [tabIndex, setTabIndex] = React.useState(0);
     useEffect(() => {
         setDeviceTwin({
             deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
@@ -147,7 +148,8 @@ export function DeviceTwin(props) {
     }, [deviceTwin, props, url]);
 
     const onClose = useCallback(() => {  
-        setNewBehaviour("");             
+        setNewBehaviour("");  
+        setTabIndex(0);           
         props.handleClose();
     }, [props]);
 
@@ -294,7 +296,7 @@ export function DeviceTwin(props) {
                             )} >
                             </Select>
                         </div>
-                        <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour} isAdmin={props.isAdmin}/>
+                        <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
                     </div >);
         }
         else {            
@@ -306,11 +308,120 @@ export function DeviceTwin(props) {
                             <div className="behaviour-list">
                                 <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
                             </div>
-                            <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour} isAdmin={props.isAdmin}/>
+                            <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
                         </div>);
             }
         }
     };   
+
+    const getBehaviourColumns = (signal) => {
+        let columns =[];
+        Object.keys(signal).map(key => {
+            columns.push(
+                {
+                  id: key,
+                  Header: key,
+                  minWidth: 100,
+                  accessor: key,
+                });
+        });
+        return [{
+            Header: "Table",
+            columns: columns,
+          }]
+    };
+    
+    const propertiesColumn = useMemo(
+      () => [
+        {
+          id: 'propKey',
+          Header: 'propKey',
+          accessor: 'propKey',
+          width: 120,
+        },
+        {
+          id: 'propValue',
+          Header: 'propValue',
+          accessor: 'propValue',
+        },
+      ],
+      [],
+    );
+
+    const propertiesData = [
+        {
+          propKey: "Device Id",
+          propValue: deviceTwin.deviceId ? deviceTwin.deviceId.toString() : null,
+        },
+        {
+            propKey: "Device Name",
+            propValue: deviceTwin.deviceName ? deviceTwin.deviceName.toString() : null,
+        },
+        {
+            propKey: "Phenomenon",
+            propValue: deviceTwin.phenomenon ? deviceTwin.phenomenon.toString() : null,
+        },
+        {
+            propKey: "Unit",
+            propValue: deviceTwin.unit ? deviceTwin.unit.toString() : null,
+        },
+        {
+            propKey: "Is value bool",
+            propValue: deviceTwin.valueIsBool ? deviceTwin.valueIsBool.toString() : "false",
+        },
+        {
+            propKey: "Period (ms)",
+            propValue: deviceTwin.telemetrySendInterval ? deviceTwin.telemetrySendInterval.toString() : null,
+        },
+      ];
+
+    const getTabContent = () => {
+      switch (tabIndex) {
+        case 0: // Properties
+          return (
+            <div className="divMarginTop">
+                <Table 
+                    columns={propertiesColumn}
+                    data={propertiesData}
+                    style={{ height: '100%', borderLeft: "thin solid #d3d3d3", borderTop: "thin solid #d3d3d3"}}
+                /> 
+            </div>
+          );
+        case 1: // Behaviour
+            return (deviceTwin.signalArray)?(
+                <div className="divMarginTop">   
+                    <div className="scrollBarStyle">
+                        {deviceTwin.signalArray.map((signal) => {
+                            const signalParse =JSON.parse(signal);
+                            if(signalParse?.Behaviour)
+                                delete signalParse.Behaviour;
+                            return(
+                                <div id="wrapper">
+                                    <div id="first"><Label style = {{fontWeight:"normal", color:"dark"}}>{JSON.parse(signal)["Behaviour"]}</Label></div>
+                                    <div id="second">
+                                        <Table 
+                                            columns={getBehaviourColumns(signalParse)}
+                                            data={[signalParse]}
+                                            style={{ height: '100%', borderLeft: "thin solid #d3d3d3", borderTop: "thin solid #d3d3d3"}}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                </div>
+                </div> 
+          ):null;
+          default: return null;
+      }
+    };
+   
+    const args = {
+         type: 'borderless',
+         labels: [
+           <Tab key={0} label='Properties' />,
+           <Tab key={1} label='Behaviour' />,
+         ],
+        };
     
     return (
         <>
@@ -318,9 +429,23 @@ export function DeviceTwin(props) {
                 closeOnExternalClick={false}
                 isOpen={props.isOpen}
                 onClose={onClose}
-                title={deviceTwin.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isAdmin ? 'Update Device' : 'Device Properties'}
+                title={deviceTwin.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isView ? 'Device Details' : 'Update Device'}
             >
-                {props.isAdmin ?
+                {props.isView ?
+                    <div className="viewStyle">
+                        <Tabs
+                            labels={[
+                            <Tab key={0} label='Properties' />,
+                            <Tab key={1} label='Behaviour' />,
+                            ]}
+                            type='borderless'
+                            {...args}
+                            onTabSelected={setTabIndex}
+                        >
+                            {getTabContent()}
+                        </Tabs>
+                    </div>
+                :
                     <div>
                         <div className="mainBox">
                             <div className="basic-prop">
@@ -364,63 +489,9 @@ export function DeviceTwin(props) {
                         </div>
                         {deviceTwin.deviceAction === DeviceAction.ADD ?
                             <Button className="buttons" styleType="high-visibility" onClick={addDevice}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateDeviceTwin}  > Update </Button>}
-                    </div>
-                    :
-                    <div style={{width:"500px"}}>
-                        <table>
-                            <tr>
-                                <td className="titleStyle" colSpan="100%"><Label>Properties</Label></td>
-                            </tr>
-                            <tr>
-                                <td className="tableLabelStyle"><Label>Device Id</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.deviceId}</Label></td>
-                            </tr>
-                            <tr>
-                                <td className="tableLabelStyle"><Label>Device Name</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.deviceName}</Label></td>
-                            </tr>
-                            <tr>
-                                <td className="tableLabelStyle"><Label>Phenomenon</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.phenomenon}</Label></td>
-                            </tr>
-                            {deviceTwin.unit ?
-                                <tr>
-                                    <td className="tableLabelStyle"><Label>Unit</Label></td>
-                                    <td className="tableStyle"><Label>{deviceTwin.unit}</Label></td>
-                                </tr> : <></>}
-                            {deviceTwin.valueIsBool ?
-                                <tr>
-                                    <td className="tableLabelStyle"><Label>Is value bool</Label></td>
-                                    <td className="tableStyle"><Label>{deviceTwin.valueIsBool.toString()}</Label></td>
-                                </tr> : <></>}
-                            <tr>
-                                <td className="tableLabelStyle"><Label>Period (ms)</Label></td>
-                                <td className="tableStyle"><Label>{deviceTwin.telemetrySendInterval}</Label></td>
-                            </tr>
-                        </table>
-                        
-                        {deviceTwin.signalArray?  
-                         <>       
-                            <table className="scrollBarStyle">
-                                <thead>
-                                    <tr id="Header" >
-                                        <td className="titleStyle"><Label>Behaviour</Label></td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {deviceTwin.signalArray.map((type,index) => {
-                                        return(
-                                            <BehaviourComponent key={index} behaviour={JSON.parse(type)["Behaviour"]} signalArray={type} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour = {props.newBehaviour} isAdmin={props.isAdmin}/>
-                                        )
-                                    })} 
-                                </tbody>
-                            </table>
-                         </> 
-                        : <></>
-                        }
-                    </div>
+                    </div>  
                 }
             </Modal >
         </>
-    )
+    );
 }

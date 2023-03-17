@@ -34,6 +34,7 @@ function App() {
   const [connectionList, setConnectionList] = useState([]);
   const [connections, setConnections] = useState([]);
   const [duration, setDuration] = useState("");
+  const [isView, setIsView] = useState(true);
 
   useTheme("os");
 
@@ -167,8 +168,9 @@ function App() {
     }
   })
 
-  const openDeviceTwinModal = async (deviceAction, deviceTwin) => {
+  const openDeviceTwinModal = async (deviceAction, deviceTwin, isButtonView) => {
     setDeviceTwin({ ...deviceTwin, deviceAction });
+    setIsView(isButtonView)
     setOpenDeviceTwin(true);
   }
 
@@ -403,13 +405,14 @@ function App() {
             id: "deviceId",
             Header: "Device Id",
             minWidth: "150px",
+            width: "27vw",
             accessor: "deviceId",
             Filter: tableFilters.TextFilter(),
           },
           {
             id: "phenomenon",
             Header: "Phenomenon",
-            minWidth: "240px",
+            minWidth: "40px",
             accessor: "phenomenon",
             Filter: tableFilters.TextFilter(),
           },
@@ -427,11 +430,14 @@ function App() {
           },
           {
             id: "action",
-            width: "100px",
+            width: isAdmin ? "170px": "100px",
             Cell: (data) => {
-              return (<div>
-                <Button size="small" styleType="cta" title={isAdmin ? "Edit Device" : "View Device Properties"} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original)}> {isAdmin ? "Edit" : "View"}</Button>
-              </div>
+              
+              return (
+                <div style={isAdmin? {display:"flex"}: {}} >
+                    <Button size="small" styleType="cta" title= "View Device" disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, true)}>View</Button>
+                    <Button size="small" styleType="cta" title="Edit Device" style={isAdmin? {}:{display:"none"}} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, false)}>Edit</Button>              
+                </div>
               );
             },
           },
@@ -523,7 +529,7 @@ function App() {
                 onSelect={onSelect}
                 isRowDisabled={isRowDisabled}
               />
-              <DeviceTwin device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isAdmin={isAdmin} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <DeviceTwin device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
             </div>
           }
         </div> :
