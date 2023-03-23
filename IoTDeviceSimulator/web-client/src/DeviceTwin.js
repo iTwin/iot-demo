@@ -316,15 +316,15 @@ export function DeviceTwin(props) {
 
     const getBehaviourColumns = (signal) => {
         let columns =[];
-        Object.keys(signal).map(key => {
+        Object.keys(signal).map(key => (
             columns.push(
                 {
                   id: key,
                   Header: key,
                   minWidth: 100,
                   accessor: key,
-                });
-        });
+                })
+        ));
         return [{
             Header: "Table",
             columns: columns,
