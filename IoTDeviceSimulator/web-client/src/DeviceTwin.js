@@ -16,6 +16,7 @@ let arr = [];
 export let currDataArray = [];
 
 export function DeviceTwin(props) {
+
     const [deviceTwin, setDeviceTwin] = useState({
         deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
         deviceId: props.device.deviceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceId)) :"" ,
@@ -30,7 +31,6 @@ export function DeviceTwin(props) {
         max: props.device.max!==undefined ? JSON.parse(JSON.stringify(props.device.max)) :"" ,
         thingTypeName: props.device.thingTypeName!==undefined ? JSON.parse(JSON.stringify(props.device.thingTypeName)) :"" ,
         signalArray: props.device.signalArray!==undefined ? JSON.parse(JSON.stringify(props.device.signalArray)) :"" ,
-    
     });
     
     const [behaviour, setBehaviour] = useState("");
@@ -41,6 +41,7 @@ export function DeviceTwin(props) {
     const [newBehaviour, setNewBehaviour]=useState("");
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
     const [tabIndex, setTabIndex] = React.useState(0);
+
     useEffect(() => {
         setDeviceTwin({
             deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
@@ -399,9 +400,9 @@ export function DeviceTwin(props) {
                             if(signalParse?.Behaviour)
                                 delete signalParse.Behaviour;
                             return(
-                                <div id="wrapper">
-                                    <div id="first"><Label style = {{fontWeight:"normal", color:"dark"}}>{JSON.parse(signal)["Behaviour"]}</Label></div>
-                                    <div id="second">
+                                <div className="wrapper">
+                                    <div className="first"><Label style = {{fontWeight:"normal", color:"dark"}}>{JSON.parse(signal)["Behaviour"]}</Label></div>
+                                    <div className="second">
                                         <Table 
                                             columns={getBehaviourColumns(signalParse)}
                                             data={[signalParse]}
@@ -418,7 +419,72 @@ export function DeviceTwin(props) {
           default: return null;
       }
     };
-   
+
+   let deviceTwinComponent; 
+
+   if(props.isView){
+        deviceTwinComponent = 
+        <div className="viewStyle">
+        <Tabs
+            labels={[
+            <Tab key={0} label='Properties' />,
+            <Tab key={1} label='Behaviour' />,
+            ]}
+            type='borderless'
+            onTabSelected={setTabIndex}
+        >
+            {getTabContent()}
+        </Tabs>
+    </div>
+   }
+   else{
+        deviceTwinComponent =
+        <div>
+            <div className="mainBox">
+                <div className="basic-prop">
+                    <LabeledInput className="basic" label='Device Id' name='deviceId' value={deviceTwin.deviceId}
+                        disabled={deviceTwin.deviceAction === DeviceAction.ADD ? false : true}
+                        onChange={handleChange} />
+                    <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
+                    <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
+                    <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
+                    <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, unit: "", signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
+                    <LabeledInput className="basic" label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
+                </div>
+                <div className="behaviour-area">
+                    <InputGroup label='No. of datapoints' displayStyle="inline">
+                        <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={parseFloat(len) === 10 ? true : false} />
+                        <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={parseFloat(len) === 50 ? true : false} />
+                        <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={parseFloat(len) === 100 ? true : false} />
+                    </InputGroup>
+
+                    <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
+
+                    {deviceTwin.signalArray && !deviceTwin.valueIsBool ?
+                        <HorizontalTabs
+                            style={{ overflow: "scroll", width: "400px" }}
+                            labels={Array(tabCount).fill(null).map((_, i) => (
+                                <div className="tab-label">
+                                    <Tab
+                                        key={i}
+                                        label={deviceTwin.signalArray[i] ? JSON.parse(deviceTwin.signalArray[i])["Behaviour"] : 'New'}
+                                    />
+                                    <div className="cancel-button" onClick={function () { removeBehaviour(i); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
+                                    {i + 1 === tabCount ? <div className="add-button" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div> : null}
+                                </div>
+                            ))}
+                            onTabSelected={setIndex}
+                        >
+                            {getContent()}
+                        </HorizontalTabs>
+                        : null}
+                </div>
+            </div>
+            {deviceTwin.deviceAction === DeviceAction.ADD ?
+                <Button className="buttons" styleType="high-visibility" onClick={addDevice}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateDeviceTwin}  > Update </Button>}
+        </div>  
+   }
+
     return (
         <>
             <Modal
@@ -427,65 +493,7 @@ export function DeviceTwin(props) {
                 onClose={onClose}
                 title={deviceTwin.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isView ? 'Device Details' : 'Update Device'}
             >
-                {props.isView ?
-                    <div className="viewStyle">
-                        <Tabs
-                            labels={[
-                            <Tab key={0} label='Properties' />,
-                            <Tab key={1} label='Behaviour' />,
-                            ]}
-                            type='borderless'
-                            onTabSelected={setTabIndex}
-                        >
-                            {getTabContent()}
-                        </Tabs>
-                    </div>
-                :
-                    <div>
-                        <div className="mainBox">
-                            <div className="basic-prop">
-                                <LabeledInput className="basic" label='Device Id' name='deviceId' value={deviceTwin.deviceId}
-                                    disabled={deviceTwin.deviceAction === DeviceAction.ADD ? false : true}
-                                    onChange={handleChange} />
-                                <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
-                                <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
-                                <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                                <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, unit: "", signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
-                                <LabeledInput className="basic" label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
-                            </div>
-                            <div className="behaviour-area">
-                                <InputGroup label='No. of datapoints' displayStyle="inline">
-                                    <Radio name="choice" value={10} label={'10'} onChange={handleLength} checked={parseFloat(len) === 10 ? true : false} />
-                                    <Radio name="choice" value={50} label={'50'} onChange={handleLength} checked={parseFloat(len) === 50 ? true : false} />
-                                    <Radio name="choice" value={100} label={'100'} onChange={handleLength} checked={parseFloat(len) === 100 ? true : false} />
-                                </InputGroup>
-
-                                <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
-
-                                {deviceTwin.signalArray && !deviceTwin.valueIsBool ?
-                                    <HorizontalTabs
-                                        style={{ overflow: "scroll", width: "400px" }}
-                                        labels={Array(tabCount).fill(null).map((_, i) => (
-                                            <div className="tab-label">
-                                                <Tab
-                                                    key={i}
-                                                    label={deviceTwin.signalArray[i] ? JSON.parse(deviceTwin.signalArray[i])["Behaviour"] : 'New'}
-                                                />
-                                                <div className="cancel-button" onClick={function () { removeBehaviour(i); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
-                                                {i + 1 === tabCount ? <div className="add-button" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div> : null}
-                                            </div>
-                                        ))}
-                                        onTabSelected={setIndex}
-                                    >
-                                        {getContent()}
-                                    </HorizontalTabs>
-                                    : null}
-                            </div>
-                        </div>
-                        {deviceTwin.deviceAction === DeviceAction.ADD ?
-                            <Button className="buttons" styleType="high-visibility" onClick={addDevice}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateDeviceTwin}  > Update </Button>}
-                    </div>  
-                }
+                {deviceTwinComponent}
             </Modal >
         </>
     );

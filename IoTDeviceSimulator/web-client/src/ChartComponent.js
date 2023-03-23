@@ -1,17 +1,16 @@
 import { Line } from 'react-chartjs-2';
 
 export function ChartComponent(props) {  
-    console.log("Inside chart Component");
+    const { labelsArray, dataArray, chartName } = props;
     return (
-        // style={{height:"15vh", width: "100%"}}
         <div className="preview" >
             <Line
                 data={{
-                    labels: props.labelsArray,
+                    labels: labelsArray,
                     datasets: [
                         {
-                            label: props.chartName,
-                            data: props.dataArray,
+                            label: chartName,
+                            data: dataArray,
                             fill: false,
                             borderColor: "rgb(0,139,225)",
                             borderWidth: 2,

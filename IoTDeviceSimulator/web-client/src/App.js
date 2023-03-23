@@ -517,14 +517,16 @@ function App() {
               <br />
               <div className="table-top-wrap">
                 <div className="table-top-left">
-                  <h2 style={{ textAlign: 'left' }}>Devices</h2>
                   {isAdmin ? 
                       selectedConnection.includes("Azure") ? 
-                          <Button className="icon-button-style"  startIcon={<SvgAdd />} styleType='high-visibility' size="small" disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>New</Button> 
+                          <Button className="icon-button-style remove-left-margin-button"  size="small"  startIcon={<SvgAdd />} styleType='high-visibility' disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>New</Button> 
                       : <></> 
                   : <></>
                   }
-                  <IconButton className="icon-button-style" styleType='borderless' size="small" onClick={refresh} disabled={toggle}><SvgRefresh/></IconButton>
+                  <IconButton className="icon-button-style remove-left-margin-button" styleType='borderless' size="small" onClick={refresh} disabled={toggle}><SvgRefresh/></IconButton>
+                </div>
+                <div className="table-top-center">
+                  <h2>Devices</h2>
                 </div>
                 <div className="table-top-right">
                   {selectedConnection.includes("Azure") ? <Checkbox label="Enable Logging" defaultChecked={enableLogging} onChange={(event) => onEnableLogging(event.target.checked)} /> : <></>}
