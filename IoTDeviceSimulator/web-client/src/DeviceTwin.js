@@ -390,7 +390,10 @@ export function DeviceTwin(props) {
         case 1: // Behaviour
             return (deviceTwin.signalArray)?(
                 <div className="divMarginTop">   
+                    <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
+
                     <div className="scrollBarStyle">
+                        <div className="border-div">
                         {deviceTwin.signalArray.map((signal) => {
                             const signalParse =JSON.parse(signal);
                             if(signalParse?.Behaviour)
@@ -408,21 +411,14 @@ export function DeviceTwin(props) {
                                 </div>
                             );
                         })}
-                </div>
+                        </div>
+                    </div>
                 </div> 
           ):null;
           default: return null;
       }
     };
    
-    const args = {
-         type: 'borderless',
-         labels: [
-           <Tab key={0} label='Properties' />,
-           <Tab key={1} label='Behaviour' />,
-         ],
-        };
-    
     return (
         <>
             <Modal
@@ -439,7 +435,6 @@ export function DeviceTwin(props) {
                             <Tab key={1} label='Behaviour' />,
                             ]}
                             type='borderless'
-                            {...args}
                             onTabSelected={setTabIndex}
                         >
                             {getTabContent()}

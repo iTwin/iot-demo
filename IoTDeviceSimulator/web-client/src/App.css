@@ -134,12 +134,18 @@ header button {
   max-width: 430px !important;
   min-width: 430px !important;
 }
-
-.table-top {
+.table-top-wrap{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.table-top-left {
   display: flex;
   flex-direction: row;
 }
-
+.table-top-right {
+  display: flex;
+}
 .mainBox {
   display: flex;
   justify-content: center;
@@ -279,9 +285,12 @@ header button {
 .scrollBarStyle {
   display: block;
   overflow: auto;
-  max-height: 44.75vh;
+  max-height: 30vh;
 }
 
+.border-div{
+  border-bottom: solid thin lightgray;
+}
 table {
   table-layout: auto;
   border-collapse: collapse;
@@ -317,5 +326,10 @@ table {
 
 .viewStyle{
 min-width: 35vw;
-min-height: 53.5vh;
+min-height: 72.3vh;
+}
+
+.icon-button-style{
+  align-items: center;
+  align-self: center;
 }

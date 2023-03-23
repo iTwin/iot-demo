@@ -3,7 +3,8 @@ import { Line } from 'react-chartjs-2';
 export function ChartComponent(props) {  
     console.log("Inside chart Component");
     return (
-        <div className="preview">
+        // style={{height:"15vh", width: "100%"}}
+        <div className="preview" >
             <Line
                 data={{
                     labels: props.labelsArray,

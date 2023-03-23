@@ -3,7 +3,7 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Button, Table, tableFilters, TablePaginator, toaster, useTheme, Checkbox, ErrorPage, LabeledSelect } from "@itwin/itwinui-react";
+import { Button, Table, tableFilters, TablePaginator, toaster, useTheme, Checkbox, ErrorPage, LabeledSelect, IconButton, ButtonGroup } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient } from "@itwin/browser-authorization";
 import './App.css';
@@ -13,6 +13,7 @@ import { ExportToCsv } from "export-to-csv";
 import { checkUserRole, getBlobData } from "./Utils";
 import { getAzureDeviceTwins, startSimulatorForAzure, stopSimulatorForAzure, editDeviceTwins } from "./AzureUtilities";
 import { getAWSThings, startSimulatorForAWS, stopSimulatorForAWS } from "./AWSUtililities";
+import {SvgAdd, SvgRefresh , SvgVisibilityShow, SvgEdit} from '@itwin/itwinui-icons-react/cjs/icons';
 
 let timeout;
 let count;
@@ -429,14 +430,16 @@ function App() {
             accessor: "telemetrySendInterval",
           },
           {
-            id: "action",
-            width: isAdmin ? "170px": "100px",
+            id: "action", 
+            width:  isAdmin ? "120px": "80px",
             Cell: (data) => {
               
               return (
-                <div style={isAdmin? {display:"flex"}: {}} >
-                    <Button size="small" styleType="cta" title= "View Device" disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, true)}>View</Button>
-                    <Button size="small" styleType="cta" title="Edit Device" style={isAdmin? {}:{display:"none"}} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, false)}>Edit</Button>              
+                <div>
+                  <ButtonGroup>
+                    <IconButton size="small" className="icon-button-style" styleType="borderless" title= "View Device" disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, true)}><SvgVisibilityShow/></IconButton>
+                    <IconButton size="small" className="icon-button-style" styleType="borderless" title="Edit Device" style={isAdmin? {}:{display:"none"}} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, false)}><SvgEdit/></IconButton>              
+                  </ButtonGroup>
                 </div>
               );
             },
@@ -472,14 +475,14 @@ function App() {
       <header>
         <Button
           onClick={signIn}
-          styleType="cta"
+          styleType="default"
           disabled={isAuthorized}
         >
           {"Sign In"}
         </Button>
         <Button
           onClick={() => authClient.signOut()}
-          styleType="cta"
+          styleType="default"
           disabled={!isAuthorized}
         >
           {"Sign Out"}
@@ -512,11 +515,20 @@ function App() {
               <Button styleType='cta' size='large' disabled={toggle} onClick={startSimulator}>Start</Button>
               <Button styleType='cta' size='large' disabled={!toggle} onClick={stopSimulator}>Stop</Button>
               <br />
-              {selectedConnection.includes("Azure") ? <Checkbox label="Enable Logging" defaultChecked={enableLogging} onChange={(event) => onEnableLogging(event.target.checked)} /> : <></>}
-              <div className="table-top">
-                <h2 style={{ textAlign: 'left' }}>Devices</h2>
-                {isAdmin ? selectedConnection.includes("Azure") ? <Button styleType='cta' disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>Add</Button> : <></> : <></>}
-                <Button styleType='cta' onClick={refresh} disabled={toggle}>Refresh</Button>
+              <div className="table-top-wrap">
+                <div className="table-top-left">
+                  <h2 style={{ textAlign: 'left' }}>Devices</h2>
+                  {isAdmin ? 
+                      selectedConnection.includes("Azure") ? 
+                          <Button className="icon-button-style"  startIcon={<SvgAdd />} styleType='high-visibility' size="small" disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>New</Button> 
+                      : <></> 
+                  : <></>
+                  }
+                  <IconButton className="icon-button-style" styleType='borderless' size="small" onClick={refresh} disabled={toggle}><SvgRefresh/></IconButton>
+                </div>
+                <div className="table-top-right">
+                  {selectedConnection.includes("Azure") ? <Checkbox label="Enable Logging" defaultChecked={enableLogging} onChange={(event) => onEnableLogging(event.target.checked)} /> : <></>}
+                </div>                
               </div>
               <Table
                 columns={columns}
