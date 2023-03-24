@@ -142,10 +142,6 @@ header button {
   flex-direction: row;
 }
 
-.table-top-center{
-  display: flex;
-}
-
 .table-top-right {
   display: flex;
 }
