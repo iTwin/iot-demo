@@ -341,5 +341,5 @@ min-height: 72.3vh;
 }
 
 .iui-button{
-  margin: 10px;
+  margin: 10px !important;
 }
