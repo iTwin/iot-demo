@@ -11,7 +11,9 @@ import { editAWSThings } from "./AWSUtililities";
 import { ChartComponent } from "./ChartComponent";
 import { BehaviourComponent } from "./BehaviourComponent";
 import { Tabs} from '@itwin/itwinui-react/esm/core/Tabs/Tabs';
+import { getAzureDeviceTwins} from "./AzureUtilities";
 
+// import App from './App';
 let arr = [];
 export let currDataArray = [];
 
@@ -41,6 +43,12 @@ export function DeviceTwin(props) {
     const [newBehaviour, setNewBehaviour]=useState("");
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
     const [tabIndex, setTabIndex] = React.useState(0);
+    const [selectedDeviceId, setSelectedDeviceId] = useState("");
+    const [deviceList, setDeviceList] = useState([]);
+
+    useEffect(() => {
+        getDeviceList();
+    },[]);
 
     useEffect(() => {
         setDeviceTwin({

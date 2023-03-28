@@ -82,3 +82,17 @@ export const editDeviceTwins = async (deviceArray, connectionStringId) => {
   }
   return { response: response, updated: false };
 }
+
+export const editDeviceInterface= async (deviceInterfaceData, connectionStringId) => {
+  const data = { deviceInterfaceId: deviceInterfaceData?.deviceInterfaceId, deviceInterfaceName: deviceInterfaceData?.deviceInterfaceName, connectionStringId: connectionStringId }
+  const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
+    method: 'POST',
+    headers: getHeaders(),
+    keepalive: true,
+    body: JSON.stringify(data),
+  }).catch(error => console.log("Request failed: " + error));
+  if (response && response.status === 200) {
+    return { response: response, updated: true };
+  }
+  return { response: response, updated: false };
+}

@@ -13,6 +13,7 @@ import { ExportToCsv } from "export-to-csv";
 import { checkUserRole, getBlobData } from "./Utils";
 import { getAzureDeviceTwins, startSimulatorForAzure, stopSimulatorForAzure, editDeviceTwins } from "./AzureUtilities";
 import { getAWSThings, startSimulatorForAWS, stopSimulatorForAWS } from "./AWSUtililities";
+import { AddDevice } from "./AddDevice";
 import {SvgAdd, SvgRefresh , SvgVisibilityShow, SvgEdit} from '@itwin/itwinui-icons-react/cjs/icons';
 
 let timeout;
@@ -36,6 +37,7 @@ function App() {
   const [connections, setConnections] = useState([]);
   const [duration, setDuration] = useState("");
   const [isView, setIsView] = useState(true);
+  const [openAddDevice, setOpenAddDevice] = useState(false);
 
   useTheme("os");
 
@@ -220,6 +222,7 @@ function App() {
       setData([...data, newDevice]);
     }
     setOpenDeviceTwin(false);
+    setOpenAddDevice(false);
   }
 
   const getDevices = useCallback(async () => {
@@ -471,6 +474,18 @@ function App() {
       </>
     ),
   };
+  const openAddDeviceModal = async (deviceAction, deviceTwin) => {
+    setDeviceTwin({ ...deviceTwin, deviceAction });
+    setOpenAddDevice(true);
+  }
+  const buttonMenuItems = () => [
+      <MenuItem key={1} onClick={() => openAddDeviceModal(DeviceAction.ADD)} textAlign="center">
+        Device
+      </MenuItem>,
+      <MenuItem key={2} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>
+        Telemetry
+      </MenuItem>,
+    ];
 
   return (
     <>

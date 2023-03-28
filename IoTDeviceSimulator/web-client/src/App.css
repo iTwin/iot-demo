@@ -115,7 +115,7 @@ header button {
 .buttons {
   margin-left: 0px !important;
   margin-right: 0px !important;
-  width: 760px;
+  width: 100%;
 }
 
 .iui-backdrop {
@@ -126,10 +126,10 @@ header button {
   margin: 5px 0px !important;
 }
 
-.iui-dialog-default {
+/* .iui-dialog-default {
   max-width: 430px !important;
   min-width: 430px !important;
-}
+} */
 
 .table-top-wrap{
   display: flex;
@@ -144,6 +144,10 @@ header button {
 
 .table-top-right {
   display: flex;
+}
+
+#tippy-2 div{
+  text-align: -webkit-center;
 }
 
 .mainBox {
@@ -331,6 +335,10 @@ min-width: 35vw;
 min-height: 72.3vh;
 }
 
+.add-device-window{
+  width: 100%;
+}
+
 .icon-button-style{
   align-items: center;
   align-self: center;
@@ -341,5 +349,5 @@ min-height: 72.3vh;
 }
 
 .iui-button{
-  margin: 10px;
+  margin: 10px !important;
 }
