@@ -5,9 +5,10 @@
 
 module.exports = async function (context, req) {
     try {
-        var iothub = require('azure-iothub');
-        var registry = iothub.Registry.fromConnectionString(process.env[req.body.connectionStringId]);
-        if(process.env[req.body.deviceInterfaceId]){
+        console.log("Entering update-device");
+        let iothub = require('azure-iothub');
+        let registry = iothub.Registry.fromConnectionString(process.env[req.body.connectionStringId]);
+        if(req.body.isDeviceTwin === true){
             const patch = {
                 properties: {
                     desired: {
@@ -18,12 +19,15 @@ module.exports = async function (context, req) {
             const deviceId = req.body.deviceInterfaceId;
             const twin = await registry.getTwin(deviceId);
             const response = await twin.responseBody.update(patch);
+            console.log('update-device for deviceTwin ' + deviceId);
             return {
                 body: response.result
             }
         }
         else{
+            console.log("Entering update-device for module twin ");
             var resultArray = [];
+            console.log("array len "+req.body.deviceTwinArray.length);
             for (let index = 0; index < req.body.deviceTwinArray.length; index++) {
                 const patch = {
                     properties: {
@@ -41,12 +45,17 @@ module.exports = async function (context, req) {
                         },
                     },
                 };
-                const deviceId = req.body.deviceTwinArray[index].deviceId;
-                const twin = await registry.getTwin(deviceId);
-                const response = await twin.responseBody.update(patch);
+                console.log(patch);
+                const deviceId = req.body.deviceTwinArray[index].deviceInterfaceId;
+                const moduleId = req.body.deviceTwinArray[index].deviceId;
+                console.log("deviceId "+ deviceId + " moduleId "+ moduleId);
+                const moduleTwin = await registry.getModuleTwin(deviceId, moduleId);
+                const response = await moduleTwin.responseBody.update(patch);
+                console.log(response.result);
                 resultArray.push(response.result);
+                console.log("ResultArray:" + resultArray);
             }
-        
+            console.log('update-device for moduleTwin ');
             return {
                 body: resultArray
             }

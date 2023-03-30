@@ -30,9 +30,7 @@ module.exports = async function (context, req) {
                 moduleTwin.responseBody.authentication = modIdentity.authentication;
                 deviceData.telemetryPoints.push(moduleTwin.responseBody);
             }
-            if (deviceData.telemetryPoints.length !== 0) {
-                dataSet.push(deviceData);
-            }
+            dataSet.push(deviceData);
         }
         return {
             body: dataSet

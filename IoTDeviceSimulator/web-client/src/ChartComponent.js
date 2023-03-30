@@ -3,7 +3,7 @@ import { Line } from 'react-chartjs-2';
 export function ChartComponent(props) {  
     const { labelsArray, dataArray, chartName } = props;
     return (
-        <div className="preview" >
+        <div>
             <Line
                 data={{
                     labels: labelsArray,

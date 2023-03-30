@@ -17,7 +17,12 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
   if (response && response.status === 200) {
     const devices = await response.json();
     const rows = [];
+    const deviceIdList = [];
+    let deviceInterfaceId;
+    let telemetryIds = [];
     devices.forEach(device => {
+      telemetryIds = [];
+      deviceInterfaceId = device.deviceId;
       device.telemetryPoints.forEach(telemetry=>{
         rows.push({
           deviceId: telemetry.moduleId,
@@ -34,11 +39,18 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
           isRunning: telemetry.properties.desired.isRunning,
           primaryKey: telemetry.authentication.symmetricKey.primaryKey,
           signalArray:telemetry.properties.desired.signalArray
-        })
-      })
-      
+        });
+        telemetryIds.push(telemetry.moduleId);
+      });
+
+      deviceIdList.push({
+          deviceInterfaceId,
+          telemetryIds
+        });
+
     });
-    return { deviceTwins: rows, rows: rows };
+    console.log("getAzureTwins rows " + rows);
+    return { rows: rows , deviceIdList: deviceIdList};
   }
 }
 
@@ -69,22 +81,14 @@ export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionS
   return false;
 }
 
-export const editDeviceTwins = async (deviceArray, connectionStringId) => {
-  const data = { deviceTwinArray: deviceArray, connectionStringId: connectionStringId }
-  const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
-    method: 'POST',
-    headers: getHeaders(),
-    keepalive: true,
-    body: JSON.stringify(data),
-  }).catch(error => console.log("Request failed: " + error));
-  if (response && response.status === 200) {
-    return { response: response, updated: true };
+export const editTwins = async (value, connectionStringId, isDeviceTwin) => {
+  let data;
+  if(isDeviceTwin){
+    data = { deviceInterfaceId: value?.deviceInterfaceId, deviceInterfaceName: value?.deviceInterfaceName, connectionStringId: connectionStringId, isDeviceTwin: isDeviceTwin }
   }
-  return { response: response, updated: false };
-}
-
-export const editDeviceInterface= async (deviceInterfaceData, connectionStringId) => {
-  const data = { deviceInterfaceId: deviceInterfaceData?.deviceInterfaceId, deviceInterfaceName: deviceInterfaceData?.deviceInterfaceName, connectionStringId: connectionStringId }
+  else{
+    data = { deviceTwinArray: value, connectionStringId: connectionStringId, isDeviceTwin: isDeviceTwin }
+  }
   const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
     method: 'POST',
     headers: getHeaders(),
@@ -92,6 +96,7 @@ export const editDeviceInterface= async (deviceInterfaceData, connectionStringId
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {
+    console.log("AzureUtilities - update res:" + response);
     return { response: response, updated: true };
   }
   return { response: response, updated: false };

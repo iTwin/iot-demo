@@ -5,15 +5,12 @@
 
 import React, { useCallback, useState, useMemo } from "react";
 import { Modal, LabeledInput,toaster, Button} from "@itwin/itwinui-react";
-import { editDeviceInterface, getHeaders } from "./AzureUtilities";
+import { editTwins, getHeaders } from "./AzureUtilities";
 
 export function AddDevice(props) {
     
     const url = useMemo(() => process.env.REACT_APP_FUNCTION_URL, []);
-    const [selectedDeviceId, setSelectedDeviceId] = useState("");
-    const [deviceList, setDeviceList] = useState([]);
-    const [openAddDevice, setOpenAddDevice] = useState(false);
-
+    
     const [deviceInterfaceData, setDeviceInterfaceData] = useState({
         deviceInterfaceId: "",
         deviceInterfaceName: "",
@@ -25,13 +22,13 @@ export function AddDevice(props) {
         
     // }, [props]);
    
-    const handleChange = useCallback((event) => {
+    const handleChange = (event) => {
         event.preventDefault();
         setDeviceInterfaceData({
             ...deviceInterfaceData,
             [event.target.name]: event.target.value,
         });
-    }, [deviceInterfaceData]);
+    };
 
     const onClose = useCallback(() => {             
         props.handleClose();
@@ -39,7 +36,7 @@ export function AddDevice(props) {
 
     const addDeviceInterface = useCallback(async (event) => {
         event.preventDefault();
-        const data = { deviceInterfaceId: deviceInterfaceData.deviceInterfaceId, connectionStringId: props.connectionStringId }
+        const data = { deviceInterfaceId: deviceInterfaceData.deviceInterfaceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'true' }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
             headers: getHeaders(),
@@ -47,7 +44,7 @@ export function AddDevice(props) {
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) { 
             let deviceInterfaceObject = deviceInterfaceData;
-            const response = await editDeviceInterface(deviceInterfaceObject, props.connectionStringId)
+            const response = await editTwins(deviceInterfaceObject, props.connectionStringId, true )
             if (response.updated) {
                 toaster.positive(`Added device : ${deviceInterfaceData.deviceInterfaceId}`);
                 props.handleClose(await response.response.json());

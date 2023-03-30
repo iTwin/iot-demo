@@ -3,15 +3,15 @@
  * See LICENSE.md in the project root for license terms and full copyright notice.
  *--------------------------------------------------------------------------------------------*/
 
-import { Button, Table, tableFilters, TablePaginator, toaster, useTheme, Checkbox, ErrorPage, LabeledSelect, IconButton, ButtonGroup } from "@itwin/itwinui-react";
+import { Button, Table, tableFilters, TablePaginator, toaster, useTheme, Checkbox, ErrorPage, LabeledSelect, IconButton, ButtonGroup, DropdownButton, MenuItem } from "@itwin/itwinui-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient } from "@itwin/browser-authorization";
 import './App.css';
-import { DeviceTwin } from "./DeviceTwin";
+import { AddTelemetry } from "./AddTelemetry";
 import { DeviceAction } from "./Utils";
 import { ExportToCsv } from "export-to-csv";
 import { checkUserRole, getBlobData } from "./Utils";
-import { getAzureDeviceTwins, startSimulatorForAzure, stopSimulatorForAzure, editDeviceTwins } from "./AzureUtilities";
+import { getAzureDeviceTwins, startSimulatorForAzure, stopSimulatorForAzure, editTwins } from "./AzureUtilities";
 import { getAWSThings, startSimulatorForAWS, stopSimulatorForAWS } from "./AWSUtililities";
 import { AddDevice } from "./AddDevice";
 import {SvgAdd, SvgRefresh , SvgVisibilityShow, SvgEdit} from '@itwin/itwinui-icons-react/cjs/icons';
@@ -43,7 +43,7 @@ function App() {
 
   const updateDeviceTwin = async (deviceArray, selectedConnectionStringId) => {
     let updatedDevice = false;
-    const response = await editDeviceTwins(deviceArray, selectedConnectionStringId)
+    const response = await editTwins(deviceArray, selectedConnectionStringId, false)
     updatedDevice = response.updated;
     if (updatedDevice) {
       handleClose();
@@ -174,6 +174,10 @@ function App() {
     setDeviceTwin({ ...deviceTwin, deviceAction });
     setIsView(isButtonView)
     setOpenDeviceTwin(true);
+  }
+
+  const openAddDeviceModal = async (deviceAction, deviceInterface) => {
+    setOpenAddDevice(true);
   }
 
   const handleClose = (device) => {
@@ -373,6 +377,7 @@ function App() {
             primaryKey: deviceTwin.primaryKey,
             signalArray: deviceTwin.signalArray
           });
+          console.log("App.js - OnSelect deviceTwin " +selectedDeviceIds);
         } else {
           selectedDeviceIds.push(row)
         }
@@ -413,6 +418,14 @@ function App() {
             minWidth: "150px",
             width: "27vw",
             accessor: "deviceId",
+            Filter: tableFilters.TextFilter(),
+          },
+          {
+            id: "telemetryId",
+            Header: "Telemetry Id",
+            minWidth: "150px",
+            width: "27vw",
+            accessor: "telemetryId",
             Filter: tableFilters.TextFilter(),
           },
           {
@@ -474,16 +487,13 @@ function App() {
       </>
     ),
   };
-  const openAddDeviceModal = async (deviceAction, deviceTwin) => {
-    setDeviceTwin({ ...deviceTwin, deviceAction });
-    setOpenAddDevice(true);
-  }
+  
   const buttonMenuItems = () => [
       <MenuItem key={1} onClick={() => openAddDeviceModal(DeviceAction.ADD)} textAlign="center">
         Device
       </MenuItem>,
       <MenuItem key={2} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>
-        Telemetry
+        TelemetryPoint
       </MenuItem>,
     ];
 
@@ -535,12 +545,13 @@ function App() {
               <div className="table-top-wrap">
                 <div className="table-top-left">
                 <h2>Devices</h2>
-                  {isAdmin ? 
-                      selectedConnection.includes("Azure") ? 
-                          <Button className="icon-button-style"  size="small"  startIcon={<SvgAdd />} styleType='high-visibility' disabled={toggle} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>New</Button> 
-                      : <></> 
+                {
+                  isAdmin ? 
+                    selectedConnection.includes("Azure") ? 
+                    <DropdownButton styleType='high-visibility' className="icon-button-style" disabled={toggle} menuItems={buttonMenuItems}><Button className="icon-button-style"  startIcon={<SvgAdd />} styleType='borderless' style={{color:"#fff"}} size="small" disabled={toggle}>New</Button> </DropdownButton>
+                    : <></> 
                   : <></>
-                  }
+                }
                   <IconButton className="icon-button-style remove-left-margin-button" styleType='borderless' size="small" onClick={refresh} disabled={toggle}><SvgRefresh/></IconButton>
                 </div>
                 <div className="table-top-right">
@@ -558,7 +569,8 @@ function App() {
                 onSelect={onSelect}
                 isRowDisabled={isRowDisabled}
               />
-              <DeviceTwin device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <AddDevice handleClose={handleClose} isOpen={openAddDevice} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <AddTelemetry device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
             </div>
           }
         </div> :
