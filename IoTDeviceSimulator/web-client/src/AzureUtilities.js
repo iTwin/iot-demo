@@ -49,7 +49,6 @@ export const getDataFromAzure = async (selectedConnectionStringId) => {
         });
 
     });
-    console.log("getAzureTwins rows " + rows);
     return { rows: rows , deviceIdList: deviceIdList};
   }
 }
@@ -96,7 +95,6 @@ export const editTwins = async (value, connectionStringId, isDeviceTwin) => {
     body: JSON.stringify(data),
   }).catch(error => console.log("Request failed: " + error));
   if (response && response.status === 200) {
-    console.log("AzureUtilities - update res:" + response);
     return { response: response, updated: true };
   }
   return { response: response, updated: false };

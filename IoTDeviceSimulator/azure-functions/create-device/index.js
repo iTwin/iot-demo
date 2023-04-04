@@ -5,18 +5,15 @@
 
 module.exports = async function (context, req) {
     try {
-        console.log("Entering create-device");
         let res;
         let iothub = require('azure-iothub');
         let registry = iothub.Registry.fromConnectionString(process.env[req.body.connectionStringId]);
-        console.log(req.body.isDeviceTwin);
         if(req.body.isDeviceTwin === 'true'){
             const deviceId = req.body.deviceId;
             res = await registry.create({ deviceId});
             console.log('create-device for deviceTwin ' + deviceId);
         }
         else{
-            console.log("Entering create-device for module twin ");
             const moduleId = req.body.telemetryId;
             const deviceId = req.body.deviceId;
             res = await registry.addModule({ deviceId, moduleId });

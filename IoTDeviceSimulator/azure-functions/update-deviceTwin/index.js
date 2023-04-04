@@ -5,7 +5,6 @@
 
 module.exports = async function (context, req) {
     try {
-        console.log("Entering update-device");
         let iothub = require('azure-iothub');
         let registry = iothub.Registry.fromConnectionString(process.env[req.body.connectionStringId]);
         if(req.body.isDeviceTwin === true){
@@ -25,9 +24,7 @@ module.exports = async function (context, req) {
             }
         }
         else{
-            console.log("Entering update-device for module twin ");
             var resultArray = [];
-            console.log("array len "+req.body.telemetryPointArray.length);
             for (let index = 0; index < req.body.telemetryPointArray.length; index++) {
                 const patch = {
                     properties: {
@@ -45,15 +42,11 @@ module.exports = async function (context, req) {
                         },
                     },
                 };
-                console.log(patch);
                 const deviceId = req.body.telemetryPointArray[index].deviceId;
                 const moduleId = req.body.telemetryPointArray[index].telemetryId;
-                console.log("deviceId "+ deviceId + " moduleId "+ moduleId);
                 const moduleTwin = await registry.getModuleTwin(deviceId, moduleId);
                 const response = await moduleTwin.responseBody.update(patch);
-                console.log(response.result);
                 resultArray.push(response.result);
-                console.log("ResultArray:" + resultArray);
             }
             console.log('update-device for moduleTwin ');
             return {

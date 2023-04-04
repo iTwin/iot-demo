@@ -455,8 +455,7 @@ export function AddTelemetryPoint(props) {
 
     const getDeviceList = async () => {
         let result;
-        const devices = await getDataFromAzure(props.connectionStringId);  
-        console.log("getDeviceList: " + JSON.stringify(devices));      
+        const devices = await getDataFromAzure(props.connectionStringId);      
         if(devices?.deviceIdList){
             result = devices.deviceIdList
         }

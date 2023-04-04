@@ -146,10 +146,6 @@ header button {
   display: flex;
 }
 
-#tippy-2 div{
-  text-align: -webkit-center;
-}
-
 .mainBox {
   display: flex;
   justify-content: center;
