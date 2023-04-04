@@ -16,21 +16,21 @@ module.exports = async function (context, req) {
 
   const jsonData = [];
   const iotHubName = ConnectionString.parse(process.env[req.body.connectionStringId], ["HostName"]).HostName;
-  let deviceArray = req.body.selectedDevices.map((deviceTwin) => {
+  let deviceArray = req.body.selectedDevices.map((telemetryPoint) => {
     return {
-      deviceId: deviceTwin.deviceId,
-      telemetrySendInterval: deviceTwin.telemetrySendInterval ?? 5000,
-      unit: deviceTwin.unit,
-      phenomenon: deviceTwin.phenomenon,
-      valueIsBool: deviceTwin.valueIsBool,
+      telemetryId: telemetryPoint.telemetryId,
+      telemetrySendInterval: telemetryPoint.telemetrySendInterval ?? 5000,
+      unit: telemetryPoint.unit,
+      phenomenon: telemetryPoint.phenomenon,
+      valueIsBool: telemetryPoint.valueIsBool,
       deviceSecurityType: "connectionString",
-      connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceInterfaceId};ModuleId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
+      connectionString: `HostName=${iotHubName};DeviceId=${telemetryPoint.deviceId};ModuleId=${telemetryPoint.telemetryId};SharedAccessKey=${telemetryPoint.primaryKey}`,
       phase: Math.random() * Math.PI,
-      noiseSd: deviceTwin.noiseSd,
-      isRunning: deviceTwin.isRunning,
-      min: deviceTwin.min,
-      max: deviceTwin.max,
-      signalArray: deviceTwin.signalArray,
+      noiseSd: telemetryPoint.noiseSd,
+      isRunning: telemetryPoint.isRunning,
+      min: telemetryPoint.min,
+      max: telemetryPoint.max,
+      signalArray: telemetryPoint.signalArray,
     }
   });
 
@@ -42,7 +42,7 @@ module.exports = async function (context, req) {
       this.currTime = 0;
       this.startTime = Date.now();
       this.device = {
-        deviceId: "",
+        telemetryId: "",
         data: this.currData,
         unit: "",
         phenomenon: "",
@@ -61,7 +61,7 @@ module.exports = async function (context, req) {
         data = this.currData;
       }
       telemetry = {
-        deviceId: this.device.deviceId,
+        telemetryId: this.device.telemetryId,
         data: data,
         timeStamp: (new Date(this.currTime)).toString()
       };
@@ -227,7 +227,7 @@ module.exports = async function (context, req) {
             });
 
             
-            intervalTokens.push({deviceId:device.deviceId, interval:SetInterval(client, device)});
+            intervalTokens.push({telemetryId:device.telemetryId, interval:SetInterval(client, device)});
             console.log("open connection")            
             client.close();
           }

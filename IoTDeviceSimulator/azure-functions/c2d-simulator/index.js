@@ -10,8 +10,8 @@ module.exports = async function (context, req) {
   var Client = require('azure-iothub').Client;
   var Message = require('azure-iot-common').Message;
 
-  var targetDeviceId = req.body.deviceId;
-  var targetDeviceInterfaceId= req.body.deviceInterfaceId; 
+  var targetTelemetryId = req.body.telemetryId;
+  var targetDeviceId= req.body.deviceId; 
   var serviceClient = Client.fromConnectionString(process.env[req.body.connectionStringId]);
 
   function printResultFor(op) {
@@ -29,7 +29,7 @@ module.exports = async function (context, req) {
     timeoutInSeconds: 30
 };
 
-serviceClient.invokeDeviceMethod(targetDeviceInterfaceId, targetDeviceId, methodParams, function(err, result) {
+serviceClient.invokeDeviceMethod(targetDeviceId, targetTelemetryId, methodParams, function(err, result) {
     if (err) {
         console.error("Direct method error: "+err.message);
     } else {

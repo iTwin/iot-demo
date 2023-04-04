@@ -7,11 +7,11 @@ import { Button, Table, tableFilters, TablePaginator, toaster, useTheme, Checkbo
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BrowserAuthorizationCallbackHandler, BrowserAuthorizationClient } from "@itwin/browser-authorization";
 import './App.css';
-import { AddTelemetry } from "./AddTelemetry";
+import { AddTelemetryPoint } from "./AddTelemetryPoint";
 import { DeviceAction } from "./Utils";
 import { ExportToCsv } from "export-to-csv";
 import { checkUserRole, getBlobData } from "./Utils";
-import { getAzureDeviceTwins, startSimulatorForAzure, stopSimulatorForAzure, editTwins } from "./AzureUtilities";
+import { getDataFromAzure, startSimulatorForAzure, stopSimulatorForAzure, editTwins } from "./AzureUtilities";
 import { getAWSThings, startSimulatorForAWS, stopSimulatorForAWS } from "./AWSUtililities";
 import { AddDevice } from "./AddDevice";
 import {SvgAdd, SvgRefresh , SvgVisibilityShow, SvgEdit} from '@itwin/itwinui-icons-react/cjs/icons';
@@ -22,9 +22,9 @@ let count;
 function App() {
   const [toggle, setToggle] = useState(false);
   const [data, setData] = useState([]);
-  const [deviceTwins, setDeviceTwins] = useState([]);
-  const [openDeviceTwin, setOpenDeviceTwin] = useState(false);
-  const [deviceTwin, setDeviceTwin] = useState({});
+  const [telemetryPoints, setTelemetryPoints] = useState([]);
+  const [openAddTelemetryPoint, setOpenAddTelemetryPoint] = useState(false);
+  const [telemetryPoint, setTelemetryPoint] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [enableLogging, setEnableLogging] = useState(false);
@@ -41,7 +41,7 @@ function App() {
 
   useTheme("os");
 
-  const updateDeviceTwin = async (deviceArray, selectedConnectionStringId) => {
+  const updateTelemetryPoint = async (deviceArray, selectedConnectionStringId) => {
     let updatedDevice = false;
     const response = await editTwins(deviceArray, selectedConnectionStringId, false)
     updatedDevice = response.updated;
@@ -55,7 +55,7 @@ function App() {
     deviceArray.forEach(device => {
       device.isRunning = true;
     });
-    updateDeviceTwin(deviceArray, selectedConnectionStringId);
+    updateTelemetryPoint(deviceArray, selectedConnectionStringId);
   };
 
   const func_stop = (deviceArray, selectedConnectionStringId) => {
@@ -63,13 +63,13 @@ function App() {
     deviceArray.forEach(device => {
       device.isRunning = false;
     })
-    updateDeviceTwin(deviceArray, selectedConnectionStringId);
+    updateTelemetryPoint(deviceArray, selectedConnectionStringId);
   };
 
   const removeDevices = async (rows, selectedDeviceIds) => {
     for (let index1 = 0; index1 < selectedDeviceIds.length; index1++) {
       for (let index2 = 0; index2 < rows.length; index2++) {
-        if (rows[index2].deviceId === selectedDeviceIds[index1].deviceId && (rows[index2].isRunning === true || rows[index2].isRunning === 'true')) {
+        if (rows[index2].telemetryId === selectedDeviceIds[index1].telemetryId && (rows[index2].isRunning === true || rows[index2].isRunning === 'true')) {
           selectedDevices.splice(index1, 1);
         }
       }
@@ -170,26 +170,26 @@ function App() {
     }
   })
 
-  const openDeviceTwinModal = async (deviceAction, deviceTwin, isButtonView) => {
-    setDeviceTwin({ ...deviceTwin, deviceAction });
+  const openAddTelemetryPointModal = async (deviceAction, telemetryPoint, isButtonView) => {
+    setTelemetryPoint({ ...telemetryPoint, deviceAction });
     setIsView(isButtonView)
-    setOpenDeviceTwin(true);
+    setOpenAddTelemetryPoint(true);
   }
-
-  const openAddDeviceModal = async (deviceAction, deviceInterface) => {
+ 
+  const openAddDeviceModal = async () => {
     setOpenAddDevice(true);
   }
 
   const handleClose = (device) => {
     if (device && device.deviceAction === DeviceAction.UPDATE) {
-      const devices = data.filter((d) => d.deviceId !== device.deviceId);
+      const devices = data.filter((d) => d.telemetryId !== device.telemetryId);
       if (selectedConnection.includes("Azure")) {
 
-        const twins = deviceTwins;
-        for (const twin of deviceTwins) {
-          if (twin.deviceId === device.deviceId) {
-            twin.deviceName = device.deviceName;
-            twin.deviceInterfaceId=device.deviceInterfaceId;            
+        const twins = telemetryPoints;
+        for (const twin of telemetryPoints) {
+          if (twin.telemetryId === device.telemetryId) {
+            twin.telemetryName = device.telemetryName;
+            twin.deviceId=device.deviceId;            
             twin.phenomenon = device.phenomenon;
             twin.unit = device.unit;
             twin.valueIsBool = device.valueIsBool;
@@ -202,17 +202,17 @@ function App() {
             break;
           }
         }
-        setDeviceTwins(twins);
+        setTelemetryPoints(twins);
       } else {
         device.valueIsBool = device.valueIsBool === "true" ? true : false;
       }
       setData([device, ...devices]);
     } else if (device) {
-      setDeviceTwins([...deviceTwins, device]);
+      setTelemetryPoints([...telemetryPoints, device]);
       const newDevice = {
-        deviceId: device.deviceId,
-        deviceInterfaceId:device.deviceInterfaceId,
-        deviceName: device.deviceName,        
+        telemetryId: device.telemetryId,
+        deviceId:device.deviceId,
+        telemetryName: device.telemetryName,        
         phenomenon: device.phenomenon,
         telemetrySendInterval: device.telemetrySendInterval,
         unit: device.unit,
@@ -225,7 +225,7 @@ function App() {
       }
       setData([...data, newDevice]);
     }
-    setOpenDeviceTwin(false);
+    setOpenAddTelemetryPoint(false);
     setOpenAddDevice(false);
   }
 
@@ -239,8 +239,8 @@ function App() {
     count = 0;
     let deviceString = "devices are";
     if (selectedConnection.includes("Azure")) {
-      const azureDevices = await getAzureDeviceTwins(selectedConnectionStringId);
-      setDeviceTwins(azureDevices.rows);
+      const azureDevices = await getDataFromAzure(selectedConnectionStringId);
+      setTelemetryPoints(azureDevices.rows);
       rows = azureDevices.rows;
     } else {
       const AWSThings = await getAWSThings();
@@ -360,24 +360,24 @@ function App() {
       const selectedDeviceIds = []
       rows.forEach((row) => {
         if (selectedConnection.includes("Azure")) {
-          const deviceTwin = deviceTwins.find((device) => device.deviceId === row.deviceId);
+          const telemetryPoint = telemetryPoints.find((device) => device.telemetryId === row.telemetryId);
           selectedDeviceIds.push({
-            deviceId: deviceTwin.deviceId,
-            deviceInterfaceId:deviceTwin.deviceInterfaceId,
-            deviceName: deviceTwin.deviceName,
+            telemetryId: telemetryPoint.telemetryId,
+            deviceId:telemetryPoint.deviceId,
+            telemetryName: telemetryPoint.telemetryName,
             deviceAction: "UPDATE",            
-            phenomenon: deviceTwin.phenomenon,
-            telemetrySendInterval: deviceTwin.telemetrySendInterval,
-            unit: deviceTwin.unit,
-            valueIsBool: deviceTwin.valueIsBool,            
-            noiseSd: deviceTwin.noiseSd,            
-            isRunning: deviceTwin.isRunning,
-            min: deviceTwin.min,
-            max: deviceTwin.max,
-            primaryKey: deviceTwin.primaryKey,
-            signalArray: deviceTwin.signalArray
+            phenomenon: telemetryPoint.phenomenon,
+            telemetrySendInterval: telemetryPoint.telemetrySendInterval,
+            unit: telemetryPoint.unit,
+            valueIsBool: telemetryPoint.valueIsBool,            
+            noiseSd: telemetryPoint.noiseSd,            
+            isRunning: telemetryPoint.isRunning,
+            min: telemetryPoint.min,
+            max: telemetryPoint.max,
+            primaryKey: telemetryPoint.primaryKey,
+            signalArray: telemetryPoint.signalArray
           });
-          console.log("App.js - OnSelect deviceTwin " +selectedDeviceIds);
+          console.log("App.js - OnSelect telemetryPoint " +selectedDeviceIds);
         } else {
           selectedDeviceIds.push(row)
         }
@@ -385,7 +385,7 @@ function App() {
       });
       setSelectedDevices(selectedDeviceIds);
     },
-    [deviceTwins, selectedConnection],
+    [telemetryPoints, selectedConnection],
   );
   const isRowDisabled = useCallback(
     (rowData) => {
@@ -416,7 +416,7 @@ function App() {
             id: "deviceId",
             Header: "Device Id",
             minWidth: "150px",
-            width: "27vw",
+            width: "22vw",
             accessor: "deviceId",
             Filter: tableFilters.TextFilter(),
           },
@@ -424,7 +424,7 @@ function App() {
             id: "telemetryId",
             Header: "Telemetry Id",
             minWidth: "150px",
-            width: "27vw",
+            width: "23vw",
             accessor: "telemetryId",
             Filter: tableFilters.TextFilter(),
           },
@@ -455,8 +455,8 @@ function App() {
               return (
                 <div>
                   <ButtonGroup>
-                    <IconButton size="small" className="icon-button-style" styleType="borderless" title= "View Device" disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, true)}><SvgVisibilityShow/></IconButton>
-                    <IconButton size="small" className="icon-button-style" styleType="borderless" title="Edit Device" style={isAdmin? {}:{display:"none"}} disabled={toggle || data.row.original.isRunning === true} onClick={() => openDeviceTwinModal(DeviceAction.UPDATE, data.row.original, false)}><SvgEdit/></IconButton>              
+                    <IconButton size="small" className="icon-button-style" styleType="borderless" title= "View Device" disabled={toggle || data.row.original.isRunning === true} onClick={() => openAddTelemetryPointModal(DeviceAction.UPDATE, data.row.original, true)}><SvgVisibilityShow/></IconButton>
+                    <IconButton size="small" className="icon-button-style" styleType="borderless" title="Edit Device" style={isAdmin? {}:{display:"none"}} disabled={toggle || data.row.original.isRunning === true} onClick={() => openAddTelemetryPointModal(DeviceAction.UPDATE, data.row.original, false)}><SvgEdit/></IconButton>              
                   </ButtonGroup>
                 </div>
               );
@@ -487,12 +487,12 @@ function App() {
       </>
     ),
   };
-  
-  const buttonMenuItems = () => [
-      <MenuItem key={1} onClick={() => openAddDeviceModal(DeviceAction.ADD)} textAlign="center">
+
+  const buttonMenuItems =  (close) => [
+      <MenuItem key={1} onClick={()=> {openAddDeviceModal(DeviceAction.ADD); close()}} textAlign="center">
         Device
       </MenuItem>,
-      <MenuItem key={2} onClick={() => openDeviceTwinModal(DeviceAction.ADD)}>
+      <MenuItem key={2} onClick={()=> {openAddTelemetryPointModal(DeviceAction.ADD); close()}}>
         TelemetryPoint
       </MenuItem>,
     ];
@@ -570,7 +570,7 @@ function App() {
                 isRowDisabled={isRowDisabled}
               />
               <AddDevice handleClose={handleClose} isOpen={openAddDevice} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
-              <AddTelemetry device={deviceTwin} handleClose={handleClose} isOpen={openDeviceTwin} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <AddTelemetryPoint device={telemetryPoint} handleClose={handleClose} isOpen={openAddTelemetryPoint} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
             </div>
           }
         </div> :

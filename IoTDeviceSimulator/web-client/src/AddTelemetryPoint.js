@@ -11,19 +11,19 @@ import { editAWSThings } from "./AWSUtililities";
 import { ChartComponent } from "./ChartComponent";
 import { BehaviourComponent } from "./BehaviourComponent";
 import { Tabs} from '@itwin/itwinui-react/esm/core/Tabs/Tabs';
-import { getAzureDeviceTwins} from "./AzureUtilities";
+import { getDataFromAzure} from "./AzureUtilities";
 
 // import App from './App';
 let arr = [];
 export let currDataArray = [];
 
-export function AddTelemetry(props) {
+export function AddTelemetryPoint(props) {
 
-    const [deviceTwin, setDeviceTwin] = useState({
+    const [telemetryPoint, setTelemetryPoint] = useState({
         deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
-        deviceInterfaceId: props.device.deviceInterfaceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceInterfaceId)) :"" ,
         deviceId: props.device.deviceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceId)) :"" ,
-        deviceName: props.device.deviceName!==undefined ? JSON.parse(JSON.stringify(props.device.deviceName)) :"",
+        telemetryId: props.device.telemetryId!==undefined ? JSON.parse(JSON.stringify(props.device.telemetryId)) :"" ,
+        telemetryName: props.device.telemetryName!==undefined ? JSON.parse(JSON.stringify(props.device.telemetryName)) :"",
         unit: props.device.unit!==undefined? JSON.parse(JSON.stringify(props.device.unit)):"" ,
         phenomenon: props.device.phenomenon!==undefined ? JSON.parse(JSON.stringify(props.device.phenomenon)) :"",
         valueIsBool: props.device.valueIsBool!==undefined? JSON.parse(JSON.stringify(props.device.valueIsBool)):false ,
@@ -35,10 +35,7 @@ export function AddTelemetry(props) {
         thingTypeName: props.device.thingTypeName!==undefined ? JSON.parse(JSON.stringify(props.device.thingTypeName)) :"" ,
         signalArray: props.device.signalArray!==undefined ? JSON.parse(JSON.stringify(props.device.signalArray)) :"" ,
     });
-    // const [deviceInterface, setDeviceInterface] = useState({
-    //     deviceInterfaceId: props.deviceInterface.deviceInterfaceId!==undefined ? JSON.parse(JSON.stringify(props.deviceInterface.deviceInterfaceId)) :"" ,
-    //     deviceInterfaceName: props.deviceInterface.deviceInterfaceName!==undefined ? JSON.parse(JSON.stringify(props.deviceInterface.deviceInterfaceName)) :"",
-    // });
+ 
     const [behaviour, setBehaviour] = useState("");
     const [index, setIndex] = useState(0);
     const [len, setLen] = useState(50);
@@ -55,11 +52,11 @@ export function AddTelemetry(props) {
     },[props]);
 
     useEffect(() => {
-        setDeviceTwin({
+        setTelemetryPoint({
             deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
+            telemetryId: props.device.telemetryId!==undefined ? JSON.parse(JSON.stringify(props.device.telemetryId)) :"" ,
             deviceId: props.device.deviceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceId)) :"" ,
-            deviceInterfaceId: props.device.deviceInterfaceId!==undefined ? JSON.parse(JSON.stringify(props.device.deviceInterfaceId)) :"" ,
-            deviceName: props.device.deviceName!==undefined ? JSON.parse(JSON.stringify(props.device.deviceName)) :"",
+            telemetryName: props.device.telemetryName!==undefined ? JSON.parse(JSON.stringify(props.device.telemetryName)) :"",
             unit: props.device.unit!==undefined? JSON.parse(JSON.stringify(props.device.unit)):"" ,
             phenomenon: props.device.phenomenon!==undefined ? JSON.parse(JSON.stringify(props.device.phenomenon)) :"",
             valueIsBool: props.device.valueIsBool!==undefined? JSON.parse(JSON.stringify(props.device.valueIsBool)):false ,
@@ -72,33 +69,29 @@ export function AddTelemetry(props) {
             signalArray: props.device.signalArray!==undefined ? JSON.parse(JSON.stringify(props.device.signalArray)) : [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`],
         });                
         setTabCount(props.device.signalArray?.length ?? 2);
-        // setDeviceInterface({
-        //     deviceInterfaceId: props.deviceInterface.deviceInterfaceId!==undefined ? JSON.parse(JSON.stringify(props.deviceInterface.deviceInterfaceId)) :"" ,
-        //     deviceInterfaceName: props.deviceInterface.deviceInterfaceName!==undefined ? JSON.parse(JSON.stringify(props.deviceInterface.deviceInterfaceName)) :"",
-        // });
-        setSelectedDeviceId(props.device.deviceInterfaceId);
+        setSelectedDeviceId(props.device.deviceId);
     }, [props]);
    
     const handleChange = (event) => {
         event.preventDefault();
-        if(event.target.name === 'deviceId'){
+        if(event.target.name === 'telemetryId'){
             deviceList.forEach(async (twin) => {
-                if (selectedDeviceId === twin.deviceInterfaceId){
+                if (selectedDeviceId === twin.deviceId){
                     if(!twin.telemetryIds.includes(event.target.value)){
-                        setDeviceTwin({
-                            ...deviceTwin,
+                        setTelemetryPoint({
+                            ...telemetryPoint,
                             [event.target.name]: event.target.value,
                         });
                     }
                     else{
-                        console.log(`ModuleId ${event.target.value}  already present`);
+                        console.log(`TelemetryId ${event.target.value}  already present`);
                     }
                 }
             });
         }
         else{
-            setDeviceTwin({
-                ...deviceTwin,
+            setTelemetryPoint({
+                ...telemetryPoint,
                 [event.target.name]: event.target.value,
             });
         }
@@ -111,8 +104,8 @@ export function AddTelemetry(props) {
 
     const setBehaviourConfigurer = () => {
         let k = 0;
-        const deviceSignalArray= deviceTwin.signalArray;
-        if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === '') {
+        const deviceSignalArray= telemetryPoint.signalArray;
+        if (telemetryPoint.signalArray[telemetryPoint.signalArray.length - 1] === '') {
             k = 1;
             deviceSignalArray.pop();
         }
@@ -125,9 +118,9 @@ export function AddTelemetry(props) {
             setNewBehaviour("");
         }
         
-        setTabCount(deviceTwin.signalArray.length+1);
+        setTabCount(telemetryPoint.signalArray.length+1);
         deviceSignalArray.push("");
-        setDeviceTwin({...deviceTwin,signalArray:deviceSignalArray});
+        setTelemetryPoint({...telemetryPoint,signalArray:deviceSignalArray});
         setBehaviour("");
     }
 
@@ -135,53 +128,53 @@ export function AddTelemetry(props) {
         setLen(event.target.value);
     }
 
-    const updateDeviceTwin = useCallback(async (event) => {
+    const updateTelemetryPoint = useCallback(async (event) => {
         event.preventDefault();
         setNewBehaviour("");
         let updatedDevice = false;
-        if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
-            deviceTwin.signalArray.pop();
+        if (telemetryPoint.signalArray[telemetryPoint.signalArray.length - 1] === "") {
+            telemetryPoint.signalArray.pop();
         }
         if (props.connection.includes("Azure")) {
-            if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
-                deviceTwin.signalArray.pop();
+            if (telemetryPoint.signalArray[telemetryPoint.signalArray.length - 1] === "") {
+                telemetryPoint.signalArray.pop();
             }
-            let deviceArray = [deviceTwin];
+            let deviceArray = [telemetryPoint];
             const response = await editTwins(deviceArray, props.connectionStringId, false)
             updatedDevice = response.updated;
             
         } else {
-            updatedDevice = await editAWSThings([deviceTwin]);
+            updatedDevice = await editAWSThings([telemetryPoint]);
         }        
         if (updatedDevice) {
-            toaster.informational(`Updated device twin : ${deviceTwin.deviceId}`);
-            props.handleClose(deviceTwin);
+            toaster.informational(`Updated telemetryPoint : ${telemetryPoint.telemetryId}`);
+            props.handleClose(telemetryPoint);
         }
-    }, [props, deviceTwin]);
+    }, [props, telemetryPoint]);
 
-    const addDevice = useCallback(async (event) => {
+    const addTelemetryPoint = useCallback(async (event) => {
         event.preventDefault();
-        const data = { deviceId: deviceTwin.deviceId, deviceInterfaceId: selectedDeviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'false' }
+        const data = { telemetryId: telemetryPoint.telemetryId, deviceId: selectedDeviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'false' }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) {            
-            if (deviceTwin.signalArray[deviceTwin.signalArray.length - 1] === "") {
-                deviceTwin.signalArray.pop();
+            if (telemetryPoint.signalArray[telemetryPoint.signalArray.length - 1] === "") {
+                telemetryPoint.signalArray.pop();
             }
-            let deviceArray = [deviceTwin];
+            let deviceArray = [telemetryPoint];
             const response = await editTwins(deviceArray, props.connectionStringId, false)
             if (response.updated) {
-                toaster.positive(`Added device : ${deviceTwin.deviceId}`);
+                toaster.positive(`Added TelemetryPoint : ${telemetryPoint.telemetryId}`);
                 props.handleClose(await response.response.json());
             }
         } else {
             const error = await response.text();
             toaster.negative(`${error}`);
         }
-    }, [deviceTwin, props, url]);
+    }, [telemetryPoint, props, url, selectedDeviceId]);
 
     const onClose = useCallback(() => {  
         setNewBehaviour("");  
@@ -201,9 +194,9 @@ export function AddTelemetry(props) {
 
     const removeBehaviour = (i) => {
         let k = 0;
-        const deviceSignalArray=deviceTwin.signalArray;
-        for (let i = 0; i < deviceTwin.signalArray.length; i++) {
-            if (deviceTwin.signalArray[i] !== '') {
+        const deviceSignalArray=telemetryPoint.signalArray;
+        for (let i = 0; i < telemetryPoint.signalArray.length; i++) {
+            if (telemetryPoint.signalArray[i] !== '') {
                 k += 1;
             }
         }
@@ -214,7 +207,7 @@ export function AddTelemetry(props) {
             
             deviceSignalArray.splice(i, 1);                      
             setTabCount(deviceSignalArray.length);
-            setDeviceTwin({...deviceTwin,signalArray:deviceSignalArray});
+            setTelemetryPoint({...telemetryPoint,signalArray:deviceSignalArray});
             setBehaviour("");
             setNewBehaviour("");
         }
@@ -222,7 +215,7 @@ export function AddTelemetry(props) {
     arr = [];
 
     for (let i = 0; i < len; i++) {
-        arr.push(i * (deviceTwin.telemetrySendInterval) / 1000);
+        arr.push(i * (telemetryPoint.telemetrySendInterval) / 1000);
     } 
     
     useEffect(()=>{
@@ -234,56 +227,56 @@ export function AddTelemetry(props) {
         getCompositeSignalDataArray();
         setCompositeSignalDataArrayChanged(!compositeSignalDataArrayChanged);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[deviceTwin,len]);
+    },[telemetryPoint,len]);
 
     const getCompositeSignalDataArray=()=>{
-        if(deviceTwin.signalArray===undefined)return [];
-        for (let i = 0; i < deviceTwin.signalArray.length; i++) {
-            if (deviceTwin.signalArray[i] !== '') {
-                if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Sine") {
+        if(telemetryPoint.signalArray===undefined)return [];
+        for (let i = 0; i < telemetryPoint.signalArray.length; i++) {
+            if (telemetryPoint.signalArray[i] !== '') {
+                if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Sine") {
                     for (let j = 0; j < len; j++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Mean"]) + Math.sin((j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000) + JSON.parse(deviceTwin.signalArray[i])["Phase"]) * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]);
+                        let currData = parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Mean"]) + Math.sin((j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000)) * (2 * Math.PI) / (parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Wave Period"]) / 1000) + JSON.parse(telemetryPoint.signalArray[i])["Phase"]) * parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Amplitude"]);
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Constant") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Constant") {
                     for (let j = 0; j < len; j++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Mean"]);
+                        let currData = parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Mean"]);
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Linear") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Linear") {
                     for (let j = 0; j < len; j++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Slope"]) * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000));
+                        let currData = parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Slope"]) * (j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000));
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Noise") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Noise") {
                     let mean = 0;
-                    let standard_deviation = parseFloat(deviceTwin.noiseSd);
+                    let standard_deviation = parseFloat(telemetryPoint.noiseSd);
                     for (let j = 0; j < len; j++) {
                         let x = (Math.random() - 0.5) * 2;
                         let noise = (1 / (Math.sqrt(2 * Math.PI) * standard_deviation)) * Math.pow(Math.E, -1 * Math.pow((x - mean) / standard_deviation, 2) / 2);
-                        let noise_mag = JSON.parse(deviceTwin.signalArray[i])["Noise Magnitude"] * Math.sign((Math.random() - 0.5) * 2);
+                        let noise_mag = JSON.parse(telemetryPoint.signalArray[i])["Noise Magnitude"] * Math.sign((Math.random() - 0.5) * 2);
                         let currData = noise * noise_mag;
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Triangular") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Triangular") {
                     for (let j = 0; j < len; j++) {
-                        let currData = (2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)))) / Math.PI;                        
+                        let currData = (2 * parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Amplitude"]) * Math.asin(Math.sin((2 * Math.PI * (j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Wave Period"]) / 1000)))) / Math.PI;                        
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Sawtooth") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Sawtooth") {
                     for (let j = 0; j < len; j++) {
-                        let currData = 2 * parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * ((j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000) - Math.floor(1 / 2 + (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)));
+                        let currData = 2 * parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Amplitude"]) * ((j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Wave Period"]) / 1000) - Math.floor(1 / 2 + (j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000)) / (parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Wave Period"]) / 1000)));
                         currDataArray[j] += currData;
                     }
                 }
-                else if (JSON.parse(deviceTwin.signalArray[i])["Behaviour"] === "Square") {
+                else if (JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] === "Square") {
                     for (let j = 0; j < len; j++) {
-                        let currData = parseFloat(JSON.parse(deviceTwin.signalArray[i])["Amplitude"]) * Math.sign(Math.sin((2 * Math.PI * (j * (parseFloat(deviceTwin.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(deviceTwin.signalArray[i])["Wave Period"]) / 1000)));
+                        let currData = parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Amplitude"]) * Math.sign(Math.sin((2 * Math.PI * (j * (parseFloat(telemetryPoint.telemetrySendInterval) / 1000))) / (parseFloat(JSON.parse(telemetryPoint.signalArray[i])["Wave Period"]) / 1000)));
                         currDataArray[j] += currData;
                     }
                 }
@@ -297,7 +290,7 @@ export function AddTelemetry(props) {
     }
   
     const setCurrDataArray=(behaviourDataArray, behaviourObject)=>{        
-        if (deviceTwin.signalArray && !deviceTwin.valueIsBool) {
+        if (telemetryPoint.signalArray && !telemetryPoint.valueIsBool) {
             currDataArray = [];
             for (let i = 0; i < len; i++) {
                 currDataArray[i] = (behaviourDataArray[i] ? behaviourDataArray[i] : 0);
@@ -307,7 +300,7 @@ export function AddTelemetry(props) {
         setNewBehaviour(behaviourObject);                
     }
                 
-    if (deviceTwin.valueIsBool) {
+    if (telemetryPoint.valueIsBool) {
         currDataArray = [];
         for (let i = 0; i < len; i++) {
             let currData = Math.round(Math.random());
@@ -324,7 +317,7 @@ export function AddTelemetry(props) {
     const squareInfo = "A square wave is a non-sinusoidal periodic wave in which the amplitude alternates at a steady frequency between fixed min & max values, with the same duration at min & max.";
 
     const getContent = () => {
-        if (deviceTwin.signalArray[index] === "") {
+        if (telemetryPoint.signalArray[index] === "") {
             return (<div className="behaviour-func">
                         <div className="behaviour-list">
                             <Select value={behaviour} placeholder={"Select Behaviour"} options={options} onChange={changeBehaviour} style={{ width: "300px" }} itemRenderer={(option) => (
@@ -332,19 +325,19 @@ export function AddTelemetry(props) {
                             )} >
                             </Select>
                         </div>
-                        <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
+                        <BehaviourComponent behaviour={behaviour} signalArray="" telemetrySendInterval={telemetryPoint.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
                     </div >);
         }
         else {            
-            if (deviceTwin.signalArray[index] === undefined) {
+            if (telemetryPoint.signalArray[index] === undefined) {
                 setIndex(0);
             }
             else {            
                 return (<div>
                             <div className="behaviour-list">
-                                <Select value={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
+                                <Select value={JSON.parse(telemetryPoint.signalArray[index])["Behaviour"]} options={options} style={{ width: "300px" }} disabled={true}></Select>
                             </div>
-                            <BehaviourComponent behaviour={JSON.parse(deviceTwin.signalArray[index])["Behaviour"]} signalArray={deviceTwin.signalArray[index]} telemetrySendInterval={deviceTwin.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
+                            <BehaviourComponent behaviour={JSON.parse(telemetryPoint.signalArray[index])["Behaviour"]} signalArray={telemetryPoint.signalArray[index]} telemetrySendInterval={telemetryPoint.telemetrySendInterval} arrayLength={len} setCurrDataArray={setCurrDataArray} newBehaviour={newBehaviour}/>
                         </div>);
             }
         }
@@ -386,28 +379,28 @@ export function AddTelemetry(props) {
 
     const propertiesData = [
         {
-          propKey: "Device Id",
-          propValue: deviceTwin.deviceId ? deviceTwin.deviceId.toString() : null,
+          propKey: "Telemetry Id",
+          propValue: telemetryPoint.telemetryId ? telemetryPoint.telemetryId.toString() : null,
         },
         {
             propKey: "Device Name",
-            propValue: deviceTwin.deviceName ? deviceTwin.deviceName.toString() : null,
+            propValue: telemetryPoint.telemetryName ? telemetryPoint.telemetryName.toString() : null,
         },
         {
             propKey: "Phenomenon",
-            propValue: deviceTwin.phenomenon ? deviceTwin.phenomenon.toString() : null,
+            propValue: telemetryPoint.phenomenon ? telemetryPoint.phenomenon.toString() : null,
         },
         {
             propKey: "Unit",
-            propValue: deviceTwin.unit ? deviceTwin.unit.toString() : null,
+            propValue: telemetryPoint.unit ? telemetryPoint.unit.toString() : null,
         },
         {
             propKey: "Is value bool",
-            propValue: deviceTwin.valueIsBool ? deviceTwin.valueIsBool.toString() : "false",
+            propValue: telemetryPoint.valueIsBool ? telemetryPoint.valueIsBool.toString() : "false",
         },
         {
             propKey: "Period (ms)",
-            propValue: deviceTwin.telemetrySendInterval ? deviceTwin.telemetrySendInterval.toString() : null,
+            propValue: telemetryPoint.telemetrySendInterval ? telemetryPoint.telemetrySendInterval.toString() : null,
         },
       ];
 
@@ -424,13 +417,13 @@ export function AddTelemetry(props) {
             </div>
           );
         case 1: // Behaviour
-            return (deviceTwin.signalArray)?(
+            return (telemetryPoint.signalArray)?(
                 <div className="divMarginTop">   
                     <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
 
                     <div className="scrollBarStyle">
                         <div className="border-div">
-                        {deviceTwin.signalArray.map((signal) => {
+                        {telemetryPoint.signalArray.map((signal) => {
                             const signalParse =JSON.parse(signal);
                             if(signalParse?.Behaviour)
                                 delete signalParse.Behaviour;
@@ -456,46 +449,37 @@ export function AddTelemetry(props) {
     };
 
     const onDeviceIdSelected = async(deviceId)=>{
-        // setDeviceInterface(...deviceInterface, deviceInterfaceId);
         setSelectedDeviceId(deviceId);
-        setDeviceTwin({...deviceTwin,deviceInterfaceId:deviceId});
+        setTelemetryPoint({...telemetryPoint,deviceId:deviceId});
     }
 
     const getDeviceList = async () => {
         let result;
-        const devices = await getAzureDeviceTwins(props.connectionStringId);        
+        const devices = await getDataFromAzure(props.connectionStringId);  
+        console.log("getDeviceList: " + JSON.stringify(devices));      
         if(devices?.deviceIdList){
             result = devices.deviceIdList
         }
-        // if(devices?.rows){
-        //     result = devices.rows.map((device) => ({ label: device.deviceInterfaceId, value: device.deviceInterfaceId}));
-        //     result = result.filter((a, i) => result.findIndex((s) => a.value === s.value) === i)
-        // }
         console.log(result);
         setDeviceList(result);
     }
-    // if (twin.deviceName!==""&& twin.deviceName!==undefined && twin.telemetryPoints[0].phenomenon!==""&& twin.telemetryPoints[0].phenomenon!==undefined && twin.deviceId!==undefined && twin.deviceId!=="" && !deviceIList.some((element) => {
-    //     return element.name.toLowerCase() === twin.deviceName.toLowerCase();
-    //   }) ){
-    //     if (twin.deviceId){
-    //       selectOptions.push({ value: twin.deviceId, label: twin.deviceId });
-    //     }
-    //   }
-    const deviceInterfaceIds = useMemo(() => {
+    
+    const deviceIds = useMemo(() => {
         let selectOptions = [];
-        deviceList.forEach(async (twin) => {
-          if (twin.deviceInterfaceId){
-              selectOptions.push({ value: twin.deviceInterfaceId, label: twin.deviceInterfaceId });
-            }
-          });
-          selectOptions = selectOptions.filter((a, i) => selectOptions.findIndex((s) => a.value === s.value) === i)
+        if(deviceList){
+            deviceList.forEach(async (twin) => {
+                if (twin.deviceId){
+                    selectOptions.push({ value: twin.deviceId, label: twin.deviceId });
+                }
+            });
+            selectOptions = selectOptions.filter((a, i) => selectOptions.findIndex((s) => a.value === s.value) === i)
+        }
         return selectOptions;
       }, [deviceList]);
 
-   let deviceTwinComponent; 
-    // const {deviceInterfaceId, deviceInterfaceName} = deviceInterface;
-   if(props.isView){
-        deviceTwinComponent = 
+   let telemetryPointComponent; 
+    if(props.isView){
+        telemetryPointComponent = 
         <div className="viewStyle">
         <Tabs
             labels={[
@@ -510,27 +494,27 @@ export function AddTelemetry(props) {
     </div>
    }
    else{
-        deviceTwinComponent =
+        telemetryPointComponent =
         <div>
             <div className="mainBox">
                 <div className="basic-prop">
                     <LabeledSelect className="basic" style={{marginTop:"15px"}}
                                         label=' Select Device ID'
-                                        options={deviceInterfaceIds}
+                                        options={deviceIds}
                                         displayStyle="default"
                                         value={selectedDeviceId}
                                         onChange={(id) => onDeviceIdSelected(id)}
                                         placeholder='Select Device ID'
-                                        disabled={deviceTwin.deviceAction === DeviceAction.ADD ? false : true}
+                                        disabled={telemetryPoint.deviceAction === DeviceAction.ADD ? false : true}
                                     />
-                    <LabeledInput className="basic" label='Device Id' name='deviceId' value={deviceTwin.deviceId}
-                        disabled={deviceTwin.deviceAction === DeviceAction.ADD ? false : true}
+                    <LabeledInput className="basic" label='Telemetry Id' name='telemetryId' value={telemetryPoint.telemetryId}
+                        disabled={telemetryPoint.deviceAction === DeviceAction.ADD ? false : true}
                         onChange={handleChange} />
-                    <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceTwin.deviceName} onChange={handleChange} />
-                    <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={deviceTwin.phenomenon} onChange={handleChange} />
-                    <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={deviceTwin.telemetrySendInterval} onChange={handleChange} />
-                    <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={deviceTwin.valueIsBool} onChange={(e) => { setDeviceTwin({ ...deviceTwin, valueIsBool: e.target.checked, unit: "", signalArray: deviceTwin.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (deviceTwin.valueIsBool) { setTabCount(2); } }} />
-                    <LabeledInput className="basic" label='Unit' name='unit' value={deviceTwin.unit} onChange={handleChange} style={{ display: deviceTwin.valueIsBool ? 'none' : 'inline' }} />
+                    <LabeledInput className="basic" label='Device Name' name='telemetryName' value={telemetryPoint.telemetryName} onChange={handleChange} />
+                    <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={telemetryPoint.phenomenon} onChange={handleChange} />
+                    <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={telemetryPoint.telemetrySendInterval} onChange={handleChange} />
+                    <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={telemetryPoint.valueIsBool} onChange={(e) => { setTelemetryPoint({ ...telemetryPoint, valueIsBool: e.target.checked, unit: "", signalArray: telemetryPoint.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] }); if (telemetryPoint.valueIsBool) { setTabCount(2); } }} />
+                    <LabeledInput className="basic" label='Unit' name='unit' value={telemetryPoint.unit} onChange={handleChange} style={{ display: telemetryPoint.valueIsBool ? 'none' : 'inline' }} />
                 </div>
                 <div className="behaviour-area">
                     <InputGroup label='No. of datapoints' displayStyle="inline">
@@ -541,14 +525,14 @@ export function AddTelemetry(props) {
 
                     <ChartComponent labelsArray={arr} dataArray={currDataArray} chartName="Composite Signal" />
 
-                    {deviceTwin.signalArray && !deviceTwin.valueIsBool ?
+                    {telemetryPoint.signalArray && !telemetryPoint.valueIsBool ?
                         <HorizontalTabs
                             style={{ overflow: "scroll", width: "400px" }}
                             labels={Array(tabCount).fill(null).map((_, i) => (
                                 <div className="tab-label">
                                     <Tab
                                         key={i}
-                                        label={deviceTwin.signalArray[i] ? JSON.parse(deviceTwin.signalArray[i])["Behaviour"] : 'New'}
+                                        label={telemetryPoint.signalArray[i] ? JSON.parse(telemetryPoint.signalArray[i])["Behaviour"] : 'New'}
                                     />
                                     <div className="cancel-button" onClick={function () { removeBehaviour(i); }}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M14.7 2.7 13.3 1.3 8 6.6 2.7 1.3 1.3 2.7 6.6 8 1.3 13.3 2.7 14.7 8 9.4 13.3 14.7 14.7 13.3 9.4 8z" /></svg></div>
                                     {i + 1 === tabCount ? <div className="add-button" onClick={setBehaviourConfigurer}><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8,0C3.6,0,0,3.6,0,8s3.6,8,8,8s8-3.6,8-8S12.4,0,8,0z M13,9H9v4H7V9H3V7h4V3h2v4h4V9z" /></svg></div> : null}
@@ -561,8 +545,8 @@ export function AddTelemetry(props) {
                         : null}
                 </div>
             </div>
-            {deviceTwin.deviceAction === DeviceAction.ADD ?
-                <Button className="buttons" styleType="high-visibility" onClick={addDevice}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateDeviceTwin}  > Update </Button>}
+            {telemetryPoint.deviceAction === DeviceAction.ADD ?
+                <Button className="buttons" styleType="high-visibility" onClick={addTelemetryPoint}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateTelemetryPoint}  > Update </Button>}
         </div>  
    }
 
@@ -572,9 +556,9 @@ export function AddTelemetry(props) {
                 closeOnExternalClick={false}
                 isOpen={props.isOpen}
                 onClose={onClose}
-                title={deviceTwin.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isView ? 'Device Details' : 'Update Device'}
+                title={telemetryPoint.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isView ? 'Device Details' : 'Update Device'}
             >
-                {deviceTwinComponent}
+                {telemetryPointComponent}
             </Modal >
         </>
     );

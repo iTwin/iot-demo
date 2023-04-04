@@ -280,11 +280,11 @@ header button {
   overflow: scroll;
 }
 
-.option {
+/* .option {
   width: 274px;
   height: 28px;
   margin: 5px 0px;
-}
+} */
 
 .scrollBarStyle {
   display: block;
@@ -348,6 +348,6 @@ min-height: 72.3vh;
   margin-left: 0px !important;
 }
 
-.iui-button{
+button {
   margin: 10px !important;
 }
