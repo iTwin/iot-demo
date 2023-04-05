@@ -171,7 +171,9 @@ function App() {
   })
 
   const openAddTelemetryPointModal = async (deviceAction, telemetryPoint, isButtonView) => {
-    setTelemetryPoint({ ...telemetryPoint, deviceAction });
+    const telemetryPointObject = telemetryPoint? telemetryPoint : {};
+    telemetryPointObject.deviceAction = deviceAction;
+    setTelemetryPoint(()=>(telemetryPointObject));
     setIsView(isButtonView)
     setOpenAddTelemetryPoint(true);
   }
@@ -202,13 +204,13 @@ function App() {
             break;
           }
         }
-        setTelemetryPoints(twins);
+        setTelemetryPoints(()=>(twins));
       } else {
         device.valueIsBool = device.valueIsBool === "true" ? true : false;
       }
       setData([device, ...devices]);
     } else if (device) {
-      setTelemetryPoints([...telemetryPoints, device]);
+      setTelemetryPoints((telemetryPoints)=>([...telemetryPoints, device]));
       const newDevice = {
         telemetryId: device.telemetryId,
         deviceId:device.deviceId,
@@ -240,8 +242,8 @@ function App() {
     let deviceString = "devices are";
     if (selectedConnection.includes("Azure")) {
       const azureDevices = await getDataFromAzure(selectedConnectionStringId);
-      setTelemetryPoints(azureDevices.rows);
       rows = azureDevices.rows;
+      setTelemetryPoints(()=>(rows));
     } else {
       const AWSThings = await getAWSThings();
       rows = AWSThings.rows;
