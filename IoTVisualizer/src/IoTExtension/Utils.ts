@@ -228,8 +228,8 @@ export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[])
     let realTimeData;
 
     if (msgJson) {
-      if (deviceList?.find((d) => d.iotId === msgJson.deviceId.toString()) !== undefined) {
-        const device = deviceList?.find((dev) => dev.iotId === msgJson.deviceId.toString());
+      if (deviceList?.find((d) => d.iotId === msgJson.telemetryId.toString()) !== undefined) {
+        const device = deviceList?.find((dev) => dev.iotId === msgJson.telemetryId.toString());
         if (device !== undefined) {
           if (!isNaN(msgJson.data)) {
             if (device?.phenomenon !== "Motion" && device?.phenomenon !== "Occupancy") {
@@ -239,7 +239,7 @@ export const getDeviceDataFromTelemetry = (msg: any, deviceList?: SmartDevice[])
             realTimeData = msgJson.data;
           }
           data.push({
-            iotId: device?.iotId, value: realTimeData, unit: device?.unit, phenomenon: device?.phenomenon, timeStamp: msgJson.timeStamp,
+            iotId: device?.iotId, value: realTimeData, unit: device?.unit !== undefined ? device.unit : "", phenomenon: device?.phenomenon, timeStamp: msgJson.timeStamp,
           });
           if (process.env.IMJS_ENABLE_ALERT === "true") {
             handleAlert(device, data, deviceList);

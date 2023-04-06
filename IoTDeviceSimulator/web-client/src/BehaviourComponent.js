@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ChartComponent } from "./ChartComponent";
 import { LabeledInput} from "@itwin/itwinui-react";
-import { currDataArray } from "./DeviceTwin";
+import { currDataArray } from "./AddTelemetryPoint";
 
 export function SineComponent(props) {
     const { arrayLength, telemetrySendInterval, signalArray, setCurrDataArray, newBehaviour } = props;

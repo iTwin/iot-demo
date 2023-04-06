@@ -47,17 +47,23 @@ export class AzureConnection extends IoTConnection {
         }),
       }).catch((error) => console.log(`Request failed: ${error}`));
       let deviceTwins: any[];
-
+      const telemetryPoints: any[] = [];
       if (response && response.status === 200) {
         deviceTwins = await response?.json();
+
+        deviceTwins.forEach((deviceTwin) => {
+          deviceTwin.telemetryPoints.forEach((telemetryPoint: any) => {
+            telemetryPoints.push(telemetryPoint);
+          });
+        });
         this._connectionVerified = true;
       }
       // set connectionId to devices belonging to Azure IoT Hub
       deviceListFromIModel.forEach((device) => {
-        if (deviceTwins !== undefined) {
-          if (deviceTwins.find((d) => d.deviceId === device.iotId)) {
+        if (telemetryPoints !== undefined) {
+          if (telemetryPoints.find((d) => d.moduleId === device.iotId)) {
             device.connectionId = connection.id.toString();
-            device.unit = deviceTwins.find((d) => d.deviceId === device.iotId).properties.desired.unit;
+            device.unit = telemetryPoints.find((d) => d.moduleId === device.iotId).properties.desired.unit;
           }
         }
       });

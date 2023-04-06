@@ -9,7 +9,7 @@ export const getHeaders = () => {
   })
 }
 
-export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
+export const getDataFromAzure = async (selectedConnectionStringId) => {
   let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/get-deviceTwins?connectionStringId=${selectedConnectionStringId}` ?? "", {
     method: "get",
     headers: getHeaders(),
@@ -17,22 +17,39 @@ export const getAzureDeviceTwins = async (selectedConnectionStringId) => {
   if (response && response.status === 200) {
     const devices = await response.json();
     const rows = [];
+    const deviceIdList = [];
+    let deviceId;
+    let telemetryIds = [];
     devices.forEach(device => {
-      rows.push({
-        deviceId: device.deviceId,
-        deviceName: device.properties.desired.deviceName,
-        phenomenon: device.properties.desired.phenomenon,
-        telemetrySendInterval: device.properties.desired.telemetrySendInterval,
-        unit: device.properties.desired.unit,
-        valueIsBool: device.properties.desired.valueIsBool,
-        noiseSd: device.properties.desired.noiseSd,
-        min: device.properties.desired.min,
-        max: device.properties.desired.max,
-        isRunning: device.properties.desired.isRunning,
-        signalArray: device.properties.desired.signalArray,
-      })
+      telemetryIds = [];
+      deviceId = device.deviceId;
+      device.telemetryPoints.forEach(telemetry=>{
+        rows.push({
+          telemetryId: telemetry.moduleId,
+          deviceId:telemetry.deviceId,
+          telemetryName: telemetry.properties.desired.name,          
+          phenomenon: telemetry.properties.desired.phenomenon,
+          telemetrySendInterval: telemetry.properties.desired.telemetrySendInterval,
+          unit: telemetry.properties.desired.unit,
+          valueIsBool: telemetry.properties.desired.valueIsBool,          
+          noiseSd: telemetry.properties.desired.noiseSd,
+          sine_period: telemetry.properties.desired.sine_period,
+          min: telemetry.properties.desired.min,
+          max: telemetry.properties.desired.max,
+          isRunning: telemetry.properties.desired.isRunning,
+          primaryKey: telemetry.authentication.symmetricKey.primaryKey,
+          signalArray:telemetry.properties.desired.signalArray
+        });
+        telemetryIds.push(telemetry.moduleId);
+      });
+
+      deviceIdList.push({
+          deviceId,
+          telemetryIds
+        });
+
     });
-    return { deviceTwins: devices, rows: rows };
+    return { rows: rows , deviceIdList: deviceIdList};
   }
 }
 
@@ -50,7 +67,7 @@ export const startSimulatorForAzure = async (selectedDevices, enableLogging, sel
 }
 
 export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionStringId) => {
-  const data = { deviceId: selectedDevices[0].deviceId, connectionStringId: selectedConnectionStringId, action: "stop" }
+  const data = { telemetryId: selectedDevices[0].telemetryId, deviceId:selectedDevices[0].deviceId, connectionStringId: selectedConnectionStringId }
   let response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/c2d-simulator`, {
     method: "POST",
     headers: getHeaders(),
@@ -63,8 +80,14 @@ export const stopSimulatorForAzure = async (selectedDevices, selectedConnectionS
   return false;
 }
 
-export const editDeviceTwins = async (deviceArray, connectionStringId) => {
-  const data = { deviceTwinArray: deviceArray, connectionStringId: connectionStringId }
+export const editTwins = async (value, connectionStringId, isDeviceTwin) => {
+  let data;
+  if(isDeviceTwin){
+    data = { deviceId: value?.deviceId, deviceName: value?.deviceName, connectionStringId: connectionStringId, isDeviceTwin: isDeviceTwin }
+  }
+  else{
+    data = { telemetryPointArray: value, connectionStringId: connectionStringId, isDeviceTwin: isDeviceTwin }
+  }
   const response = await fetch(`${process.env.REACT_APP_FUNCTION_URL ?? ""}/update-deviceTwin`, {
     method: 'POST',
     headers: getHeaders(),

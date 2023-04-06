@@ -16,21 +16,21 @@ module.exports = async function (context, req) {
 
   const jsonData = [];
   const iotHubName = ConnectionString.parse(process.env[req.body.connectionStringId], ["HostName"]).HostName;
-  let deviceArray = req.body.selectedDevices.map((deviceTwin) => {
+  let deviceArray = req.body.selectedDevices.map((telemetryPoint) => {
     return {
-      deviceId: deviceTwin.deviceId,
-      telemetrySendInterval: deviceTwin.telemetrySendInterval ?? 5000,
-      unit: deviceTwin.unit,
-      phenomenon: deviceTwin.phenomenon,
-      valueIsBool: deviceTwin.valueIsBool,
+      telemetryId: telemetryPoint.telemetryId,
+      telemetrySendInterval: telemetryPoint.telemetrySendInterval ?? 5000,
+      unit: telemetryPoint.unit,
+      phenomenon: telemetryPoint.phenomenon,
+      valueIsBool: telemetryPoint.valueIsBool,
       deviceSecurityType: "connectionString",
-      connectionString: `HostName=${iotHubName};DeviceId=${deviceTwin.deviceId};SharedAccessKey=${deviceTwin.primaryKey}`,
+      connectionString: `HostName=${iotHubName};DeviceId=${telemetryPoint.deviceId};ModuleId=${telemetryPoint.telemetryId};SharedAccessKey=${telemetryPoint.primaryKey}`,
       phase: Math.random() * Math.PI,
-      noiseSd: deviceTwin.noiseSd,
-      isRunning: deviceTwin.isRunning,
-      min: deviceTwin.min,
-      max: deviceTwin.max,
-      signalArray: deviceTwin.signalArray,
+      noiseSd: telemetryPoint.noiseSd,
+      isRunning: telemetryPoint.isRunning,
+      min: telemetryPoint.min,
+      max: telemetryPoint.max,
+      signalArray: telemetryPoint.signalArray,
     }
   });
 
@@ -42,7 +42,7 @@ module.exports = async function (context, req) {
       this.currTime = 0;
       this.startTime = Date.now();
       this.device = {
-        deviceId: "",
+        telemetryId: "",
         data: this.currData,
         unit: "",
         phenomenon: "",
@@ -61,7 +61,7 @@ module.exports = async function (context, req) {
         data = this.currData;
       }
       telemetry = {
-        deviceId: this.device.deviceId,
+        telemetryId: this.device.telemetryId,
         data: data,
         timeStamp: (new Date(this.currTime)).toString()
       };
@@ -199,43 +199,36 @@ module.exports = async function (context, req) {
         }
         // fromConnectionString must specify a transport, coming from any transport package.
         try {
-          const client = Client.fromConnectionString(deviceConnectionString, Protocol);
-
+          const client = Client.fromConnectionString(deviceConnectionString, Protocol);        
           try {
             // Add the modelId here
             await client.setOptions(modelIdObject);
 
-            await client.open();
-            intervalTokens[device.deviceId] = SetInterval(client, device);
-
-            client.on('message', async function (msg) {
-              if (msg.messageId.includes("stop")) {
-                stop = true;
-                for (const key in intervalTokens) {
-                  clearInterval(intervalTokens[key]);
-                }
-                intervalTokens = [];
-                if (req.body.enableLogging) {
-                  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-                  const data = JSON.stringify(jsonData);
-                  // Upload data to the blob              
-                  const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
-                }
+            await client.open();          
+            client.onDeviceMethod("stop",async (request, response)=>{
+              stop = true;
+              console.log("inside stop")
+              intervalTokens.forEach((value) => clearInterval(value.interval));
+              intervalTokens = [];
+              if (req.body.enableLogging) {
+                const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+                const data = JSON.stringify(jsonData);
+                // Upload data to the blob              
+                const uploadBlobResponse = await blockBlobClient.upload(data, data.length);
               }
-              else if (msg.messageId.includes("resolve")) {
-                clearInterval(intervalTokens[device.deviceId]);
-                device.signalArray = [`{"Behaviour":"Random","Min":${device.min},"Max":${device.max}}`]
-                intervalTokens[device.deviceId] = SetInterval(client, device);
-              }
-              client.complete(msg, function (err) {
+              client.complete(request, function (err) {
                 if (err) {
                   context.log('Complete error: ' + err.toString());
                 } else {
                   context.log('Complete sent');
                 }
               });
-              // client.close();
+              response.send(200,"stopped the simulator")
             });
+
+            
+            intervalTokens.push({telemetryId:device.telemetryId, interval:SetInterval(client, device)});
+            console.log("open connection")            
             client.close();
           }
           catch (ex) {
@@ -248,9 +241,7 @@ module.exports = async function (context, req) {
     }
 
     if (stop) {
-      for (const key in intervalTokens) {
-        clearInterval(intervalTokens[key]);
-      }
+      intervalTokens.forEach((value) => clearInterval(value.interval));
     }
   }
 
