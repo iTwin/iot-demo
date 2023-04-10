@@ -154,7 +154,8 @@ export function AddTelemetryPoint(props) {
 
     const addTelemetryPoint = useCallback(async (event) => {
         event.preventDefault();
-        const data = { telemetryId: telemetryPoint.telemetryId, deviceId: selectedDeviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'false' }
+        const telemetryId = selectedDeviceId+"-"+telemetryPoint.telemetryId;
+        const data = { telemetryId: telemetryId, deviceId: selectedDeviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'false' }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
             headers: getHeaders(),
@@ -165,6 +166,7 @@ export function AddTelemetryPoint(props) {
                 telemetryPoint.signalArray.pop();
             }
             let deviceArray = [telemetryPoint];
+            deviceArray[0]["telemetryId"] = telemetryId;
             const response = await editTwins(deviceArray, props.connectionStringId, false)
             if (response.updated) {
                 toaster.positive(`Added TelemetryPoint : ${telemetryPoint.telemetryId}`);
@@ -556,7 +558,7 @@ export function AddTelemetryPoint(props) {
                 closeOnExternalClick={false}
                 isOpen={props.isOpen}
                 onClose={onClose}
-                title={telemetryPoint.deviceAction === DeviceAction.ADD ? 'Add Device' : props.isView ? 'Device Details' : 'Update Device'}
+                title={telemetryPoint.deviceAction === DeviceAction.ADD ? 'Add Telemetry' : props.isView ? 'Device Details' : 'Update Device'}
             >
                 {telemetryPointComponent}
             </Modal >

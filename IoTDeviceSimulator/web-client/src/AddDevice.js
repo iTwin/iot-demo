@@ -31,13 +31,15 @@ export function AddDevice(props) {
 
     const addDevice = useCallback(async (event) => {
         event.preventDefault();
-        const data = { deviceId: deviceData.deviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'true' }
+        const deviceId = "iothub:device:"+deviceData.deviceId;
+        const data = { deviceId: deviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'true' }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) { 
+            deviceData["deviceId"] = deviceId;
             const response = await editTwins(deviceData, props.connectionStringId, true )
             if (response.updated) {
                 toaster.positive(`Added device : ${deviceData.deviceId}`);
