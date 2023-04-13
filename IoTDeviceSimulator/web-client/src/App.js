@@ -22,6 +22,7 @@ let count;
 function App() {
   const [toggle, setToggle] = useState(false);
   const [data, setData] = useState([]);
+  const [deviceData, setDeviceIds] = useState([]);
   const [telemetryPoints, setTelemetryPoints] = useState([]);
   const [openAddTelemetryPoint, setOpenAddTelemetryPoint] = useState(false);
   const [telemetryPoint, setTelemetryPoint] = useState({});
@@ -212,7 +213,7 @@ function App() {
     } else if (device) {
       setTelemetryPoints((telemetryPoints)=>([...telemetryPoints, device]));
       const newDevice = {
-        telemetryId: device.telemetryId,
+        telemetryId: device.moduleId,
         deviceId:device.deviceId,
         telemetryName: device.telemetryName,        
         phenomenon: device.phenomenon,
@@ -225,8 +226,12 @@ function App() {
         isRunning: device.isRunning,
         signalArray: device.signalArray
       }
+      if(newDevice.telemetryId !== undefined)
       setData([...data, newDevice]);
+      else
+      setDeviceIds([...deviceData , newDevice]);
     }
+    
     setOpenAddTelemetryPoint(false);
     setOpenAddDevice(false);
   }
@@ -236,7 +241,9 @@ function App() {
       return;
     }
     let rows = [];
+    let deviceIds = [] ;
     setData([]);
+    setDeviceIds([]);
     setIsLoading(true);
     count = 0;
     let deviceString = "devices are";
@@ -244,6 +251,8 @@ function App() {
       const azureDevices = await getDataFromAzure(selectedConnectionStringId);
       rows = azureDevices.rows;
       setTelemetryPoints(()=>(rows));
+      deviceIds = azureDevices.deviceIdList;
+      setDeviceIds(() => (deviceIds));
     } else {
       const AWSThings = await getAWSThings();
       rows = AWSThings.rows;
@@ -379,7 +388,7 @@ function App() {
             primaryKey: telemetryPoint.primaryKey,
             signalArray: telemetryPoint.signalArray
           });
-          console.log("App.js - OnSelect telemetryPoint " +selectedDeviceIds);
+         // console.log("App.js - OnSelect telemetryPoint " +selectedDeviceIds);
         } else {
           selectedDeviceIds.push(row)
         }
@@ -571,7 +580,7 @@ function App() {
                 onSelect={onSelect}
                 isRowDisabled={isRowDisabled}
               />
-              <AddDevice handleClose={handleClose} isOpen={openAddDevice} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
+              <AddDevice handleClose={handleClose} isOpen={openAddDevice} connectionStringId={selectedConnectionStringId} connection={selectedConnection} data={deviceData}/>
               <AddTelemetryPoint device={telemetryPoint} handleClose={handleClose} isOpen={openAddTelemetryPoint} isView={isView} connectionStringId={selectedConnectionStringId} connection={selectedConnection} />
             </div>
           }

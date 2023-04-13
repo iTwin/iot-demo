@@ -51,6 +51,9 @@ export function AddTelemetryPoint(props) {
         getDeviceList();
     },[props]);
 
+    const [errorMsg, setErrorMsg] = useState('');
+    const [exists,setExists] = useState(false);
+
     useEffect(() => {
         setTelemetryPoint({
             deviceAction: props.device.deviceAction!==undefined ? JSON.parse(JSON.stringify(props.device.deviceAction)):"",
@@ -74,20 +77,8 @@ export function AddTelemetryPoint(props) {
    
     const handleChange = (event) => {
         event.preventDefault();
-        if(event.target.name === 'telemetryId'){
-            deviceList.forEach(async (twin) => {
-                if (selectedDeviceId === twin.deviceId){
-                    if(!twin.telemetryIds.includes(event.target.value)){
-                        setTelemetryPoint((telemetryPoint)=>({
-                            ...telemetryPoint,
-                            [event.target.name]: event.target.value,
-                        }));
-                    }
-                    else{
-                        console.log(`TelemetryId ${event.target.value}  already present`);
-                    }
-                }
-            });
+        if(event.target.name === 'telemetryId' ){
+            validateTelemetryId(selectedDeviceId, event.target.value);
         }
         else{
             setTelemetryPoint((telemetryPoint)=>({
@@ -170,7 +161,8 @@ export function AddTelemetryPoint(props) {
             const response = await editTwins(deviceArray, props.connectionStringId, false)
             if (response.updated) {
                 toaster.positive(`Added TelemetryPoint : ${telemetryPoint.telemetryId}`);
-                props.handleClose(await response.response.json());
+                const jsonResponse = await response.response.json();
+                props.handleClose(jsonResponse[0]);
             }
         } else {
             const error = await response.text();
@@ -180,7 +172,9 @@ export function AddTelemetryPoint(props) {
 
     const onClose = useCallback(() => {  
         setNewBehaviour("");  
-        setTabIndex(0);           
+        setTabIndex(0); 
+        setErrorMsg("");
+        setExists(false);            
         props.handleClose();
     }, [props]);
 
@@ -385,7 +379,7 @@ export function AddTelemetryPoint(props) {
           propValue: telemetryPoint.telemetryId ? telemetryPoint.telemetryId.toString() : null,
         },
         {
-            propKey: "Device Name",
+            propKey: "Telemetry Name",
             propValue: telemetryPoint.telemetryName ? telemetryPoint.telemetryName.toString() : null,
         },
         {
@@ -454,18 +448,42 @@ export function AddTelemetryPoint(props) {
         setSelectedDeviceId(deviceId);
         setTelemetryPoint((telemetryPoint)=>({...telemetryPoint,deviceId:deviceId}));
 
+        if(telemetryPoint.telemetryId !== "")
+        validateTelemetryId(deviceId,telemetryPoint.telemetryId)
     }
 
+    const validateTelemetryId = (dId,tp) => {
+        deviceList.forEach(async (twin) => {
+            if (dId === twin.deviceId){
+                const inputTelemetryId = tp;
+                if(twin.telemetryIds.find(function (element) {
+                    return element === selectedDeviceId+"-"+inputTelemetryId;
+                })){
+                    setExists(true);
+                    setErrorMsg(`Telemetry Id ${tp}  already present`);
+                }
+                else{
+                    setExists(false);
+                    setErrorMsg('');
+                }
+                setTelemetryPoint((telemetryPoint)=>({
+                    ...telemetryPoint,
+                    telemetryId: tp,
+                }));
+            }
+        });
+    }
+    
     const getDeviceList = async () => {
         let result;
         const devices = await getDataFromAzure(props.connectionStringId);      
         if(devices?.deviceIdList){
             result = devices.deviceIdList
         }
-        console.log(result);
+        // console.log(result);
         setDeviceList(result);
     }
-    
+
     const deviceIds = useMemo(() => {
         let selectOptions = [];
         if(deviceList){
@@ -501,6 +519,7 @@ export function AddTelemetryPoint(props) {
             <div className="mainBox">
                 <div className="basic-prop">
                     <LabeledSelect className="basic" style={{marginTop:"15px"}}
+                                        name= 'deviceId'
                                         label=' Select Device ID'
                                         options={deviceIds}
                                         displayStyle="default"
@@ -511,8 +530,11 @@ export function AddTelemetryPoint(props) {
                                     />
                     <LabeledInput className="basic" label='Telemetry Id' name='telemetryId' value={telemetryPoint.telemetryId}
                         disabled={telemetryPoint.deviceAction === DeviceAction.ADD ? false : true}
-                        onChange={handleChange} />
-                    <LabeledInput className="basic" label='Device Name' name='telemetryName' value={telemetryPoint.telemetryName} onChange={handleChange} />
+                        onChange={handleChange}
+                        message={errorMsg !== "" ? errorMsg : ''}
+                        status={errorMsg !== "" ? 'negative' : undefined}
+                        />
+                    <LabeledInput className="basic" label='Telemetry Name' name='telemetryName' value={telemetryPoint.telemetryName} onChange={handleChange} />
                     <LabeledInput className="basic" label='Phenomenon' name='phenomenon' value={telemetryPoint.phenomenon} onChange={handleChange} />
                     <LabeledInput className="basic" label='Data Period (ms per observation)' name='telemetrySendInterval' value={telemetryPoint.telemetrySendInterval} onChange={handleChange} />
                     <ToggleSwitch className="basic" label='Is value bool' labelPosition="left" name='valueIsBool' checked={telemetryPoint.valueIsBool} onChange={(e) => { setTelemetryPoint((telemetryPoint)=>({ ...telemetryPoint, valueIsBool: e.target.checked, unit: "", signalArray: telemetryPoint.valueIsBool ? [`{"Behaviour":"Constant","Mean":100}`, `{"Behaviour":"Noise","Noise Magnitude":5,"Noise Standard-deviation":0.45}`] : [] })); if (telemetryPoint.valueIsBool) { setTabCount(2); } }} />
@@ -548,7 +570,7 @@ export function AddTelemetryPoint(props) {
                 </div>
             </div>
             {telemetryPoint.deviceAction === DeviceAction.ADD ?
-                <Button className="buttons" styleType="high-visibility" onClick={addTelemetryPoint}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateTelemetryPoint}  > Update </Button>}
+                <Button className="buttons" styleType="high-visibility" onClick={addTelemetryPoint} disabled={exists}> Add </Button> : <Button className="buttons" styleType="high-visibility" onClick={updateTelemetryPoint}  > Update </Button>}
         </div>  
    }
 
