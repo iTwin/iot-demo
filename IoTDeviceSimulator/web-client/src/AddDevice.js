@@ -15,9 +15,25 @@ export function AddDevice(props) {
         deviceId: "",
         deviceName: "",
       });
+
+    const [errorMsg, setErrorMsg] = useState('');
+    const [exists,setExists] = useState(false);
    
     const handleChange = (event) => {
         event.preventDefault();
+        const deviceId = "iothub:device:"+event.target.value;
+        let found = props.data.find(function (element) {
+            return element.deviceId == deviceId;
+        });
+        if(found)
+        {
+            setExists(true);
+            setErrorMsg(`Device Id ${deviceId}  already present`);
+        }
+        else{
+            setExists(false);
+            setErrorMsg('');
+        }
         setDeviceData({
             ...deviceData,
             [event.target.name]: event.target.value,
@@ -25,19 +41,23 @@ export function AddDevice(props) {
     };
 
     const onClose = useCallback(() => {   
-        setDeviceData("");          
+        setDeviceData(""); 
+        setErrorMsg("");
+        setExists(false);         
         props.handleClose();
     }, [props]);
 
     const addDevice = useCallback(async (event) => {
         event.preventDefault();
-        const data = { deviceId: deviceData.deviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'true' }
+        const deviceId = "iothub:device:"+deviceData.deviceId;
+        const data = { deviceId: deviceId, connectionStringId: props.connectionStringId, isDeviceTwin: 'true' }
         const response = await fetch(`${url}/create-device`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(data),
         }).catch(error => console.log("Request failed: " + error));
         if (response && response.status === 200) { 
+            deviceData["deviceId"] = deviceId;
             const response = await editTwins(deviceData, props.connectionStringId, true )
             if (response.updated) {
                 toaster.positive(`Added device : ${deviceData.deviceId}`);
@@ -62,11 +82,14 @@ export function AddDevice(props) {
                 >
                 <div className="mainBox">
                     <div className="add-device-window">
-                        <LabeledInput className="basic" label='Device Id' name='deviceId' value={deviceId} onChange={handleChange} />
+                        <LabeledInput className="basic" label='Device Id' name='deviceId' value={deviceId} onChange={handleChange} 
+                        message={errorMsg != "" ? errorMsg : ''}
+                        status={errorMsg != "" ? 'negative' : undefined}
+                        />
                         <LabeledInput className="basic" label='Device Name' name='deviceName' value={deviceName} onChange={handleChange} />
                     </div>
                 </div>
-                <Button className="buttons" styleType="high-visibility" onClick={addDevice} > Add </Button>
+                <Button className="buttons" styleType="high-visibility" onClick={addDevice} disabled={exists} > Add </Button>
             </Modal >
         </>
     )
