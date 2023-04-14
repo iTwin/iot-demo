@@ -30,9 +30,9 @@ export class MockAPIConnection extends IoTConnection {
   }) {
 
     deviceListFromIModel.forEach((device) => {
-      if (mockData !== undefined && mockData.find((d) => d.deviceId.toString() === device.iotId.toString()) !== undefined) {
+      if (mockData !== undefined && mockData.find((d) => d.moduleId.toString() === device.iotId.toString()) !== undefined) {
         device.connectionId = connection.id.toString();
-        device.unit = mockData.find((d) => d.deviceId.toString() === device.iotId.toString())?.unit ?? "";
+        device.unit = mockData.find((d) => d.moduleId.toString() === device.iotId.toString())?.unit ?? "";
       }
     });
     this._connectionVerified = true;
@@ -48,7 +48,7 @@ export class MockAPIConnection extends IoTConnection {
       if (this._connectionUrl === "") {
         return false;
       }
-      const response = await fetch(`${this._connectionUrl}/iot_sim_1.json`).catch((error) => {
+      const response = await fetch(`${this._connectionUrl}/SensorData.json`).catch((error) => {
         console.log(error);
       });
       if (response && response.status === 200 && await response.json() !== undefined && this._connectionVerified) {
@@ -68,13 +68,15 @@ export class MockAPIConnection extends IoTConnection {
       const reading = await IoTLink.fetchReading();
       const callBacks = ITwinViewerApp.store.getState().consumerState.consumerCallbacks;
       if (reading !== undefined) {
-        reading.forEach((read) => {
-          const readingData = { deviceId: read.IoTId, data: read.Reading.split(" ")[0], unit: read.Reading.split(" ")[1], timeStamp: new Date().toString() };
-          if (callBacks.size === 0) {
-            this.stopMonitoring();
-          } else {
-            for (const value of callBacks.values()) {
-              value(JSON.stringify(readingData));
+        Object.keys(reading).forEach((key) => {
+          if (key !== "Timestamp") {
+            const readingData = { telemetryId: key, data: reading[key].split(/(?<=\d)(?=[a-zA-Z])/)[0], unit: reading[key].split(/(?<=\d)(?=[a-zA-Z])/)[1], timeStamp: new Date().toString() };
+            if (callBacks.size === 0) {
+              this.stopMonitoring();
+            } else {
+              for (const value of callBacks.values()) {
+                value(JSON.stringify(readingData));
+              }
             }
           }
         });

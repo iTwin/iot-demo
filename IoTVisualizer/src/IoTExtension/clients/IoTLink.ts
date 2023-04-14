@@ -8,18 +8,13 @@ import { displayToaster } from "../../App";
 import { IoTConnectionManager } from "../IoTConnection/IoTConnectionManager";
 import { getConfiguration } from "../Utils";
 
-interface Reading {
-  IoTId: string;
-  Reading: string;
-}
-
 export class IoTLink {
   private static time: number = 1;
-  private static latestReadings: Reading[];
+  private static latestReadings: { [key: string]: any };
 
   public static fetchReading = async () => {
     IoTLink.latestReadings = await IoTLink.fetchData();
-    IoTLink.time = (IoTLink.time === 30) ? 1 : ++IoTLink.time;
+    IoTLink.time = (IoTLink.time === 441) ? 0 : ++IoTLink.time;
     return IoTLink.latestReadings;
   };
 
@@ -34,13 +29,13 @@ export class IoTLink {
     let readings;
     if (hostUrl) {
       try {
-        const response = await fetch(`${hostUrl}/iot_sim_${IoTLink.time}.json`);
+        const response = await fetch(`${hostUrl}/SensorData.json`);
         readings = await response.json();
       } catch (error) {
         displayToaster("Invalid Connection URL Please check connection URLs!!!");
       }
     }
 
-    return readings;
+    return readings[IoTLink.time];
   };
 }

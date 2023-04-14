@@ -55,7 +55,7 @@ export class IoTConnectionManager {
   }
 
   public static createConnection = async () => { // Initialize all IoT connections
-    const connections = getConfiguration().Connections;
+    const connections = getConfiguration().Connections.filter((item: any) => item.type === "MOCK_API_CONNECTION");
     if (!connections) {
       console.log(`No IoT connections found.`);
       return;

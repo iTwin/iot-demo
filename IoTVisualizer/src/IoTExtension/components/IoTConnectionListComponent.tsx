@@ -11,7 +11,7 @@ import { Roles } from "../SmartDevice";
 import { getConfiguration, getUserRole } from "../Utils";
 
 export const IoTConnectionListComponent = (props: any) => {
-  const connections = getConfiguration().Connections;
+  const connections = getConfiguration().Connections.filter((item: any) => item.type === "MOCK_API_CONNECTION");
   return (
     <>
       < InputGroup

@@ -1,44 +1,32 @@
 [
   {
-    "deviceName": "P1",
-    "deviceId": "25791",
-    "phenomenon": "Water Pressure",
-    "unit": "psi"
+    "name": "9450 North FPB 1N-10",
+    "moduleId": "FPB 1N-10",
+    "phenomenon": "Discharge Air Flow",
+    "unit": "cfm"
   },
   {
-    "deviceName": "T1",
-    "deviceId": "27983",
-    "phenomenon": "Temperature",
-    "unit": "deg F"
+    "name": "9450 North VAV 1N-11",
+    "moduleId": "VAV 1N-11",
+    "phenomenon": "Discharge Air Flow",
+    "unit": "cfm"
   },
   {
-    "deviceName": "V1",
-    "deviceId": "27985",
-    "phenomenon": "Visibility",
-    "unit": "ft"
+    "name": "9450 North VAV 1N-10",
+    "moduleId": "VAV 1N-10",
+    "phenomenon": "Discharge Air Flow",
+    "unit": "cfm"
   },
   {
-    "deviceName": "MS1",
-    "deviceId": "27987",
-    "phenomenon": "Motion",
-    "unit": ""
+    "name": "9450 North FPB 1N-9",
+    "moduleId": "FPB 1N-9",
+    "phenomenon": "Discharge Air Flow",
+    "unit": "cfm"
   },
   {
-    "deviceName": "L1",
-    "deviceId": "27988",
-    "phenomenon": "Water Level",
-    "unit": "ft"
-  },
-  {
-    "deviceName": "AQ1",
-    "deviceId": "27898",
-    "phenomenon": "Air Quality",
-    "unit": "aqi"
-  },
-  {
-    "deviceName": "O1",
-    "deviceId": "67800",
-    "phenomenon": "Occupancy",
-    "unit": ""
+    "name": "9450 North FPB 1N-11",
+    "moduleId": "FPB 1N-11",
+    "phenomenon": "Discharge Air Flow",
+    "unit": "cfm"
   }
 ]

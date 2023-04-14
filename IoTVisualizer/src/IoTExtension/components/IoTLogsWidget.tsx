@@ -96,7 +96,7 @@ export const IoTLogsWidget = () => {
 
   useEffect(() => {
     const connList = [];
-    const connections = getConfiguration().Connections;
+    const connections = getConfiguration().Connections.filter((item: any) => item.type === "MOCK_API_CONNECTION");
     if (connections !== undefined) {
       for (const connection of connections) {
         connList.push({ label: connection.name, value: connection.id });
