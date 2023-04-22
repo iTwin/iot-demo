@@ -9,11 +9,11 @@
   },
   "dependencies": {
     "@azure/storage-blob": "^12.11.0",
-    "aws-sdk": "^2.1233.0",
+    "aws-sdk": "^2.1363.0",
     "azure-iot-device-mqtt": "1.15.8",
     "azure-iot-provisioning-device-mqtt": "1.7.12",
     "azure-iot-security-symmetric-key": "1.7.12",
-    "azure-iothub": "^1.14.6",
+    "azure-iothub": "^1.16.2",
     "dotenv": "^16.0.1"
   }
 }
