@@ -24,7 +24,6 @@ export class AwsConnection extends IoTConnection {
           aws_appsync_authenticationType: "API_KEY",
           aws_appsync_apiKey: process.env[key],
         });
-        console.log(this._connection);
       } catch (error) {
         console.log(error);
       }
