@@ -8,6 +8,8 @@ import { DeviceActionId } from "../app/AppState";
 import { ITwinViewerApp } from "../app/ITwinViewerApp";
 import { SmartDevice } from "../SmartDevice";
 import { IoTConnection } from "./IotConnection";
+import { DeviceMonitorUI } from "../DeviceMonitorUI";
+import { displayToaster } from "../../App";
 
 export class AzureConnection extends IoTConnection {
   constructor(connectionUrl: string, key: string) {
@@ -38,6 +40,7 @@ export class AzureConnection extends IoTConnection {
     connectionUrl1: string;
     connectionUrl2: string;
   }) {
+    let errorOccured = false;
     try {
       // populateDevices
       // fetch Azure device twins from Azure IoT hub
@@ -46,12 +49,19 @@ export class AzureConnection extends IoTConnection {
         headers: new Headers({
           "x-functions-key": process.env.IMJS_SIMULATOR_FUNCTION_APP_KEY ?? "",
         }),
-      }).catch((error) => console.log(`Request failed: ${error}`));
+      }).catch((error) => {
+        console.log(`Request failed: ${error}`);
+        errorOccured = true;
+        this.indicateError(connection.id, connection.name);
+      });
       let deviceTwins: any[];
 
       if (response && response.status === 200) {
         deviceTwins = await response?.json();
         this._connectionVerified = true;
+        DeviceMonitorUI.onPopulateDeviceComplete.raiseEvent();
+      } else if (!errorOccured) {
+        this.indicateError(connection.id, connection.name);
       }
       // set connectionId to devices belonging to Azure IoT Hub
       deviceListFromIModel.forEach((device) => {
@@ -68,7 +78,8 @@ export class AzureConnection extends IoTConnection {
         payload: deviceListFromIModel,
       });
     } catch (error) {
-      // displayToaster("Invalid Function URL Please check connection URLs!!!");
+      if (!errorOccured)
+        this.indicateError(connection.id, connection.name);
     }
   }
 
@@ -89,6 +100,11 @@ export class AzureConnection extends IoTConnection {
     } else {
       return false;
     }
+  }
+
+  private indicateError(connectionId: number, connectionName: string) {
+    displayToaster(`There is some problem in loading ${connectionName} devices!!`);
+    DeviceMonitorUI.onPopulateDeviceError.raiseEvent(connectionId);
   }
 
   public listen() {

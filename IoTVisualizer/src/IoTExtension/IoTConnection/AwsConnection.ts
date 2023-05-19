@@ -9,6 +9,8 @@ import { SmartDevice } from "../SmartDevice";
 import { IoTConnection } from "./IotConnection";
 import * as awsCLient from "../clients/AWSClient";
 import { Amplify } from "@aws-amplify/core";
+import { DeviceMonitorUI } from "../DeviceMonitorUI";
+import { displayToaster } from "../../App";
 
 const subscriptions: any[] = [];
 
@@ -39,21 +41,32 @@ export class AwsConnection extends IoTConnection {
     connectionUrl1: string;
     connectionUrl2: string;
   }) {
+    let errorOccured = false;
     try {
       // fetch AWS things from AWS IoT Core
+
       const response = await fetch(`${connection.connectionUrl2}/getthings` ?? "", {
         method: "get",
         headers: new Headers({
           "x-api-key": process.env.IMJS_AWS_API_GATEWAY_APIKEY ?? "",
           "Content-Type": "application/json",
         }),
-      }).catch((error) => console.log(`Request failed: ${error}`));
+      }).catch((error) => {
+        console.log(`Request failed: ${error}`);
+        errorOccured = true;
+        this.indicateError(connection.id, connection.name);
+      });
+
       let things: { thingName: string, attributes: { Phenomenon: string, Unit: string } }[] = [];
       if (response && response.status === 200) {
         const result = await response.json();
         things = JSON.parse(result.body);
         this._connectionVerified = true;
+        DeviceMonitorUI.onPopulateDeviceComplete.raiseEvent();
+      } else if (!errorOccured) {
+        this.indicateError(connection.id, connection.name);
       }
+
       // set connectionId and unit for all devices belonging to AWS connection
       deviceListFromIModel.forEach((device) => {
         if (things !== undefined) {
@@ -69,6 +82,8 @@ export class AwsConnection extends IoTConnection {
         payload: deviceListFromIModel,
       });
     } catch (error) {
+      if (!errorOccured)
+        this.indicateError(connection.id, connection.name);
     }
   }
 
@@ -77,6 +92,11 @@ export class AwsConnection extends IoTConnection {
       return false;
     }
     return true;
+  }
+
+  private indicateError(connectionId: number, connectionName: string) {
+    displayToaster(`There is some problem in loading ${connectionName} devices!!`);
+    DeviceMonitorUI.onPopulateDeviceError.raiseEvent(connectionId);
   }
 
   public async listen() {
