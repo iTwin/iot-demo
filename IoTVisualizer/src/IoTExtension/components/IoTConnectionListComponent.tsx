@@ -20,7 +20,7 @@ export const IoTConnectionListComponent = (props: any) => {
         {connections?.map((connection: any) => {
 
           return (
-            <Checkbox key={connection.id} label={connection.name} defaultChecked={false} onChange={async (e: { target: { checked: any } }) => {
+            <Checkbox key={connection.id} label={connection.name} defaultChecked={false} disabled={props.failedConnections.includes(connection.id)} onChange={async (e: { target: { checked: any } }) => {
               const connectionObject = IoTConnectionManager.getConnection(connection.id.toString());
               if (!e.target.checked) {
                 if (connectionObject) {

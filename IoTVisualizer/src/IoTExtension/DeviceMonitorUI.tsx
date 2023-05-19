@@ -15,6 +15,7 @@ import { getConfiguration } from "./Utils";
 import "chartjs-adapter-moment";
 import { getLogData, setLogData } from "./components/IoTLogsWidget";
 import { Code } from "@itwin/itwinui-react";
+import { BeEvent } from "@itwin/core-bentley";
 
 Chart.register(CategoryScale,
   LinearScale,
@@ -40,6 +41,9 @@ export class DeviceMonitorUI {
   public static _chartData: chartData[] = [];
   public static chartLabel: Map<string, chartLabels> = new Map();
   public static _colorPallete: string[] = getConfiguration()?.chart?.colors ?? "";
+
+  public static onPopulateDeviceComplete = new BeEvent<() => void>();
+  public static onPopulateDeviceError = new BeEvent<(connectionId: number) => void>();
 
   public static createToolTip(device: SmartDevice, realTimeData: any, location: Readonly<WritableXAndY> | undefined, unitOfData?: string) {
     const title = unitOfData ? `<b> ${device.label} - ${device.type} </b><br> ${device.phenomenon}: ${realTimeData} ${unitOfData}` : `<b> ${device.label} - ${device.type} </b><br> ${device.phenomenon}: ${realTimeData}`;

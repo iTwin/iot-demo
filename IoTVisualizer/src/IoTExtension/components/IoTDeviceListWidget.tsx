@@ -8,14 +8,16 @@ import { IModelApp, IModelConnection, ViewState3d } from "@itwin/core-frontend";
 import { ClipPlane, ClipPrimitive, ClipVector, ConvexClipPlaneSet, Plane3dByOriginAndUnitNormal, Point3d, Vector3d } from "@itwin/core-geometry";
 import { Story } from "../clients/ITwinLink";
 import { SensorList } from "./SensorList";
-import { Select, ToggleSwitch } from "@itwin/itwinui-react";
+import { Label, NonIdealState, ProgressRadial, Select, ToggleSwitch } from "@itwin/itwinui-react";
 import { IoTConnectionListComponent } from "./IoTConnectionListComponent";
-import { getConnection, getLevelList } from "../Utils";
+import { getConfiguration, getConnection, getLevelList } from "../Utils";
 import { useSelector } from "react-redux";
 import { DeviceActionId, RootState } from "../app/AppState";
 import { ITwinViewerApp } from "../app/ITwinViewerApp";
 import { ActivityStatus } from "../SmartDevice";
 import { IoTConnection } from "../IoTConnection/IotConnection";
+import { DeviceMonitorUI } from "../DeviceMonitorUI";
+import { SvgError } from "@itwin/itwinui-illustrations-react";
 
 export interface DeviceListWidgetProps {
   imodel?: IModelConnection;
@@ -28,6 +30,8 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
   const [selectedLevel, setSelectedLevel] = useState<Story>();
   const [showMakers, setShowMarkers] = useState<boolean>(true);
   const [connectionChanged, setConnectionChanged] = useState<boolean>(true);
+  const [readyConnections, setReadyConnections] = useState<number>(0);
+  const [failedConnections, setFailedConnections] = useState<number[]>([]);
 
   const changeDeviceStatus = useSelector<RootState, boolean | undefined>(
     (state) => state?.deviceState?.changeDeviceStatus,
@@ -40,6 +44,14 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
     props.levelChanged(level);
     setSelectedLevel(level);
   }, [props]);
+
+  const listFailedConnections = useCallback((connectionId: number) => {
+    const failedConnectionArray = failedConnections.slice();
+    if (!failedConnectionArray.includes(connectionId)) {
+      failedConnectionArray.push(connectionId);
+      setFailedConnections(failedConnectionArray);
+    }
+  }, [failedConnections]);
 
   useEffect(() => {
     const populateLevelList = async (_imodel: IModelConnection) => {
@@ -62,6 +74,20 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
       console.error(error);
     });
   }, [levelSelected, props]);
+
+  useEffect(() => {
+    DeviceMonitorUI.onPopulateDeviceComplete.addListener(() => setReadyConnections(readyConnections + 1));
+    return () => {
+      DeviceMonitorUI.onPopulateDeviceComplete.removeListener(() => setReadyConnections(readyConnections + 1));
+    };
+  });
+
+  useEffect(() => {
+    DeviceMonitorUI.onPopulateDeviceError.addListener((connectionId: number) => listFailedConnections(connectionId));
+    return () => {
+      DeviceMonitorUI.onPopulateDeviceError.removeListener((connectionId: number) => listFailedConnections(connectionId));
+    };
+  });
 
   const onLevelChange = (value: Number) => {
     const level = levelListState.find((val: Story) => val.levelNumber === value);
@@ -115,24 +141,33 @@ export const IoTDeviceListWidget: React.FC<DeviceListWidgetProps> = (props: Devi
     return { value: l.levelNumber, label: l.name };
   });
 
-  return (<><div style={{ margin: "8px" }}>
-    <div style={{ margin: "5px 0px" }}>
-      <IoTConnectionListComponent handleConnectionChanged={handleConnectionChanged} />
-    </div>
-    <br />
-    <div style={{ margin: "5px 0px" }}>
-      {selectedLevel ?
-        <Select value={selectedLevel?.levelNumber} options={array} onChange={(value: any) => onLevelChange(value)}></Select>
-        : <></>
-      }
-      <br />
-      <ToggleSwitch labelPosition="right" defaultChecked={showMakers} onChange={(e) => onShowMarkersToggle(e.target.checked)} label={"Show devices"} />
-      <br />
-      <SensorList selectedLevel={selectedLevel} deviceStatusChanged={changeDeviceStatus} />
-      {/* <Button styleType="cta" onClick={toggleSimulationStatus}>{simulationText}</Button> */}
-    </div>
-    <br />
-  </div> </>);
+  return (<>
+
+    {(failedConnections && readyConnections + failedConnections.length === getConfiguration().Connections.length) ? readyConnections !== 0 ?
+      <div style={{ margin: "8px" }}>
+        <div style={{ margin: "5px 0px" }}>
+          <IoTConnectionListComponent handleConnectionChanged={handleConnectionChanged} failedConnections={failedConnections} />
+        </div>
+        <br />
+        <div style={{ margin: "5px 0px" }}>
+          {selectedLevel ?
+            <Select value={selectedLevel?.levelNumber} options={array} onChange={(value: any) => onLevelChange(value)}></Select>
+            : <></>
+          }
+          <br />
+          <ToggleSwitch labelPosition="right" defaultChecked={showMakers} onChange={(e) => onShowMarkersToggle(e.target.checked)} label={"Show devices"} />
+          <br />
+          <SensorList selectedLevel={selectedLevel} deviceStatusChanged={changeDeviceStatus} />
+          {/* <Button styleType="cta" onClick={toggleSimulationStatus}>{simulationText}</Button> */}
+        </div>
+        <br />
+      </div> :
+      < div > <NonIdealState heading="Error" description="Something went wrong! Please check the connection urls." svg={<SvgError />} /></div > :
+      <div style={{ textAlign: "center", marginTop: "20vh" }}>
+        <ProgressRadial indeterminate style={{ alignContent: "center" }} />
+        <Label>Loading Device List</Label>
+      </div>
+    }</>);
 };
 
 const changeViewForModel = async (level: Story) => {

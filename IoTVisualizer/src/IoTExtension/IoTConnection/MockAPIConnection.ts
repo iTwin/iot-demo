@@ -9,6 +9,7 @@ import { IoTLink } from "../clients/IoTLink";
 import { SmartDevice } from "../SmartDevice";
 import { IoTConnection } from "./IotConnection";
 import mockData from "./MockConnection.json";
+import { DeviceMonitorUI } from "../DeviceMonitorUI";
 
 export class MockAPIConnection extends IoTConnection {
   private _timer: NodeJS.Timeout[] = [];
@@ -36,6 +37,7 @@ export class MockAPIConnection extends IoTConnection {
       }
     });
     this._connectionVerified = true;
+    DeviceMonitorUI.onPopulateDeviceComplete.raiseEvent();
     ITwinViewerApp.store.dispatch({
       type: DeviceActionId.setDeviceList,
       payload: deviceListFromIModel,
