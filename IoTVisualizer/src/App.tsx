@@ -42,7 +42,7 @@ export const checkNamedVersionCreated = async (result: Promise<MessageBoxValue>)
   }
 };
 
-//Test commit
+// Test commit
 
 export const displayToaster = (msg: string) => {
   toaster.negative(msg, { type: "persisting" });
