@@ -3,6 +3,7 @@ import { IModelApp, ViewChangeOptions } from "@itwin/core-frontend";
 
 export class IoTAlertApi {
   public static zoomToElements = async (elementId: string, location: Point3d) => {
+    // Testing deployment
     const vp = IModelApp.viewManager.selectedView;
     if (vp && elementId) {
       const viewChangeOpts: ViewChangeOptions = {};
