@@ -8,7 +8,7 @@
     "@aws-amplify/pubsub": "^4.5.3",
     "@azure/storage-blob": "^12.11.0",
     "@bentley/icons-generic": "^1.0.34",
-    "@bentley/react-scripts": "^4.0.7",
+    "@bentley/react-scripts": "^5.0.7",
     "@itwin/appui-abstract": "3.4.6",
     "@itwin/appui-layout-react": "3.4.6",
     "@itwin/appui-react": "3.4.6",
